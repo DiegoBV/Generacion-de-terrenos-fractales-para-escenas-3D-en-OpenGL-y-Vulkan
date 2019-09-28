@@ -1,0 +1,16 @@
+TFG:
+http://www.iquilezles.org/index.html
+http://www.iquilezles.org/www/articles/terrainmarching/terrainmarching.htm
+http://www.iquilezles.org/www/articles/morenoise/morenoise.htm
+http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/
+
+Libro:
+Ebert, Musgrave, Peachey, Perlin, Worley. : Texturing and Modeling: A Procedural Approach. 
+Capítulos: PROCEDURAL FRACTAL TERRAINS (489),  MOJOWORLD (565)
+
+
+Nuestros:
+-Videos: https://matematicascercanas.com/2014/05/28/fractal-en-3d-mandelbox-3d/
+https://imaginary.org/film/3d-fractal-trip-far-away
+-Info: http://personales.upv.es/rmullor/Fractales/Fractales.htm
+-Software: http://www.cadnav.com/software/view-46041.html
