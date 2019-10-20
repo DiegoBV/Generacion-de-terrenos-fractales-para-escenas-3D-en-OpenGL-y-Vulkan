@@ -2,17 +2,18 @@
 #include <freeglut.h> 
 #include <iostream> 
 #include <string> 
+#include <fstream>
 
 std::string vertexShader = "#version 430\n"
 "in vec3 pos;"
+"in vec2 uv;"
+"out vec2 vn;"
 "void main() {"
-"gl_Position = vec4(pos, 1);"
+	"vn = uv;"
+	"gl_Position = vec4(pos, 1);"
 "}";
 
-std::string fragmentShader = "#version 430\n"
-"void main() {"
-"gl_FragColor = vec4(1, 0, 0, 1);"
-"}";
+using namespace std;
 
 // Compile and create shader object and returns its id 
 GLuint compileShaders(std::string shader, GLenum type)
@@ -92,7 +93,7 @@ GLuint loadDataInBuffers()
 	GLfloat vertices[] = { // vertex coordinates 
 						   -0.7, -0.7, 0,
 						   0.7, -0.7, 0,
-						   0, 0.7, 0
+						   0, 0.7, 0,
 	};
 
 	GLuint vboId;
@@ -111,13 +112,20 @@ GLuint loadDataInBuffers()
 // Initialize and put everything together 
 void init()
 {
+	//PROVISIONAL
+
+	ifstream infile{ "\\Shaders\\fragmentShader.txt" };
+	string file_contents{ istreambuf_iterator<char>(infile), istreambuf_iterator<char>() };
+
+	//PROVISIONAL
+
 	// clear the framebuffer each frame with black color 
 	glClearColor(0, 0, 0, 0);
 
 	GLuint vboId = loadDataInBuffers();
 
 	GLuint vShaderId = compileShaders(vertexShader, GL_VERTEX_SHADER);
-	GLuint fShaderId = compileShaders(fragmentShader, GL_FRAGMENT_SHADER);
+	GLuint fShaderId = compileShaders(file_contents, GL_FRAGMENT_SHADER);
 
 	GLuint programId = linkProgram(vShaderId, fShaderId);
 
@@ -165,7 +173,7 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(100, 50);
-	glutCreateWindow("Triangle Using OpenGL");
+	glutCreateWindow("Circle Using OpenGL");
 	glewInit();
 	init();
 	glutDisplayFunc(display);

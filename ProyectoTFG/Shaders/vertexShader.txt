@@ -1,0 +1,11 @@
+uniform int MAX_MARCHING_STEPS = 255;
+uniform float MIN_DIST = 0.0;
+uniform float MAX_DIST = 100.0;
+uniform float EPSILON = 0.0001;
+
+#version 120
+void main()
+{
+  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+}
