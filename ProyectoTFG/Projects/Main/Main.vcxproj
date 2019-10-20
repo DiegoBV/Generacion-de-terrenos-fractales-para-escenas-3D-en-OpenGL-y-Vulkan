@@ -73,23 +73,23 @@
     <OutDir>$(SolutionDir)exes\</OutDir>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
-    <IncludePath>$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\glfw-3.3\include;$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)exes\</OutDir>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\glfw-3.3\include;$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)exes\</OutDir>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
-    <IncludePath>$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\glfw-3.3\include;$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)exes\</OutDir>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\glfw-3.3\include;$(SolutionDir)Dependencies\freeglut\include\GL\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,11 +97,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\glfw-3.3\lib-vc2017\;$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -110,11 +110,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\glfw-3.3\lib-vc2017\;$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,13 +125,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\glfw-3.3\lib-vc2017\;$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,16 +142,17 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glew-2.1.0\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\glfw-3.3\lib-vc2017\;$(SolutionDir)\Dependencies\freeglut\lib\;$(SolutionDir)\Dependencies\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Main\glad.c" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

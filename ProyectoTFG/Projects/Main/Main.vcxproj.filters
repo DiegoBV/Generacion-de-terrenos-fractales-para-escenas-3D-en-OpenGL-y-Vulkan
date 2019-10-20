@@ -18,5 +18,8 @@
     <ClCompile Include="..\..\src\Main\main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Main\glad.c">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

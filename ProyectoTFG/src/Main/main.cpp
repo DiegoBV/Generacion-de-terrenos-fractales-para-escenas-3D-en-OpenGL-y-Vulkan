@@ -1,182 +1,81 @@
-#include <GL\glew.h> 
-#include <freeglut.h> 
-#include <iostream> 
-#include <string> 
-#include <fstream>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
-std::string vertexShader = "#version 430\n"
-"in vec3 pos;"
-"in vec2 uv;"
-"out vec2 vn;"
-"void main() {"
-	"vn = uv;"
-	"gl_Position = vec4(pos, 1);"
-"}";
+#include <iostream>
 
-using namespace std;
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow *window);
 
-// Compile and create shader object and returns its id 
-GLuint compileShaders(std::string shader, GLenum type)
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+int main()
 {
+	// glfw: initialize and configure
+	// ------------------------------
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	const char* shaderCode = shader.c_str();
-	GLuint shaderId = glCreateShader(type);
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
+#endif
 
-	if (shaderId == 0) { // Error: Cannot create shader object 
-		std::cout << "Error creating shaders";
-		return 0;
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
 	}
 
-	// Attach source code to this object 
-	glShaderSource(shaderId, 1, &shaderCode, NULL);
-	glCompileShader(shaderId); // compile the shader object 
+	// render loop
+	// -----------
+	while (!glfwWindowShouldClose(window))
+	{
+		// input
+		// -----
+		processInput(window);
 
-	GLint compileStatus;
-
-	// check for compilation status 
-	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &compileStatus);
-
-	if (!compileStatus) { // If compilation was not successfull 
-		int length;
-		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-		char* cMessage = new char[length];
-
-		// Get additional information 
-		glGetShaderInfoLog(shaderId, length, &length, cMessage);
-		std::cout << "Cannot Compile Shader: " << cMessage;
-		delete[] cMessage;
-		glDeleteShader(shaderId);
-		return 0;
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
-	return shaderId;
-}
-
-// Creates a program containg vertex and fragment shader 
-// links it and returns its ID 
-GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId)
-{
-	GLuint programId = glCreateProgram(); // create a program 
-
-	if (programId == 0) {
-		std::cout << "Error Creating Shader Program";
-		return 0;
-	}
-
-	// Attach both the shaders to it 
-	glAttachShader(programId, vertexShaderId);
-	glAttachShader(programId, fragmentShaderId);
-
-	// Create executable of this program 
-	glLinkProgram(programId);
-
-	GLint linkStatus;
-
-	// Get the link status for this program 
-	glGetProgramiv(programId, GL_LINK_STATUS, &linkStatus);
-
-	if (!linkStatus) { // If the linking failed 
-		std::cout << "Error Linking program";
-		glDetachShader(programId, vertexShaderId);
-		glDetachShader(programId, fragmentShaderId);
-		glDeleteProgram(programId);
-
-		return 0;
-	}
-
-	return programId;
-}
-
-// Load data in VBO and return the vbo's id 
-GLuint loadDataInBuffers()
-{
-	GLfloat vertices[] = { // vertex coordinates 
-						   -0.7, -0.7, 0,
-						   0.7, -0.7, 0,
-						   0, 0.7, 0,
-	};
-
-	GLuint vboId;
-
-	// allocate buffer sapce and pass data to it 
-	glGenBuffers(1, &vboId);
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// unbind the active buffer 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	return vboId;
-}
-
-// Initialize and put everything together 
-void init()
-{
-	//PROVISIONAL
-
-	ifstream infile{ "\\Shaders\\fragmentShader.txt" };
-	string file_contents{ istreambuf_iterator<char>(infile), istreambuf_iterator<char>() };
-
-	//PROVISIONAL
-
-	// clear the framebuffer each frame with black color 
-	glClearColor(0, 0, 0, 0);
-
-	GLuint vboId = loadDataInBuffers();
-
-	GLuint vShaderId = compileShaders(vertexShader, GL_VERTEX_SHADER);
-	GLuint fShaderId = compileShaders(file_contents, GL_FRAGMENT_SHADER);
-
-	GLuint programId = linkProgram(vShaderId, fShaderId);
-
-	// Get the 'pos' variable location inside this program 
-	GLuint posAttributePosition = glGetAttribLocation(programId, "pos");
-
-	GLuint vaoId;
-	glGenVertexArrays(1, &vaoId); // Generate VAO 
-
-	// Bind it so that rest of vao operations affect this vao 
-	glBindVertexArray(vaoId);
-
-	// buffer from which 'pos' will recive its data and the format of that data 
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-	glVertexAttribPointer(posAttributePosition, 3, GL_FLOAT, false, 0, 0);
-
-	// Enable this attribute array linked to 'pos' 
-	glEnableVertexAttribArray(posAttributePosition);
-
-	// Use this program for rendering. 
-	glUseProgram(programId);
-}
-
-// Function that does the drawing 
-// glut calls this function whenever it needs to redraw 
-void display()
-{
-	// clear the color buffer before each drawing 
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	// draw triangles starting from index 0 and 
-	// using 3 indices 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	// swap the buffers and hence show the buffers  
-	// content to the screen 
-	glutSwapBuffers();
-}
-
-// main function 
-// sets up window to which we'll draw 
-int main(int argc, char** argv)
-{
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutInitWindowSize(500, 500);
-	glutInitWindowPosition(100, 50);
-	glutCreateWindow("Circle Using OpenGL");
-	glewInit();
-	init();
-	glutDisplayFunc(display);
-	glutMainLoop();
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
 	return 0;
+}
+
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow *window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+}
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	// make sure the viewport matches the new window dimensions; note that width and 
+	// height will be significantly larger than specified on retina displays.
+	glViewport(0, 0, width, height);
 }
