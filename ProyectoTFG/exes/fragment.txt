@@ -1,0 +1,40 @@
+#version 330 core
+  
+uniform vec2 resolution; //window resolution 
+
+float getDistance(vec3 point){ //problem here
+    vec4 sphere = vec4(0, 0, 1, 1);
+    float sphereDist = length(point - sphere.xyz) - sphere.w;
+
+    return sphereDist;
+}
+
+float rayMarch(vec3 rayOrigin, vec3 rayDir){
+    float distanceFromOrigin = 0.0;
+
+    for(int i = 0; i < 100; i++){ //100 = MAX_STEPS
+        vec3 currentMarchingLocation = rayOrigin + rayDir * distanceFromOrigin;
+        float distanceToSurface = getDistance(currentMarchingLocation);
+        distanceFromOrigin = distanceFromOrigin + distanceToSurface;
+
+        if(distanceFromOrigin > 100.0 || distanceToSurface < 0.01)
+            break;       
+    }
+
+    return distanceFromOrigin;
+}
+
+void main()
+{
+    vec2 pixelCoord = gl_FragCoord.xy;
+    vec2 uv = (pixelCoord - 0.5*resolution.xy)/resolution.y;
+
+    vec3 rayOrigin = vec3(0, 0, 0); 
+    vec3 rayDir = normalize(vec3(uv.xy, 1.0f));
+
+    float distanceToSurface = rayMarch(rayOrigin, rayDir);
+
+    vec3 color = vec3(distanceToSurface, distanceToSurface, distanceToSurface);
+
+    gl_FragColor = vec4(color, 1.0);
+} 
