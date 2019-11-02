@@ -24,9 +24,15 @@
     <ClCompile Include="..\..\src\Main\Shader.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Main\FileHandler.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Main\Shader.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\FileHandler.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

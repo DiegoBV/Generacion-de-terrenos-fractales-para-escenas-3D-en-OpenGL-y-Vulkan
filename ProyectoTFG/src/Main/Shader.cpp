@@ -1,11 +1,8 @@
 #include "Shader.h"
 #include <glad/glad.h>
+#include "FileHandler.h"
 
-#include <fstream>
-#include <sstream>
 #include <iostream>
-
-
 
 Shader::Shader()
 {
@@ -151,27 +148,10 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 std::string Shader::readFile(const char* filePath)
 {
 	std::string outputString;
-	std::ifstream inputFile;
+	std::fstream file = FileHandler::openInputFile(filePath);
 
-	// ensure ifstream objects can throw exceptions:
-	inputFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-	try
-	{
-		// open files
-		inputFile.open(filePath);
-		std::stringstream stream;
-		// read file's buffer contents into streams
-		stream << inputFile.rdbuf();
-		// close file handlers
-		inputFile.close();
-		// convert stream into string
-		outputString = stream.str();
-	}
-	catch (std::ifstream::failure e)
-	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-	}
+	outputString = FileHandler::readInputFile(file);
+	FileHandler::closeFile(file);
 
 	return outputString;
 }
