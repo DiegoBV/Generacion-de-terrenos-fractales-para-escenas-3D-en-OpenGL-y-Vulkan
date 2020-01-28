@@ -1,20 +1,19 @@
 #version 330 core
 
-in vec2 texCoords;
-
-uniform vec2 resolution; //window resolution
+uniform vec2 resolution;
+uniform float time;
 
 const int MAX_MARCHING_STEPS = 255;
-const float MIN_DIST = 0.0f;
-const float MAX_DIST = 100.0f;
-const float EPSILON = 0.0001f;
+const float MIN_DIST = 0.0;
+const float MAX_DIST = 100.0;
+const float EPSILON = 0.0001;
 
 float getDistance(vec3 point){
 //and this.... dist at z must be > radius
-    vec4 sphere = vec4(0.0f, 0.0f, 4.0f, 3.9998f);
+    vec4 sphere = vec4(0.0, 0.0, 5.0, 3);
     float sphereDist = length(point - sphere.xyz) - sphere.w;
 
-    return sphereDist;
+    return min(sphereDist, point.y + 5.0);
 }
 
 float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end){
@@ -44,20 +43,24 @@ vec3 getNormal(vec3 p){
 
 float getLight(vec3 p){
     vec3 lightPos = vec3(0, 5, 0);
+    lightPos.x += cos(time)*2.0;
+    lightPos.z += sin(time)*2.0;
     vec3 light = normalize(lightPos - p);
     vec3 normal = getNormal(p);
 
     float dif = dot(normal, light);
+    float distancia = rayMarch(p + (normal * EPSILON * 2.0), light, MIN_DIST, MAX_DIST);
+    if(distancia < length(lightPos - p)) dif *= 0.1;
     return dif;
 }
 
 void main()
 {
     vec2 pixelCoord = gl_FragCoord.xy;
-    vec2 uv = vec2(pixelCoord.x - resolution.x/2.0f, pixelCoord.y - resolution.y/2.0f);
+    vec2 uv = vec2(pixelCoord.x - (resolution.x/2.0), pixelCoord.y - (resolution.y/2.0))/1500.0;
 
-    vec3 rayOrigin = vec3(0.0f, 0.0f, 0.0f);
-    vec3 rayDir = normalize(vec3(uv, 1.0f));
+    vec3 rayOrigin = vec3(0.0, 0.0, -50.0);
+    vec3 rayDir = normalize(vec3(uv, 1.0));
 
     float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
 
@@ -67,11 +70,10 @@ void main()
 
     if (distanceToSurface > MAX_DIST - EPSILON) {
         // Didn't hit anything
-        gl_FragColor = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
 		return;
     }
 
     vec3 col = vec3(dif);
-    
-    gl_FragColor = vec4(col, 1.0f);
+    gl_FragColor = vec4(col, 1.0);
 }
