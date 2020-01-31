@@ -152,12 +152,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Main\Camera.cpp" />
     <ClCompile Include="..\..\src\Main\FileHandler.cpp" />
     <ClCompile Include="..\..\src\Main\glad.c" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
     <ClCompile Include="..\..\src\Main\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Main\Camera.h" />
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
     <ClInclude Include="..\..\src\Main\Shader.h" />
   </ItemGroup>

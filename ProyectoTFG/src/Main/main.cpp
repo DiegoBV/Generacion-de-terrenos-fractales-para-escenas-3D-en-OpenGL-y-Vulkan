@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Shader.h"
+#include "Camera.h"
 
 #include <iostream>
 
@@ -8,8 +9,49 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SRC_WIDTH = 1280;
+const unsigned int SRC_HEIGHT = 720;
+
+Camera camera;
+glm::dvec2 mCoord;
+
+//calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
+//callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
+//momento en el cual se actualiza mCoord (se llama a mouse) y se produce un desplazamiento
+void motion(int x, int y) {
+	glm::dvec2 mOffset = mCoord; // var. global (mCoord vale las coordenadas del raton)
+	mCoord = glm::dvec2(x, SRC_HEIGHT - y);//actualizamos mCoord invirtiendo el eje y
+	mOffset = (mCoord - mOffset) * 0.15; // sensitivity. mOffset vale la diferencia (desplazamiento -> nuevas coord del raton - coord anteriores)
+	camera.rotatePY(mOffset.y, mOffset.x);//mandamos que se mueva con el desplazamiento
+}
+
+//actualiza las coordenadas del raton invirtiendo el eje y; callback llamado cada vez que clicamos
+void mouse(GLFWwindow* window, double xpos, double ypos) {
+	mCoord = glm::dvec2(xpos, SRC_HEIGHT - ypos);
+}
+
+void key(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	bool need_redisplay = true;
+
+	switch (key) {
+	case 'W'://si pulsamos "w" acercamos la camara
+		camera.moveFB(1);
+		break;
+	case 'S'://"s" la alejamos
+		camera.moveFB(-1);
+		break;
+	case 'D'://derecha
+		camera.moveLR(-1);
+		break;
+	case 'A'://izquierda
+		camera.moveLR(1);
+		break;
+	default:
+		need_redisplay = false;
+		break;
+	}//switch
+}
 
 int main()
 {
@@ -26,7 +68,7 @@ int main()
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SRC_WIDTH, SRC_HEIGHT, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -35,6 +77,17 @@ int main()
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	//CAMERA
+	// Viewport position and size
+	Viewport viewPort(SRC_WIDTH, SRC_HEIGHT);
+	// Camera position, view volume and projection
+	camera = Camera(&viewPort);
+	camera.setAZ();
+
+	// Callback registration
+	glfwSetKeyCallback(window, key);
+	glfwSetCursorPosCallback(window, mouse);
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -47,7 +100,9 @@ int main()
 	Shader shader = Shader();
 	shader.init("..\\Shaders\\vertex.txt", "..\\Shaders\\fragment.txt");
 	shader.use();
-	shader.setVec2("resolution", SCR_WIDTH, SCR_HEIGHT);
+	shader.setVec2("resolution", SRC_WIDTH, SRC_HEIGHT);
+	shader.setVec3("cameraPosition", camera.getEye().x, camera.getEye().y, camera.getEye().z);
+	shader.setVec3("cameraDirection", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 
 	// TODO: EN UN FUTURO ESTO COINCIDIRA CON EL NEAR PLANE!!!
 	float vertices[] = {
@@ -86,7 +141,10 @@ int main()
 	{
 		// input
 		// -----
+		std::cout << camera.getEye().x << " " << camera.getEye().z << std::endl;
 		processInput(window);
+		shader.setVec3("cameraPosition", camera.getEye().x, camera.getEye().y, camera.getEye().z);
+		shader.setVec3("cameraDirection", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 		shader.use();
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
