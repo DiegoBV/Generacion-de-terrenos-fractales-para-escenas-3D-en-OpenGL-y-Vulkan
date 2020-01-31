@@ -5,30 +5,30 @@
 class FileHandler
 {
 public:
-	//open a file with read permissions
+	// open a file with read permissions
 	static std::fstream openInputFile(const char* inputFilePath);
-	//open a file with write permissions, deleting all previous content
+	// open a file with write permissions, deleting all previous content
 	static std::fstream openOutputTruncatedFile(const char* filePath);
-	//open a file with read permissions, setting the pointer at the eof, appending previous and new content
+	// open a file with read permissions, setting the pointer at the eof, appending previous and new content
 	static std::fstream openOutputAppendedFile(const char* filePath);
 
-	//opens the file from inputFilePath, reads the entire file and returns it
+	// opens the file from inputFilePath, reads the entire file and returns it
 	static std::string readInputFile(const char* inputFilePath);
-	//reads the entire given inputFile and returns it
+	// reads the entire given inputFile and returns it
 	static std::string readInputFile(std::fstream& inputFile);
-	//reads a line from the input file, moving the file pointer as expected
+	// reads a line from the input file, moving the file pointer as expected
 	static std::string readLineFromInputFile(std::fstream& inputFile);
 
-	//writes a string without formatting it to an output file, moving the file pointer as expected
+	// writes a string without formatting it to an output file, moving the file pointer as expected
 	static void writeRawStringToOutputFile(std::fstream& outputFile, const std::string& stringToWrite);
-	//writes a string with a \n at the end of the file
+	// writes a string with a \n at the end of the file
 	static void writeLineToOutputFile(std::fstream& outputFile, const std::string& lineToWrite);
 
 	static bool isFileOpen(const std::fstream& file);
 	static void closeFile(std::fstream& file);
 
 private:
-	//private constructor because it's a static class
+	// private constructor because it's a static class
 	FileHandler() {};
 	static std::fstream _openFilePrivate(const char* filePath, const int& permissions);
 	static std::string _readInputFilePrivate(std::fstream& inputFile);

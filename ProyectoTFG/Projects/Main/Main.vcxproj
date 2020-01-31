@@ -157,11 +157,15 @@
     <ClCompile Include="..\..\src\Main\glad.c" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
     <ClCompile Include="..\..\src\Main\Shader.cpp" />
+    <ClCompile Include="..\..\src\Main\TimeManager.cpp" />
+    <ClCompile Include="..\..\src\Main\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Main\Camera.h" />
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
     <ClInclude Include="..\..\src\Main\Shader.h" />
+    <ClInclude Include="..\..\src\Main\TimeManager.h" />
+    <ClInclude Include="..\..\src\Main\Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
