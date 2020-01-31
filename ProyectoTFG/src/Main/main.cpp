@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include "Shader.h"
 #include "Camera.h"
+#include "TimeManager.h"
 
 #include <iostream>
 
@@ -18,9 +19,9 @@ glm::dvec2 mCoord;
 //calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
 //callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
 //momento en el cual se actualiza mCoord (se llama a mouse) y se produce un desplazamiento
-void motion(int x, int y) {
+void motion(GLFWwindow* window, double xpos, double ypos) {
 	glm::dvec2 mOffset = mCoord; // var. global (mCoord vale las coordenadas del raton)
-	mCoord = glm::dvec2(x, SRC_HEIGHT - y);//actualizamos mCoord invirtiendo el eje y
+	mCoord = glm::dvec2(xpos, SRC_HEIGHT - ypos);//actualizamos mCoord invirtiendo el eje y
 	mOffset = (mCoord - mOffset) * 0.15; // sensitivity. mOffset vale la diferencia (desplazamiento -> nuevas coord del raton - coord anteriores)
 	camera.rotatePY(mOffset.y, mOffset.x);//mandamos que se mueva con el desplazamiento
 }
@@ -36,16 +37,16 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	switch (key) {
 	case 'W'://si pulsamos "w" acercamos la camara
-		camera.moveFB(1);
+		camera.moveFB(100 * TimeManager::GetDeltaTime());
 		break;
 	case 'S'://"s" la alejamos
-		camera.moveFB(-1);
+		camera.moveFB(-100 * TimeManager::GetDeltaTime());
 		break;
 	case 'D'://derecha
-		camera.moveLR(-1);
+		camera.moveLR(-100 * TimeManager::GetDeltaTime());
 		break;
 	case 'A'://izquierda
-		camera.moveLR(1);
+		camera.moveLR(100 * TimeManager::GetDeltaTime());
 		break;
 	default:
 		need_redisplay = false;
@@ -78,6 +79,8 @@ int main()
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+	TimeManager::Init();
+
 	//CAMERA
 	// Viewport position and size
 	Viewport viewPort(SRC_WIDTH, SRC_HEIGHT);
@@ -87,7 +90,8 @@ int main()
 
 	// Callback registration
 	glfwSetKeyCallback(window, key);
-	glfwSetCursorPosCallback(window, mouse);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, motion);
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -101,8 +105,6 @@ int main()
 	shader.init("..\\Shaders\\vertex.txt", "..\\Shaders\\fragment.txt");
 	shader.use();
 	shader.setVec2("resolution", SRC_WIDTH, SRC_HEIGHT);
-	shader.setVec3("cameraPosition", camera.getEye().x, camera.getEye().y, camera.getEye().z);
-	shader.setVec3("cameraDirection", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 
 	// TODO: EN UN FUTURO ESTO COINCIDIRA CON EL NEAR PLANE!!!
 	float vertices[] = {
@@ -139,12 +141,15 @@ int main()
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
+		TimeManager::Update();
+
 		// input
 		// -----
-		std::cout << camera.getEye().x << " " << camera.getEye().z << std::endl;
+		std::cout << camera.getFront().x << " " << camera.getFront().z << std::endl;
 		processInput(window);
 		shader.setVec3("cameraPosition", camera.getEye().x, camera.getEye().y, camera.getEye().z);
-		shader.setVec3("cameraDirection", camera.getFront().x, camera.getFront().y, camera.getFront().z);
+		shader.setVec3("cameraDirection", -camera.getFront().x, camera.getFront().y, camera.getFront().z);
+		shader.setFloat("time", TimeManager::GetTimeSinceBeginning());
 		shader.use();
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -155,6 +160,8 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	TimeManager::Release();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
