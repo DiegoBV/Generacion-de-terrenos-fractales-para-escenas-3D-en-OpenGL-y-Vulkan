@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D1FF4BA5-1712-4984-A277-AAF1BB863E3D}</ProjectGuid>
     <RootNamespace>Main</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -34,20 +34,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -155,17 +155,22 @@
     <ClCompile Include="..\..\src\Main\Camera.cpp" />
     <ClCompile Include="..\..\src\Main\FileHandler.cpp" />
     <ClCompile Include="..\..\src\Main\glad.c" />
+    <ClCompile Include="..\..\src\Main\GLManager.cpp" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
     <ClCompile Include="..\..\src\Main\Shader.cpp" />
     <ClCompile Include="..\..\src\Main\TimeManager.cpp" />
     <ClCompile Include="..\..\src\Main\Timer.cpp" />
+    <ClCompile Include="..\..\src\Main\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Main\Camera.h" />
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
+    <ClInclude Include="..\..\src\Main\GLManager.h" />
+    <ClInclude Include="..\..\src\Main\Manager.h" />
     <ClInclude Include="..\..\src\Main\Shader.h" />
     <ClInclude Include="..\..\src\Main\TimeManager.h" />
     <ClInclude Include="..\..\src\Main\Timer.h" />
+    <ClInclude Include="..\..\src\Main\Viewport.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

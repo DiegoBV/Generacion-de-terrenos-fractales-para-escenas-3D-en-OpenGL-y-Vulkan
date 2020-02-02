@@ -1,68 +1,39 @@
 #include "Camera.h"
-
+#include "Viewport.h"
 #include <gtc/matrix_transform.hpp>  
 #include <gtc/type_ptr.hpp>
 
 using namespace glm;
 
-//-------------------------------------------------------------------------
-
- void Viewport::setSize(GLsizei aw, GLsizei ah) 
- { 
-   w = aw; 
-   h = ah; 
-   set(); 
- }
-
- void Viewport::setPos(GLsizei ax, GLsizei ay)
- {
-	x = ax;
-	y = ay;
-	set();
- }
- //-------------------------------------------------------------------------
-
- void Viewport::set() 
- { 
-   glViewport(x, y, w, h);
- }
-//-------------------------------------------------------------------------
-
-void Camera::setAZ() 
+Camera::Camera()
 {
-  eye= dvec3(0, 0, -50);
-  look= dvec3(0, 0, 0);
-  up= dvec3(0, 1, 0);
-  update();//actualizamos vectores, pitch y yaw
-  p = 0;
-  y = 0;
-  viewMat = lookAt(eye, look, up);
-  setVM();
+}
+
+Camera::Camera(Viewport* avp) : vp(avp), viewMat(1.0), projMat(1.0),
+xRight(avp->getW() / 2.0), xLeft(-xRight), yTop(avp->getH() / 2.0), yBot(-yTop) {}
+
+void Camera::setAZ()
+{
+	eye = dvec3(0, 0, -50);
+	look = dvec3(0, 0, 0);
+	up = dvec3(0, 1, 0);
+	update();//actualizamos vectores, pitch y yaw
+	p = 0;
+	y = 0;
+	viewMat = lookAt(eye, look, up);
+	setVM();
 }
 //-------------------------------------------------------------------------
 
-void Camera::set3D() 
+void Camera::setVM()
 {
-  eye= dvec3(500, 500, 500);
-  look= dvec3(0, 10, 0);
-  up = dvec3(0, 1, 0);
-  update();//actualizamos vectores, pitch y yaw
-  p = degrees(asin(-front.y));
-  y = degrees(asin(-front.x / cos(radians(p))));
-  viewMat = lookAt(eye, look, up);
-  setVM();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixd(value_ptr(viewMat));
 }
 //-------------------------------------------------------------------------
 
-void Camera::setVM() 
+void Camera::pitch(GLdouble a)
 {
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrixd(value_ptr(viewMat));
-}
-//-------------------------------------------------------------------------
-
-void Camera::pitch(GLdouble a) 
-{  
 	rotatePY(a, 0);
 }
 //-------------------------------------------------------------------------
@@ -73,45 +44,42 @@ void Camera::yaw(GLdouble a)
 //-------------------------------------------------------------------------
 void Camera::roll(GLdouble a)
 {
-  //viewMat = rotate(viewMat, glm::radians(-a), glm::dvec3(0, 0, 1.0));
+	//viewMat = rotate(viewMat, glm::radians(-a), glm::dvec3(0, 0, 1.0));
 }
 //-------------------------------------------------------------------------
 
 void Camera::scale(GLdouble s)
-{ 
-  factScale -= s; 
-  if (s < 0) s = 0.01;
-  setPM(); 
+{
+	factScale -= s;
+	if (s < 0) s = 0.01;
+	setPM();
 }
 //-------------------------------------------------------------------------
 
-void Camera::setSize(GLdouble aw, GLdouble ah) 
+void Camera::setSize(GLdouble aw, GLdouble ah)
 {
-  xRight = aw / 2.0;
-  xLeft = -xRight;
-  yTop = ah / 2.0;
-  yBot = -yTop;
- 
-  setPM();
+	xRight = aw / 2.0;
+	xLeft = -xRight;
+	yTop = ah / 2.0;
+	yBot = -yTop;
+
+	setPM();
 }
 //-------------------------------------------------------------------------
 
-void Camera::setPM() 
+void Camera::setPM()
 {
-	if (orto){//si orto esta a true la vista sera ortogonal
-		glMatrixMode(GL_PROJECTION);
-		projMat = ortho(xLeft*factScale, xRight*factScale, yBot*factScale, yTop*factScale, nearVal, farVal);
-		//(left, right, bottom, top, near, far)
-		glLoadMatrixd(value_ptr(projMat));
-		glMatrixMode(GL_MODELVIEW);
-	}
-	else {//si no, sera en perspectiva
-		glMatrixMode(GL_PROJECTION);
-		projMat = frustum(xLeft*factScale, xRight*factScale, yBot*factScale, yTop*factScale, 2*yTop, farVal);
-		//near es 2*top para un fov de 60. Si se quiere un fov de 90 near = top
-		glLoadMatrixd(value_ptr(projMat));
-		glMatrixMode(GL_MODELVIEW);
-	}
+	glMatrixMode(GL_PROJECTION);
+	projMat = frustum(xLeft * factScale, xRight * factScale, yBot * factScale, yTop * factScale, 2 * yTop, farVal);
+	//near es 2*top para un fov de 60. Si se quiere un fov de 90 near = top
+	glLoadMatrixd(value_ptr(projMat));
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void Camera::update() {
+	front = normalize(eye - look);
+	right = normalize(cross(up, front));
+	//up no es necesario, puesto que siempre va hacia arriba o hacia abajo, no depende de la rotacion
 }
 
 //-------------------------------------------MOVIMIENTO/ROTACION-------------------------------------------------------------------
@@ -143,7 +111,7 @@ void Camera::moveUD(GLdouble cs) {
 
 //rota en el eje correspondiente
 void Camera::rotatePY(GLdouble incrPitch, GLdouble incrYaw) {
-	p += incrPitch; 
+	p += incrPitch;
 	y += incrYaw; // Actualizar los ángulos
 	if (p > 89.5) p = 89.5; // Limitar los ángulos
 	else if (p < -89.5) p = -89.5; // impide que des la vuelta en el eje y (si miras hacia arriba o abajo)
@@ -156,12 +124,5 @@ void Camera::rotatePY(GLdouble incrPitch, GLdouble incrYaw) {
 	viewMat = lookAt(eye, look, up);
 }
 //---------------------------------------------------------------------------------------------------------------------------------
-
-//activa/desactiva la vista en perspectiva, es llamado al pulsar "p" (main.cpp)
-void Camera::setPrj(){
-	orto = !orto;//bool que alterna entre orotgonal (true) y perspectiva (false)
-	setPM();
-}
-//-------------------------------------------------------------------------
 
 

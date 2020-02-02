@@ -10,12 +10,45 @@ const float MIN_DIST = 0.0;
 const float MAX_DIST = 1000.0;
 const float EPSILON = 0.0001;
 
-float getDistance(vec3 point){
-//and this.... dist at z must be > radius
-    vec4 sphere = vec4(0.0, 0.0, 5.0, 3);
-    float sphereDist = length(point - sphere.xyz) - sphere.w;
+float intersectSDF(float distA, float distB) {
+    return max(distA, distB);
+}
 
-    return min(sphereDist, point.y + 5.0);
+float unionSDF(float distA, float distB) {
+    return min(distA, distB);
+}
+
+float differenceSDF(float distA, float distB) {
+    return max(distA, -distB);
+}
+
+float SDFBox( vec3 p, vec3 b )
+{
+  vec3 q = abs(p) - b;
+  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
+float SDFSphere(vec3 point, float radius)
+{
+    vec4 sphere = vec4(0.0, 0.0, 0.0, radius);
+    return length(point - sphere.xyz) - sphere.w;
+}
+
+float SDFCylinder( vec3 p, float h, float r )
+{
+  vec2 d = abs(vec2(length(p.xy),p.z)) - vec2(r,h);
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+
+float getDistance(vec3 point){
+    float radiusSphere = 3.0;    
+    float radiusCylinder = 1.5;
+    float height = 3.0;
+    vec3 boxD = vec3(2.5, 2.5, 2.5);
+
+    float intersection = intersectSDF(SDFBox(point, boxD), SDFSphere(point, radiusSphere));
+    intersection = differenceSDF(intersection, SDFCylinder(point, height, radiusCylinder));
+    return min(intersection, point.y + 5.0);
 }
 
 float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end){
@@ -45,8 +78,8 @@ vec3 getNormal(vec3 p){
 
 float getLight(vec3 p){
     vec3 lightPos = vec3(0, 5, 0);
-    lightPos.x += cos(time)*2.0;
-    lightPos.z += sin(time)*2.0;
+    lightPos.x += cos(time)*5.0;
+    lightPos.z += sin(time)*5.0;
     vec3 light = normalize(lightPos - p);
     vec3 normal = getNormal(p);
 
@@ -72,7 +105,7 @@ void main()
 
     if (distanceToSurface > MAX_DIST - EPSILON) {
         // Didn't hit anything
-        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
 		return;
     }
 

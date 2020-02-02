@@ -2,9 +2,21 @@
 #include <GLFW/glfw3.h>
 #include "Timer.h"
 
-double TimeManager::currentDeltaTime_;
-double TimeManager::currentTime_;
-std::list<Timer*> TimeManager::timers_;
+TimeManager* TimeManager::instance = nullptr;
+
+TimeManager* TimeManager::GetSingleton()
+{
+	if (instance == nullptr) instance = new TimeManager();
+	return instance;
+}
+
+void TimeManager::ShutDownSingleton()
+{
+	if (instance != nullptr) {
+		instance->release();
+		delete instance; instance = nullptr;
+	}
+}
 
 TimeManager::TimeManager()
 {
@@ -14,19 +26,19 @@ TimeManager::~TimeManager()
 {
 }
 
-void TimeManager::CalculateDeltaTime()
+void TimeManager::calculateDeltaTime()
 {
 	float t = glfwGetTime(); // time in seconds
 	currentDeltaTime_ = t - currentTime_;
 	currentTime_ = t;
 }
 
-void TimeManager::Init()
+void TimeManager::init()
 {
 	currentDeltaTime_ = currentTime_ = 0;
 }
 
-void TimeManager::Release()
+void TimeManager::release()
 {
 	for (Timer* timer : timers_) {
 		delete timer;
@@ -34,20 +46,20 @@ void TimeManager::Release()
 	}
 }
 
-void TimeManager::Update()
+void TimeManager::update()
 {
-	CalculateDeltaTime();
+	calculateDeltaTime();
 	for (Timer* timer : timers_) {
-		timer->update(GetDeltaTime());
+		timer->update(getDeltaTime());
 	}
 }
 
-double TimeManager::GetTimeSinceBeginning()
+double TimeManager::getTimeSinceBeginning()
 {
 	return currentTime_;
 }
 
-double TimeManager::GetDeltaTime()
+double TimeManager::getDeltaTime()
 {
 	return currentDeltaTime_;
 }
