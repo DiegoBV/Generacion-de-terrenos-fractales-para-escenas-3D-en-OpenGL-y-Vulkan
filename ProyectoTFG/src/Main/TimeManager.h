@@ -14,7 +14,7 @@ private:
 	TimeManager();
 	~TimeManager();
 
-	// Calculates delta time in seconds
+	/// Calculates delta time in seconds
 	void calculateDeltaTime();
 
 public:
@@ -22,15 +22,15 @@ public:
 	static void ShutDownSingleton();
 
 	virtual void init();
-	// updates timers and calculates deltaTime and currentTime. Must be called before anything else.
+	/// updates timers and calculates deltaTime and currentTime. Must be called before anything else.
 	virtual void update();
 	virtual void release();
 
-	// returns time since glfwInit()
+	/// returns time since glfwInit()
 	double getTimeSinceBeginning();
-	// returns delta time in seconds
+	/// returns delta time in seconds
 	double getDeltaTime();
-	// creates a timer and stores it. Returns a pointer to it
+	/// creates a timer and stores it. Returns a pointer to it
 	Timer* createTimer();
 };
 
