@@ -1,7 +1,7 @@
 #include "Shader.h"
 #include <glad/glad.h>
 #include "FileHandler.h"
-
+#include "ShaderInclude.h"
 #include <iostream>
 
 Shader::Shader()
@@ -14,8 +14,8 @@ Shader::~Shader()
 
 void Shader::init(const char * vertexPath, const char * fragmentPath)
 {
-	std::string vertexCode = readFile(vertexPath);
-	std::string fragmentCode = readFile(fragmentPath);
+	std::string vertexCode = ShaderInclude::InterpretShader(vertexPath, "#include");
+	std::string fragmentCode = ShaderInclude::InterpretShader(fragmentPath, "#include");
 
 	const char* vShaderCode = vertexCode.c_str();
 	const char * fShaderCode = fragmentCode.c_str();

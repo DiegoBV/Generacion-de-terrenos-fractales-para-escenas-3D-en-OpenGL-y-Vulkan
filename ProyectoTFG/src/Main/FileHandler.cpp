@@ -44,12 +44,12 @@ std::fstream FileHandler::openOutputAppendedFile(const char * filePath)
 	return file;
 }
 
-std::string FileHandler::readInputFile(const char* inputFilePath)
+std::fstream FileHandler::readInputFile(const char* inputFilePath, std::string& buffer)
 {
 	std::fstream inputFile = openInputFile(inputFilePath);
-	std::string fileContent = _readInputFilePrivate(inputFile);
+	buffer = _readInputFilePrivate(inputFile);
 
-	return fileContent;
+	return inputFile;
 }
 
 std::string FileHandler::readInputFile(std::fstream & inputFile)
@@ -67,6 +67,7 @@ std::string FileHandler::readLineFromInputFile(std::fstream& inputFile)
 	}
 	catch (std::fstream::failure exception) {
 		_logMessageError("ERROR::LINE_NOT_SUCCESFULLY_READ::MAYBE_YOU_HAVE_REACHED_EOF");
+		fileLine = "EOF";
 	}
 
 	return fileLine;

@@ -12,11 +12,11 @@ public:
 	/// open a file with read permissions, setting the pointer at the eof, appending previous and new content
 	static std::fstream openOutputAppendedFile(const char* filePath);
 
-	/// opens the file from inputFilePath, reads the entire file and returns it
-	static std::string readInputFile(const char* inputFilePath);
-	/// reads the entire given inputFile and returns it
+	/// opens the file from inputFilePath, reads the entire file, stores it in buffer and returns the fstream handler
+	static std::fstream readInputFile(const char* inputFilePath, std::string& buffer);
+	/// reads the entire given inputFile and returns the string
 	static std::string readInputFile(std::fstream& inputFile);
-	/// reads a line from the input file, moving the file pointer as expected
+	/// reads a line from the input file, moving the file pointer as expected. If the file reaches EOF, returns string = "EOF"
 	static std::string readLineFromInputFile(std::fstream& inputFile);
 
 	/// writes a string without formatting it to an output file, moving the file pointer as expected

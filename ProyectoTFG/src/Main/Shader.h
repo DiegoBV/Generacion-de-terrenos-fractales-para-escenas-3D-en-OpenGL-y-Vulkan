@@ -4,7 +4,6 @@
 #include <string>
 #include <glm.hpp>
 
-
 class Shader
 {
 public:

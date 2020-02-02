@@ -1,5 +1,6 @@
 #version 330 core
 
+//include ..\\Shaders\\a.txt
 uniform vec2 resolution;
 uniform float time;
 uniform vec3 cameraPosition;
