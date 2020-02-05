@@ -39,12 +39,18 @@ float getDistance(vec3 point){
     box.center = vec3(0.0, 0.0, 0.0);
     box.dimensions = vec3(2.5, 2.5, 2.5);
     box.color = vec4(0.0, 1.0, 0.0, 1.0);
+    box.rotation = mat3(
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+        );
+    box.rotateZ(30.0);
     
     float radiusCylinder = 1.5;
     float height = 3.0;
 
     float intersection = intersectSDF(box.SDF(point), sphere.SDF(point));
-    //intersection = differenceSDF(intersection, SDFCylinder(point, height, radiusCylinder));
+    intersection = differenceSDF(intersection, SDFCylinder(point, height, radiusCylinder));
     return min(intersection, point.y + 5.0);
 }
 
