@@ -18,8 +18,8 @@ glm::dvec2 mCoord;
 void motion(GLFWwindow* window, double xpos, double ypos) {
 	glm::dvec2 mOffset = mCoord; // var. global (mCoord vale las coordenadas del raton)
 	mCoord = glm::dvec2(xpos, GLManager::GetSingleton()->getWindowHeight() - ypos);//actualizamos mCoord invirtiendo el eje y
-	mOffset = (mCoord - mOffset) * 0.15; // sensitivity. mOffset vale la diferencia (desplazamiento -> nuevas coord del raton - coord anteriores)
-	camera.rotatePY(mOffset.y, mOffset.x);//mandamos que se mueva con el desplazamiento
+	mOffset = (mCoord - mOffset) * 0.05; // sensitivity. mOffset vale la diferencia (desplazamiento -> nuevas coord del raton - coord anteriores)
+	camera.ProcessMouseMovement(mOffset.x, mOffset.y);//mandamos que se mueva con el desplazamiento
 }
 
 //actualiza las coordenadas del raton invirtiendo el eje y; callback llamado cada vez que clicamos
@@ -33,16 +33,16 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	switch (key) {
 	case 'W'://si pulsamos "w" acercamos la camara
-		camera.moveFB(100 * deltaTime);
+		camera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
 		break;
 	case 'S'://"s" la alejamos
-		camera.moveFB(-100 * deltaTime);
+		camera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
 		break;
 	case 'D'://derecha
-		camera.moveLR(-100 * deltaTime);
+		camera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
 		break;
 	case 'A'://izquierda
-		camera.moveLR(100 * deltaTime);
+		camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
 		break;
 	default:
 		break;
@@ -64,8 +64,7 @@ int main()
 	// Viewport position and size
 	Viewport viewPort(glManager->getWindowWidth(), glManager->getWindowHeight());
 	// Camera position, view volume and projection
-	camera = Camera(&viewPort);
-	camera.setAZ();
+	//camera.setAZ();
 
 	// Callback registration
 	glfwSetKeyCallback(glManager->getWindow(), key);
@@ -83,10 +82,18 @@ int main()
 	{
 		for (Manager* manager : managers) manager->update();
 
-		shader.setVec3("cameraPosition", camera.getEye().x, camera.getEye().y, camera.getEye().z);
-		shader.setVec3("cameraDirection", -camera.getFront().x, camera.getFront().y, camera.getFront().z);
+		shader.setVec3("cameraPosition", camera.Position.x, camera.Position.y, camera.Position.z);
+		shader.setVec3("cameraDirection", -camera.Front.x, camera.Front.y, camera.Front.z);
 		shader.setFloat("time", timeManager->getTimeSinceBeginning());
 		shader.use();
+
+		// pass projection matrix to shader (note that in this case it could change every frame)
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)glManager->getWindowWidth() / (float)glManager->getWindowHeight(), 0.1f, 100.0f);
+		shader.setMat4("projection", projection);
+
+		// camera/view transformation
+		glm::mat4 view = camera.GetViewMatrix();
+		shader.setMat4("view", view);
 	}
 
 	glManager->ShutDownSingleton();
