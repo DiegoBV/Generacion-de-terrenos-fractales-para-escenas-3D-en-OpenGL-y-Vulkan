@@ -72,7 +72,7 @@ int main()
 	glfwSetCursorPosCallback(glManager->getWindow(), motion);
 
 	Shader shader = Shader();
-	shader.init("..\\Shaders\\vertex.txt", "..\\Shaders\\fragment.txt");
+	shader.init("..\\Shaders\\vertex.c", "..\\Shaders\\fragment.c");
 	shader.use();
 	shader.setVec2("resolution", glManager->getWindowWidth(), glManager->getWindowHeight());
 

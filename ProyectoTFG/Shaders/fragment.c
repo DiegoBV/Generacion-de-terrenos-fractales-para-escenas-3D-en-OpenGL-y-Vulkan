@@ -1,6 +1,7 @@
 #version 330 core
 
-//include ..\\Shaders\\a.txt
+#include ..\\Shaders\\geometries.c
+
 uniform vec2 resolution;
 uniform float time;
 uniform vec3 cameraPosition;
@@ -23,18 +24,6 @@ float differenceSDF(float distA, float distB) {
     return max(distA, -distB);
 }
 
-float SDFBox( vec3 p, vec3 b )
-{
-  vec3 q = abs(p) - b;
-  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
-}
-
-float SDFSphere(vec3 point, float radius)
-{
-    vec4 sphere = vec4(0.0, 0.0, 0.0, radius);
-    return length(point - sphere.xyz) - sphere.w;
-}
-
 float SDFCylinder( vec3 p, float h, float r )
 {
   vec2 d = abs(vec2(length(p.xy),p.z)) - vec2(r,h);
@@ -42,13 +31,20 @@ float SDFCylinder( vec3 p, float h, float r )
 }
 
 float getDistance(vec3 point){
-    float radiusSphere = 3.0;    
+    Sphere sphere;
+    sphere.center = vec3(1.0, 0.0, 0.0);
+    sphere.radius = 3.0;
+    sphere.color = vec4(1.0, 0.0, 0.0, 1.0);
+    Box box;
+    box.center = vec3(0.0, 0.0, 0.0);
+    box.dimensions = vec3(2.5, 2.5, 2.5);
+    box.color = vec4(0.0, 1.0, 0.0, 1.0);
+    
     float radiusCylinder = 1.5;
     float height = 3.0;
-    vec3 boxD = vec3(2.5, 2.5, 2.5);
 
-    float intersection = intersectSDF(SDFBox(point, boxD), SDFSphere(point, radiusSphere));
-    intersection = differenceSDF(intersection, SDFCylinder(point, height, radiusCylinder));
+    float intersection = intersectSDF(box.SDF(point), sphere.SDF(point));
+    //intersection = differenceSDF(intersection, SDFCylinder(point, height, radiusCylinder));
     return min(intersection, point.y + 5.0);
 }
 
