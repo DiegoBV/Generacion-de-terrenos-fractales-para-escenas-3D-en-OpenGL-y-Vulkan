@@ -1,6 +1,4 @@
 #include "GLManager.h"
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
 
 GLManager* GLManager::instance = nullptr;
@@ -82,6 +80,8 @@ void GLManager::init()
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glfwSetInputMode(getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void GLManager::update()
@@ -108,6 +108,16 @@ void GLManager::release()
 	glfwTerminate();
 }
 
+void GLManager::setKeyCallback(GLFWkeyfun function)
+{
+	glfwSetKeyCallback(getWindow(), function);
+}
+
+void GLManager::setCursorCallback(GLFWcursorposfun function)
+{
+	glfwSetCursorPosCallback(getWindow(), function);
+}
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void GLManager::processInput(GLFWwindow* window)
@@ -123,6 +133,11 @@ void GLManager::framebuffer_size_callback(GLFWwindow* window, int width, int hei
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
+}
+
+bool GLManager::shouldClose()
+{
+	return glfwWindowShouldClose(getWindow());
 }
 
 GLManager::GLManager()

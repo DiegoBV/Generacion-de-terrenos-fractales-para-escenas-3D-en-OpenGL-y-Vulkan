@@ -4,8 +4,9 @@
 
 uniform vec2 resolution;
 uniform float time;
-uniform vec3 cameraPosition;
-uniform vec3 cameraDirection;
+uniform vec3 cameraEye;
+uniform vec3 cameraFront;
+uniform vec3 worldUp;
 
 const int MAX_MARCHING_STEPS = 2550;
 const float MIN_DIST = 0.0;
@@ -92,13 +93,32 @@ float getLight(vec3 p){
     return dif;
 }
 
+mat4 viewMatrix(vec3 eye, vec3 center, vec3 up) {
+    // Based on gluLookAt man page
+    vec3 f = normalize(center -eye);
+    vec3 s = normalize(cross(f, up));
+    vec3 u = cross(s, f);
+    return mat4(
+        vec4(s, 0.0),
+        vec4(u, 0.0),
+        vec4(-f, 0.0),
+        vec4(0.0, 0.0, 0.0, 1)
+    );
+}
+
+vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
+    vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
+    float z = size.y / tan(radians(fieldOfView) / 2.0);
+    return normalize(vec3(uv, -z));
+}
+
 void main()
 {
     vec2 pixelCoord = gl_FragCoord.xy;
-    vec2 uv = vec2(pixelCoord.x - (resolution.x/2.0), pixelCoord.y - (resolution.y/2.0))/1500.0;
-
-    vec3 rayOrigin = cameraPosition;
-    vec3 rayDir = normalize(vec3(uv.x + cameraDirection.x, uv.y + cameraDirection.y, cameraDirection.z));
+    vec3 rayOrigin = cameraEye;
+    vec3 rayDir = rayDirection(45.0, resolution, pixelCoord);
+    mat4 viewToWorld = viewMatrix(rayOrigin, cameraEye + cameraFront, worldUp);
+    rayDir = (viewToWorld * vec4(rayDir, 0.0)).xyz; //works
 
     float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
 
