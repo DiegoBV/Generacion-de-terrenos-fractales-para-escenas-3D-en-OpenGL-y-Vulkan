@@ -4,8 +4,9 @@
 
 uniform vec2 resolution;
 uniform float time;
-uniform vec3 cameraPosition;
-uniform vec3 cameraDirection;
+uniform vec3 cameraEye;
+uniform vec3 cameraFront;
+uniform vec3 worldUp;
 
 const int MAX_MARCHING_STEPS = 2550;
 const float MIN_DIST = 0.0;
@@ -176,13 +177,32 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
     return color;
 }
 
+mat4 viewMatrix(vec3 eye, vec3 center, vec3 up) {
+    // Based on gluLookAt man page
+    vec3 f = normalize(center -eye);
+    vec3 s = normalize(cross(f, up));
+    vec3 u = cross(s, f);
+    return mat4(
+        vec4(s, 0.0),
+        vec4(u, 0.0),
+        vec4(-f, 0.0),
+        vec4(0.0, 0.0, 0.0, 1)
+    );
+}
+
+vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
+    vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
+    float z = size.y / tan(radians(fieldOfView) / 2.0);
+    return normalize(vec3(uv, -z));
+}
+
 void main()
 {
     vec2 pixelCoord = gl_FragCoord.xy;
-    vec2 uv = vec2(pixelCoord.x - (resolution.x/2.0), pixelCoord.y - (resolution.y/2.0))/1500.0;
-
-    vec3 rayOrigin = cameraPosition;
-    vec3 rayDir = normalize(vec3(uv.x + cameraDirection.x, uv.y + cameraDirection.y, cameraDirection.z));
+    vec3 rayOrigin = cameraEye;
+    vec3 rayDir = rayDirection(45.0, resolution, pixelCoord);
+    mat4 viewToWorld = viewMatrix(rayOrigin, cameraEye + cameraFront, worldUp);
+    rayDir = (viewToWorld * vec4(rayDir, 0.0)).xyz; //works
 
     float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
 
@@ -202,7 +222,7 @@ void main()
     vec3 K_s = vec3(1.0, 1.0, 1.0);
     float shininess = 10.0;
     
-    vec3 phongColor = phongIllumination(K_a, K_d, K_s, shininess, p, cameraPosition);
+    vec3 phongColor = phongIllumination(K_a, K_d, K_s, shininess, p, cameraEye);
 
     vec3 lightColor = vec3(dif);
     gl_FragColor = vec4(phongColor * lightColor, 1.0);

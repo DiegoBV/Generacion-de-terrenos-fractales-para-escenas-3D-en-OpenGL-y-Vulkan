@@ -1,8 +1,5 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
-
 #include "Shader.h"
 #include "Camera.h"
 #include "Viewport.h"
@@ -19,7 +16,7 @@ void motion(GLFWwindow* window, double xpos, double ypos) {
 	glm::dvec2 mOffset = mCoord; // var. global (mCoord vale las coordenadas del raton)
 	mCoord = glm::dvec2(xpos, GLManager::GetSingleton()->getWindowHeight() - ypos);//actualizamos mCoord invirtiendo el eje y
 	mOffset = (mCoord - mOffset) * 0.05; // sensitivity. mOffset vale la diferencia (desplazamiento -> nuevas coord del raton - coord anteriores)
-	camera.ProcessMouseMovement(mOffset.x, mOffset.y);//mandamos que se mueva con el desplazamiento
+	camera.handleOrientation(mOffset.x, mOffset.y);//mandamos que se mueva con el desplazamiento
 }
 
 //actualiza las coordenadas del raton invirtiendo el eje y; callback llamado cada vez que clicamos
@@ -33,16 +30,16 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	switch (key) {
 	case 'W'://si pulsamos "w" acercamos la camara
-		camera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
+		camera.handleMovement(Camera_Movement::FORWARD, deltaTime);
 		break;
 	case 'S'://"s" la alejamos
-		camera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
+		camera.handleMovement(Camera_Movement::BACKWARD, deltaTime);
 		break;
 	case 'D'://derecha
-		camera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
+		camera.handleMovement(Camera_Movement::LEFT, deltaTime);
 		break;
 	case 'A'://izquierda
-		camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
+		camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
 		break;
 	default:
 		break;
@@ -67,9 +64,8 @@ int main()
 	//camera.setAZ();
 
 	// Callback registration
-	glfwSetKeyCallback(glManager->getWindow(), key);
-	glfwSetInputMode(glManager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(glManager->getWindow(), motion);
+	glManager->setKeyCallback(key);
+	glManager->setCursorCallback(motion);
 
 	Shader shader = Shader();
 	shader.init("..\\Shaders\\vertex.c", "..\\Shaders\\fragment.c");
@@ -78,12 +74,13 @@ int main()
 
 	// render loop
 	// -----------
-	while (!glfwWindowShouldClose(glManager->getWindow()))
+	while (!glManager->shouldClose())
 	{
 		for (Manager* manager : managers) manager->update();
 
-		shader.setVec3("cameraPosition", camera.Position.x, camera.Position.y, camera.Position.z);
-		shader.setVec3("cameraDirection", -camera.Front.x, camera.Front.y, camera.Front.z);
+		shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
+		shader.setVec3("cameraFront", camera.getFront().x, camera.getFront().y, camera.getFront().z);
+		shader.setVec3("worldUp", camera.getWorldUp().x, camera.getWorldUp().y, camera.getWorldUp().z);
 		shader.setFloat("time", timeManager->getTimeSinceBeginning());
 		shader.use();
 
@@ -92,7 +89,7 @@ int main()
 		shader.setMat4("projection", projection);
 
 		// camera/view transformation
-		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 view = camera.getViewMatrix();
 		shader.setMat4("view", view);
 	}
 
