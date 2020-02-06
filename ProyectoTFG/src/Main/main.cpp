@@ -36,10 +36,10 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		camera.handleMovement(Camera_Movement::BACKWARD, deltaTime);
 		break;
 	case 'D'://derecha
-		camera.handleMovement(Camera_Movement::LEFT, deltaTime);
+		camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
 		break;
 	case 'A'://izquierda
-		camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
+		camera.handleMovement(Camera_Movement::LEFT, deltaTime);
 		break;
 	default:
 		break;
