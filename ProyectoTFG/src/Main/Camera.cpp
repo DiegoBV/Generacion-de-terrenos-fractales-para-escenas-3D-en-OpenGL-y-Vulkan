@@ -73,5 +73,5 @@ void Camera::handleZoom(float yoffset)
 
 glm::mat4 Camera::getViewMatrix()
 {
-    return glm::lookAt(eye, eye + front, up);
+    return glm::lookAt(eye, eye + front, worldUp);
 }

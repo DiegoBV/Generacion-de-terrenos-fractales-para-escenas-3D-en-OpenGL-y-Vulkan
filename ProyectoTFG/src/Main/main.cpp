@@ -81,6 +81,7 @@ int main()
 		shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
 		shader.setVec3("cameraFront", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 		shader.setVec3("worldUp", camera.getWorldUp().x, camera.getWorldUp().y, camera.getWorldUp().z);
+		shader.setMat4("viewMat", transpose(camera.getViewMatrix()));
 		shader.setFloat("time", timeManager->getTimeSinceBeginning());
 		shader.use();
 
