@@ -9,14 +9,40 @@ class GLFWwindow;
 class VulkanManager : public Manager
 {
 private:
+	struct QueueFamilyIndices {
+		uint32_t graphicsFamily = UINT32_MAX;
+
+		bool isValid() {
+			return graphicsFamily != UINT32_MAX;
+		}
+	};
+
 	static VulkanManager* instance;
 	GLFWwindow* window;
+	/// vulkan instance
 	VkInstance vkInstance;
+	/// selected physical device (GPU)
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	/// logical device, used to interact with the physical device
+	VkDevice logicDevice = VK_NULL_HANDLE;
+	/// graphic command queue, needed to interact with the logic device (tell the GPU to do things)
+	VkQueue graphicsCommandQueue;
+
 	unsigned int VBO, VAO, EBO;
 	// settings
 	const unsigned int SRC_WIDTH = 1280;
 	const unsigned int SRC_HEIGHT = 720;
 
+	/// creates vulkan instance
+	void createInstance();
+	/// picks the most suitable device for this
+	void pickPhysicalDevice();
+	/// basic requirements, if the device fulfills them, returns true
+	bool isDeviceSuitable(VkPhysicalDevice device);
+	/// finds the queue family that supports GRAPHICS BIT
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	/// set up a logical device to interact with the physical device
+	void createLogicalDevice();
 	VulkanManager();
 	~VulkanManager();
 
