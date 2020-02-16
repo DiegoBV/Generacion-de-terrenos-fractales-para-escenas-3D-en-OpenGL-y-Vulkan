@@ -1,7 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <glad/glad.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
@@ -55,7 +54,7 @@ public:
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void handleMovement(Camera_Movement direction, float deltaTime);
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void handleOrientation(float xoffset, float yoffset, GLboolean constrainPitch = true);
+    void handleOrientation(float xoffset, float yoffset, bool constrainPitch = true);
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void handleZoom(float yoffset);
 

@@ -2,24 +2,26 @@
 #include "Manager.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <vulkan.hpp>
 
 class GLFWwindow;
 
-class GLManager: public Manager 
+class VulkanManager : public Manager
 {
 private:
-	static GLManager* instance;
+	static VulkanManager* instance;
 	GLFWwindow* window;
+	VkInstance vkInstance;
 	unsigned int VBO, VAO, EBO;
 	// settings
 	const unsigned int SRC_WIDTH = 1280;
 	const unsigned int SRC_HEIGHT = 720;
 
-	GLManager();
-	~GLManager();
+	VulkanManager();
+	~VulkanManager();
 
 public:
-	static GLManager* GetSingleton();
+	static VulkanManager* GetSingleton();
 	static void ShutDownSingleton();
 
 	virtual void init();

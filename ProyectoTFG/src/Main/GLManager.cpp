@@ -1,4 +1,7 @@
+#if defined(GL_DEBUG) || defined(GL_RELEASE)
+
 #include "GLManager.h"
+#include <glad/glad.h>
 #include <iostream>
 
 GLManager* GLManager::instance = nullptr;
@@ -147,3 +150,5 @@ GLManager::GLManager()
 GLManager::~GLManager()
 {
 }
+
+#endif

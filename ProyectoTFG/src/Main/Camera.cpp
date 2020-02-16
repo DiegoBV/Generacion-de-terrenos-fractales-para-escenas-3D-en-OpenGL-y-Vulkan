@@ -40,7 +40,7 @@ void Camera::handleMovement(Camera_Movement direction, float deltaTime)
         eye += right * velocity;
 }
 
-void Camera::handleOrientation(float xoffset, float yoffset, GLboolean constrainPitch)
+void Camera::handleOrientation(float xoffset, float yoffset, bool constrainPitch)
 {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
