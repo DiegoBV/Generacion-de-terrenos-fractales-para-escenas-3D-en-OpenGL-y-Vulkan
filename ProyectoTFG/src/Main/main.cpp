@@ -60,10 +60,10 @@ int main()
 	appManager->setKeyCallback(key);
 	appManager->setCursorCallback(motion);
 
-	Shader shader = Shader();
+	/*Shader shader = Shader();
 	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\fragment.c");
 	shader.use();
-	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());
+	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());*/
 
 	// render loop
 	// -----------
@@ -71,7 +71,7 @@ int main()
 	{
 		for (Manager* manager : managers) manager->update();
 
-		shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
+		/*shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
 		shader.setVec3("cameraFront", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 		shader.setVec3("worldUp", camera.getWorldUp().x, camera.getWorldUp().y, camera.getWorldUp().z);
 		shader.setMat4("viewMat", transpose(camera.getViewMatrix()));
@@ -84,7 +84,7 @@ int main()
 
 		// camera/view transformation
 		glm::mat4 view = camera.getViewMatrix();
-		shader.setMat4("view", view);
+		shader.setMat4("view", view);*/
 	}
 
 	appManager->ShutDownSingleton();
