@@ -2,8 +2,8 @@
 
 float sceneSDF(vec3 point);
 
-#include ..\\Shaders\\geometries.c
-#include ..\\Shaders\\lightning.c
+#include ..\\..\\Shaders\\geometries.c
+#include ..\\..\\Shaders\\lightning.c
 
 float intersectSDF(float distA, float distB) {
     return max(distA, distB);

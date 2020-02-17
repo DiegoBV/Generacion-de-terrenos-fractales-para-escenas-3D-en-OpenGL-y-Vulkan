@@ -2,7 +2,7 @@
 #include <iostream>
 #include "FileHandler.h"
 
-std::string ShaderInclude::tempPath = "..\\Shaders\\temp.c";
+std::string ShaderInclude::tempPath = "..\\..\\Shaders\\temp.c";
 std::fstream ShaderInclude::tempFile;
 
 std::string ShaderInclude::InterpretShader(const char * shaderPath, std::string includeReservedWord)

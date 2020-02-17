@@ -17,7 +17,7 @@ const float EPSILON = 0.0001;
 float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end);
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 
-#include ..\\Shaders\\scene0.c
+#include ..\\..\\Shaders\\scene0.c
 
 float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end){
     float depth = start;
