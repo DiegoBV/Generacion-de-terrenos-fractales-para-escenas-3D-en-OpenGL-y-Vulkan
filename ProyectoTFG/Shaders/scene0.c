@@ -1,6 +1,11 @@
-// TESTING SCENE
+vec2 SDF(vec3 point);
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end);
 
-float sceneSDF(vec3 point);
+const int MAX_MARCHING_STEPS = 2500;
+const float MIN_DIST = 0.0;
+const float MAX_DIST = 1000.0;
+const float EPSILON = 0.0001;
+const float  MARCHINGSTEP = 1.0;
 
 #include ..\\..\\Shaders\\geometries.c
 #include ..\\..\\Shaders\\lightning.c
@@ -32,7 +37,7 @@ float getDistance(vec3 point){
     return min(sphere.SDF(point), point.y + 5.0);
 }
 
-float sceneSDF(vec3 point){
+vec2 SDF(vec3 point){
     mat3 identity = mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
     point = rotateY(degrees(time / 2.0), identity) * point;
 
@@ -81,5 +86,37 @@ float sceneSDF(vec3 point){
     
     float intersection =  unionSDF(balls, csgNut);
 
-    return min(intersection, plane.SDF(point));
+    return vec2(min(intersection, plane.SDF(point)), 1.0);
+}
+
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end){
+    float depth = start;
+
+    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
+        vec2 dist = SDF(eye + depth * marchingDirection);
+        if (dist.x < EPSILON) {
+			break;
+        }
+        depth += MARCHINGSTEP * dist.x;
+        if (depth >= end) {
+            break;
+        }
+    }
+
+    return depth;
+}
+
+vec3 getColor(vec3 p){        
+    float dif = getLight(p);
+    
+    vec3 K_a = (getNormal(p) + vec3(1.0)) / 2.0;
+    vec3 K_d = K_a;
+    vec3 K_s = vec3(1.0, 1.0, 1.0);
+    float shininess = 10.0;
+    
+    vec3 phongColor = phongIllumination(K_a, K_d, K_s, shininess, p, cameraEye);
+
+    vec3 lightColor = vec3(dif);
+
+    return lightColor * phongColor;
 }

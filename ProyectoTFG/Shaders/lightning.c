@@ -2,9 +2,9 @@
 
 vec3 getNormal(vec3 p){
     return normalize(vec3(
-        sceneSDF(vec3(p.x + EPSILON, p.y, p.z)) - sceneSDF(vec3(p.x - EPSILON, p.y, p.z)),
-        sceneSDF(vec3(p.x, p.y + EPSILON, p.z)) - sceneSDF(vec3(p.x, p.y - EPSILON, p.z)),
-        sceneSDF(vec3(p.x, p.y, p.z  + EPSILON)) - sceneSDF(vec3(p.x, p.y, p.z - EPSILON))
+        SDF(vec3(p.x + EPSILON, p.y, p.z)).x - SDF(vec3(p.x - EPSILON, p.y, p.z)).x,
+        SDF(vec3(p.x, p.y + EPSILON, p.z)).x - SDF(vec3(p.x, p.y - EPSILON, p.z)).x,
+        SDF(vec3(p.x, p.y, p.z  + EPSILON)).x - SDF(vec3(p.x, p.y, p.z - EPSILON)).x
     ));
 }
 
