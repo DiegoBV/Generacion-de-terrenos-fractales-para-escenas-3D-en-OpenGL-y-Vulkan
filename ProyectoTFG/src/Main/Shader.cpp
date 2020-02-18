@@ -1,3 +1,4 @@
+#if defined (GL_DEBUG) || defined (GL_RELEASE)
 #include "Shader.h"
 #include <glad/glad.h>
 #include "FileHandler.h"
@@ -155,3 +156,4 @@ std::string Shader::readFile(const char* filePath)
 
 	return outputString;
 }
+#endif

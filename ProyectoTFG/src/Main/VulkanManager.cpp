@@ -48,11 +48,13 @@ void VulkanManager::init()
 	glfwSetInputMode(getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	createInstance();
+	setupDebugMessenger();
 	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+	createRenderPass();
 	createGraphicsPipeline();
 }
 
@@ -71,12 +73,18 @@ void VulkanManager::update()
 
 void VulkanManager::release()
 {
+	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
 	for (auto imageView : swapChainImageViews) {
 		vkDestroyImageView(logicalDevice, imageView, nullptr);
 	}
 	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, surface, nullptr);
+	if (enableValidationLayers) {
+		DestroyDebugUtilsMessengerEXT(vkInstance, debugMessenger, nullptr);
+	}
 	vkDestroyInstance(vkInstance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -126,17 +134,47 @@ void VulkanManager::createInstance()
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &appInfo;
 
-	uint32_t glfwExtensionCount = 0;
+	/*uint32_t glfwExtensionCount = 0;
 	const char** glfwExtensions;
 	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
 	createInfo.enabledExtensionCount = glfwExtensionCount;
-	createInfo.ppEnabledExtensionNames = glfwExtensions;
+	createInfo.ppEnabledExtensionNames = glfwExtensions;*/
 
-	createInfo.enabledLayerCount = 0;
+	auto extensions = getRequiredExtensions();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+	createInfo.ppEnabledExtensionNames = extensions.data();
+
+	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+	if (enableValidationLayers) {
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+
+		populateDebugMessengerCreateInfo(debugCreateInfo);
+		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+	}
+	else {
+		createInfo.enabledLayerCount = 0;
+
+		createInfo.pNext = nullptr;
+	}
 
 	if (vkCreateInstance(&createInfo, nullptr, &vkInstance) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create instance!");
+	}
+
+	if (enableValidationLayers && !checkValidationLayerSupport()) {
+		throw std::runtime_error("validation layers requested, but not available!");
+	}
+}
+
+void VulkanManager::setupDebugMessenger()
+{
+	VkDebugUtilsMessengerCreateInfoEXT createInfo;
+	populateDebugMessengerCreateInfo(createInfo);
+
+	if (CreateDebugUtilsMessengerEXT(vkInstance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+		throw std::runtime_error("failed to set up debug messenger!");
 	}
 }
 
@@ -250,14 +288,13 @@ void VulkanManager::createLogicalDevice()
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-	// por ahora, no tenemos validation layers, asi que se deja a 0
-	//if (enableValidationLayers) {
-	//	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-	//	createInfo.ppEnabledLayerNames = validationLayers.data();
-	//}
-	//else {
-	createInfo.enabledLayerCount = 0;
-	//}
+	if (enableValidationLayers) {
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+	}
+	else {
+		createInfo.enabledLayerCount = 0;
+	}
 
 	// creacion del dispositivo logico
 	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS) {
@@ -365,6 +402,38 @@ void VulkanManager::createImageViews()
 	}
 }
 
+void VulkanManager::createRenderPass()
+{
+	VkAttachmentDescription colorAttachment = {};
+	colorAttachment.format = swapChainImageFormat;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	VkAttachmentReference colorAttachmentRef = {};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+
+	VkRenderPassCreateInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &colorAttachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+
+	if (vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create render pass!");
+	}
+}
+
 void VulkanManager::createGraphicsPipeline()
 {
 	auto vertShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vvert.spv");
@@ -390,6 +459,141 @@ void VulkanManager::createGraphicsPipeline()
 	fragShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
+	// format of the vertex data that will be passed to the vertex shader
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
+	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+
+	// what kind of geometry are we drawing
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+	// region of the framebuffer that the output will be rendered to
+	VkViewport viewport = {};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)swapChainExtent.width;
+	viewport.height = (float)swapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	
+	// what region of the image should be rendered. Any pixel outside of the scissor rectangle will be discarded by the rasterizer
+	VkRect2D scissor = {};
+	scissor.offset = { 0, 0 };
+	scissor.extent = swapChainExtent;
+
+	// viewport and scissors should be together
+	VkPipelineViewportStateCreateInfo viewportState = {};
+	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportState.viewportCount = 1;
+	viewportState.pViewports = &viewport;
+	viewportState.scissorCount = 1;
+	viewportState.pScissors = &scissor;
+
+	// rasterizer configuration. Takes the geometry generated ath vertex shader and turns it into fragments
+	VkPipelineRasterizationStateCreateInfo rasterizer = {};
+	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer.depthClampEnable = VK_FALSE;
+	rasterizer.rasterizerDiscardEnable = VK_FALSE;
+	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizer.lineWidth = 1.0f;
+	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.depthBiasEnable = VK_FALSE;
+	rasterizer.depthBiasConstantFactor = 0.0f; // Optional
+	rasterizer.depthBiasClamp = 0.0f; // Optional
+	rasterizer.depthBiasSlopeFactor = 0.0f; // Optional
+
+	// multisampling and anti-aliasing
+	VkPipelineMultisampleStateCreateInfo multisampling = {};
+	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampling.sampleShadingEnable = VK_FALSE;
+	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisampling.minSampleShading = 1.0f; // Optional
+	multisampling.pSampleMask = nullptr; // Optional
+	multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
+	multisampling.alphaToOneEnable = VK_FALSE; // Optional
+
+	// color blending. The way the colors produced in the fragment shader are mixed with the old values
+	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
+	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	colorBlendAttachment.blendEnable = VK_FALSE;
+	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
+	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
+	colorBlendAttachment.blendEnable = VK_TRUE;
+	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+	// i dont really know what this is
+	VkPipelineColorBlendStateCreateInfo colorBlending = {};
+	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlending.logicOpEnable = VK_FALSE;
+	colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
+	colorBlending.attachmentCount = 1;
+	colorBlending.pAttachments = &colorBlendAttachment;
+	colorBlending.blendConstants[0] = 0.0f; // Optional
+	colorBlending.blendConstants[1] = 0.0f; // Optional
+	colorBlending.blendConstants[2] = 0.0f; // Optional
+	colorBlending.blendConstants[3] = 0.0f; // Optional
+
+	// parameters than can be changed without recreating the pipeline
+	VkDynamicState dynamicStates[] = {
+	VK_DYNAMIC_STATE_VIEWPORT,
+	VK_DYNAMIC_STATE_LINE_WIDTH
+	};
+
+	VkPipelineDynamicStateCreateInfo dynamicState = {};
+	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicState.dynamicStateCount = 2;
+	dynamicState.pDynamicStates = dynamicStates;
+
+	// creation of the uniform variable's pipeline
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 0; // Optional
+	pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
+	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
+	pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+
+	if (vkCreatePipelineLayout(logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create pipeline layout!");
+	}
+
+	VkGraphicsPipelineCreateInfo pipelineInfo = {};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &viewportState;
+	pipelineInfo.pRasterizationState = &rasterizer;
+	pipelineInfo.pMultisampleState = &multisampling;
+	pipelineInfo.pDepthStencilState = nullptr; // Optional
+	pipelineInfo.pColorBlendState = &colorBlending;
+	pipelineInfo.pDynamicState = nullptr; // Optional
+	pipelineInfo.layout = pipelineLayout;
+	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.subpass = 0;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
+	pipelineInfo.basePipelineIndex = -1; // Optional
+
+	if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create graphics pipeline!");
+	}
 
 	// cleanup modules
 	vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
@@ -489,6 +693,82 @@ VkShaderModule VulkanManager::createShaderModule(const std::vector<char>& code)
 	}
 
 	return shaderModule;
+}
+
+bool VulkanManager::checkValidationLayerSupport()
+{
+	uint32_t layerCount;
+	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+	std::vector<VkLayerProperties> availableLayers(layerCount);
+	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+	for (const char* layerName : validationLayers) {
+		bool layerFound = false;
+
+		for (const auto& layerProperties : availableLayers) {
+			if (strcmp(layerName, layerProperties.layerName) == 0) {
+				layerFound = true;
+				break;
+			}
+		}
+
+		if (!layerFound) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void VulkanManager::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+{
+	createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	createInfo.pfnUserCallback = debugCallback;
+}
+
+std::vector<const char*> VulkanManager::getRequiredExtensions()
+{
+	uint32_t glfwExtensionCount = 0;
+	const char** glfwExtensions;
+	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+	if (enableValidationLayers) {
+		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	}
+
+	return extensions;
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL VulkanManager::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+{
+	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+
+	return VK_FALSE;
+}
+
+VkResult VulkanManager::CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+{
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+	if (func != nullptr) {
+		return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+	}
+	else {
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+}
+
+void VulkanManager::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+{
+	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+	if (func != nullptr) {
+		func(instance, debugMessenger, pAllocator);
+	}
 }
 
 VulkanManager::VulkanManager()

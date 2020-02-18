@@ -32,6 +32,8 @@ private:
 	GLFWwindow* window;
 	/// vulkan instance
 	VkInstance vkInstance;
+	/// debug and validation layers
+	VkDebugUtilsMessengerEXT debugMessenger;
 	/// selected physical device (GPU)
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	/// logical device, used to interact with the physical device
@@ -54,6 +56,22 @@ private:
 	VkExtent2D swapChainExtent;
 	// image views storage
 	std::vector<VkImageView> swapChainImageViews;
+	// info about render buffers
+	VkRenderPass renderPass;
+	// used for uniform variables
+	VkPipelineLayout pipelineLayout;
+	// handler of the pipeline
+	VkPipeline graphicsPipeline;
+	// validation layers
+	const std::vector<const char*> validationLayers = {
+	"VK_LAYER_KHRONOS_validation"
+	};
+
+#ifdef NDEBUG
+	const bool enableValidationLayers = false;
+#else
+	const bool enableValidationLayers = true;
+#endif
 
 	unsigned int VBO, VAO, EBO;
 	// settings
@@ -62,6 +80,8 @@ private:
 
 	/// creates vulkan instance
 	void createInstance();
+	/// sets up the debugger and the validation layers
+	void setupDebugMessenger();
 	/// picks the most suitable device for this
 	void pickPhysicalDevice();
 	/// basic requirements, if the device fulfills them, returns true
@@ -76,6 +96,8 @@ private:
 	void createSwapChain();
 	/// creates a basic image view for every image in the swap chain
 	void createImageViews();
+	/// tells vulkan the information about our render buffers
+	void createRenderPass();
 	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
 	void createGraphicsPipeline();
 	/// chek if the device has swap chain support
@@ -90,6 +112,18 @@ private:
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	/// helper function. Creates a VkShaderModule (maybe we could move this to our shader class)
 	VkShaderModule createShaderModule(const std::vector<char>& code);
+
+	/// checks if all the requested layers are available
+	bool checkValidationLayerSupport();
+	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+	/// return the required list of extensions based on whether validation layers are enabled or not
+	std::vector<const char*> getRequiredExtensions();
+	/// debug callback function
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 	VulkanManager();
 	~VulkanManager();
 
