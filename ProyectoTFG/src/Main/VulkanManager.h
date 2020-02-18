@@ -76,6 +76,8 @@ private:
 	void createSwapChain();
 	/// creates a basic image view for every image in the swap chain
 	void createImageViews();
+	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
+	void createGraphicsPipeline();
 	/// chek if the device has swap chain support
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	/// populate the swap chain struct

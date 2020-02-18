@@ -52,6 +52,7 @@ void VulkanManager::init()
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+	createGraphicsPipeline();
 }
 
 void VulkanManager::update()
@@ -361,6 +362,10 @@ void VulkanManager::createImageViews()
 			throw std::runtime_error("failed to create image views!");
 		}
 	}
+}
+
+void VulkanManager::createGraphicsPipeline()
+{
 }
 
 bool VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
