@@ -34,7 +34,7 @@ std::string ShaderInclude::InterpretShader(const char * shaderPath, std::string 
 		currentLine = FileHandler::readLineFromInputFile(shaderFile);
 	}
 
-#if _DEBUG
+#if defined(GL_DEBUG) || defined(VULKAN_DEBUG)
 	tempFile = FileHandler::openOutputTruncatedFile(tempPath.c_str());
 	FileHandler::writeRawStringToOutputFile(tempFile, shaderCode);
 	FileHandler::closeFile(tempFile);
