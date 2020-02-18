@@ -25,6 +25,7 @@ public:
 	virtual void init();
 	virtual void update();
 	virtual void release();
+	virtual void waitUntilFinishEverything();
 
 	void setKeyCallback(GLFWkeyfun function);
 	void setCursorCallback(GLFWcursorposfun function);

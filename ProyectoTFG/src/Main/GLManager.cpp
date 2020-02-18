@@ -111,6 +111,10 @@ void GLManager::release()
 	glfwTerminate();
 }
 
+void GLManager::waitUntilFinishEverything()
+{
+}
+
 void GLManager::setKeyCallback(GLFWkeyfun function)
 {
 	glfwSetKeyCallback(getWindow(), function);

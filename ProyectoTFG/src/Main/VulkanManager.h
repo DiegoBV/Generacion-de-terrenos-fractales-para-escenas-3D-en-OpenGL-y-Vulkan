@@ -62,6 +62,22 @@ private:
 	VkPipelineLayout pipelineLayout;
 	// handler of the pipeline
 	VkPipeline graphicsPipeline;
+	// one frame buffer for each swap chain image
+	std::vector<VkFramebuffer> swapChainFramebuffers;
+	// command Pool, needs to be created in order to use command buffers
+	VkCommandPool commandPool;
+	// command buffer, this one is for drawing commands
+	std::vector<VkCommandBuffer> commandBuffers;
+	// handle image semaphore, one for each frame in flight
+	std::vector<VkSemaphore> imageAvailableSemaphores;
+	// handle render semaphore,  one for each frame in flight
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	// fences are like semaphores but are available to wait in our code
+	std::vector<VkFence> inFlightFences;
+	// avoid rendering images that are currently being rendered
+	std::vector<VkFence> imagesInFlight;
+	// current frame presented
+	size_t currentFrame = 0;
 	// validation layers
 	const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -77,6 +93,7 @@ private:
 	// settings
 	const unsigned int SRC_WIDTH = 1280;
 	const unsigned int SRC_HEIGHT = 720;
+	const int MAX_FRAMES_IN_FLIGHT = 2;
 
 	/// creates vulkan instance
 	void createInstance();
@@ -100,6 +117,15 @@ private:
 	void createRenderPass();
 	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
 	void createGraphicsPipeline();
+	/// fill the frameBuffer vector
+	void createFramebuffers();
+	/// creates and fills the commandPool object
+	void createCommandPool();
+	/// creates the command buffers (one for each image of the swap chain)
+	void createCommandBuffers();
+	/// creates the needed semaphores
+	void createSyncObjects();
+
 	/// chek if the device has swap chain support
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	/// populate the swap chain struct
@@ -124,6 +150,10 @@ private:
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
+
+	/// acquire image from swap chain, execute the next command and returns the modified image to the swap chain for presentation. Maybe this is not the place for this.
+	void drawFrame();
+
 	VulkanManager();
 	~VulkanManager();
 
@@ -134,6 +164,7 @@ public:
 	virtual void init();
 	virtual void update();
 	virtual void release();
+	virtual void waitUntilFinishEverything();
 
 	void setKeyCallback(GLFWkeyfun function);
 	void setCursorCallback(GLFWcursorposfun function);

@@ -87,6 +87,7 @@ int main()
 		// shader.setMat4("view", view);
 	}
 
+	appManager->waitUntilFinishEverything();
 	appManager->ShutDownSingleton();
 	timeManager->ShutDownSingleton();
 	return 0;
