@@ -73,6 +73,23 @@ std::string FileHandler::readLineFromInputFile(std::fstream& inputFile)
 	return fileLine;
 }
 
+std::vector<char> FileHandler::readBinaryFile(const std::string& filename)
+{
+	std::ifstream file(filename, std::ios::ate | std::ios::binary); // start reading at the end to allocate memory
+
+	if (!file.is_open()) {
+		throw std::runtime_error("failed to open file!");
+	}
+
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+	file.close();
+
+	return buffer;
+}
+
 void FileHandler::writeRawStringToOutputFile(std::fstream& outputFile, const std::string & stringToWrite)
 {	
 	_writeStringToOutputFile(outputFile, stringToWrite);

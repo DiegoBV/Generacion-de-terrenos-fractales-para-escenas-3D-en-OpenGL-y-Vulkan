@@ -88,6 +88,8 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	/// resolution of the swap chain images
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	/// helper function. Creates a VkShaderModule (maybe we could move this to our shader class)
+	VkShaderModule createShaderModule(const std::vector<char>& code);
 	VulkanManager();
 	~VulkanManager();
 

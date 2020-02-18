@@ -76,15 +76,15 @@ int main()
 		shader.setVec3("worldUp", camera.getWorldUp().x, camera.getWorldUp().y, camera.getWorldUp().z);
 		shader.setMat4("viewMat", transpose(camera.getViewMatrix()));
 		shader.setFloat("time", timeManager->getTimeSinceBeginning());
-		shader.use();
+		shader.use();*/
 
 		// pass projection matrix to shader (note that in this case it could change every frame)
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)appManager->getWindowWidth() / (float)appManager->getWindowHeight(), 0.1f, 100.0f);
-		shader.setMat4("projection", projection);
+		//shader.setMat4("projection", projection);
 
 		// camera/view transformation
 		glm::mat4 view = camera.getViewMatrix();
-		shader.setMat4("view", view);*/
+		//shader.setMat4("view", view);
 	}
 
 	appManager->ShutDownSingleton();

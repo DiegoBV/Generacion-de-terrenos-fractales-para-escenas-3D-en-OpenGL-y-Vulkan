@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <fstream>
+#include <vector>
 
 class FileHandler
 {
@@ -18,6 +19,8 @@ public:
 	static std::string readInputFile(std::fstream& inputFile);
 	/// reads a line from the input file, moving the file pointer as expected. If the file reaches EOF, returns string = "EOF"
 	static std::string readLineFromInputFile(std::fstream& inputFile);
+	/// read s abinary file and returns the all the data
+	static std::vector<char> readBinaryFile(const std::string& filename);
 
 	/// writes a string without formatting it to an output file, moving the file pointer as expected
 	static void writeRawStringToOutputFile(std::fstream& outputFile, const std::string& stringToWrite);

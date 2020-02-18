@@ -1,5 +1,6 @@
 #if defined(VULKAN_DEBUG) || defined(VULKAN_RELEASE)
 #include "VulkanManager.h"
+#include "FileHandler.h"
 #include <iostream>
 #include <set>
 #include <algorithm>
@@ -366,6 +367,33 @@ void VulkanManager::createImageViews()
 
 void VulkanManager::createGraphicsPipeline()
 {
+	auto vertShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vvert.spv");
+	auto fragShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vfrag.spv");
+
+	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+	// assign the shaders to a specific pipeline stage (lol)
+	// this is the vertex shader
+	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
+	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	vertShaderStageInfo.module = vertShaderModule;
+	vertShaderStageInfo.pName = "main"; // ENTRYPOINT
+	// pSpecializationInfo, maybe its worth for us, i dont know
+
+	// this is the fragment shader
+	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragShaderStageInfo.module = fragShaderModule;
+	fragShaderStageInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
+	// cleanup modules
+	vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
+	vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
 }
 
 bool VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
@@ -445,6 +473,22 @@ VkExtent2D VulkanManager::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capab
 
 		return actualExtent;
 	}
+}
+
+VkShaderModule VulkanManager::createShaderModule(const std::vector<char>& code)
+{
+	// we need to specify the code and its length
+	VkShaderModuleCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = code.size();
+	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create shader module!");
+	}
+
+	return shaderModule;
 }
 
 VulkanManager::VulkanManager()
