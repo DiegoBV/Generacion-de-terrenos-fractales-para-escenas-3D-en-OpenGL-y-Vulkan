@@ -15,3 +15,17 @@ https://imaginary.org/film/3d-fractal-trip-far-away
 -Info: http://personales.upv.es/rmullor/Fractales/Fractales.htm
 -Software: http://www.cadnav.com/software/view-46041.html
 - https://github.com/tntmeijs/GLSL-Shader-Includes
+
+-MandelBox 1: https://www.shadertoy.com/view/wldGR4
+-MandelBox 2: https://www.shadertoy.com/view/tdXSRn
+-MandelBox tunel: https://www.shadertoy.com/view/MlfSWX
+-MandelBox 3: https://www.shadertoy.com/view/3dBXzd
+-Sobre Mandelbox 1: http://blog.hvidtfeldts.net/index.php/2011/11/distance-estimated-3d-fractals-vi-the-mandelbox/
+-Sobre Mandelbox 2: http://www.fractalforums.com/3d-fractal-generation/a-mandelbox-distance-estimate-formula/
+
+
+-Mandelbulb 1: https://www.shadertoy.com/view/wdjGWR
+-Mandelbulb2: https://www.shadertoy.com/view/ltfSWn
+
+-Fractal terrain 1: https://www.shadertoy.com/view/3lcGRX
+-Fractal terrain 2: https://www.shadertoy.com/view/3ldGRX
