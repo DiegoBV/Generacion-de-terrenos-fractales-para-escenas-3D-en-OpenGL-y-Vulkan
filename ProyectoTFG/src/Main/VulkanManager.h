@@ -3,6 +3,53 @@
 #include <vulkan.hpp>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <glm.hpp>
+
+// test shader variables
+
+struct Vertex {
+	glm::vec2 pos;
+	glm::vec3 color;
+
+	static VkVertexInputBindingDescription getBindingDescription() {
+		VkVertexInputBindingDescription bindingDescription = {};
+		bindingDescription.binding = 0; // index of the binding in the array of bindings
+		bindingDescription.stride = sizeof(Vertex); // number of bytes from one entry to the next
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // move to the next data entry after each vertex
+		return bindingDescription;
+	}
+
+	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+		// how to extract a vertex attribute from a chunk of vertex data originating from a binding description
+		// position
+		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+		attributeDescriptions[0].binding = 0; // from wich binding this comes
+		attributeDescriptions[0].location = 0; // location at vertex shader
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; // format. see vulkan help
+		attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+		// color
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		return attributeDescriptions;
+	}
+};
+
+const std::vector<Vertex> vertices = {
+	{{-0.5f, -0.5f}, {0.5f, 0.0f, 0.0f}},
+	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+};
+
+const std::vector<uint16_t> indices = {
+	0, 1, 2, 2, 3, 0
+};
+
+// end of test shader variables
 
 class GLFWwindow;
 
@@ -78,12 +125,20 @@ private:
 	std::vector<VkFence> imagesInFlight;
 	// current frame presented
 	size_t currentFrame = 0;
+
+	// Shader buffer
+	VkBuffer vertexBuffer;
+	// handle of the vertex buffer memory
+	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
+
 	// validation layers
 	const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 	};
 
-#ifdef NDEBUG
+#ifdef VULKAN_RELEASE
 	const bool enableValidationLayers = false;
 #else
 	const bool enableValidationLayers = true;
@@ -121,10 +176,19 @@ private:
 	void createFramebuffers();
 	/// creates and fills the commandPool object
 	void createCommandPool();
-	/// creates the command buffers (one for each image of the swap chain)
+	/// variables that can be read by the graphic card (in attributes of the vertex shader) (SHADER)
+	void createVertexBuffer();
+	/// an index buffer allows us to reuse existing data, reordenate the vertex buffer data (SHADER)
+	void createIndexBuffer();
+	/// creates the command buffers (one for each image of the swap chain) (SHADER + OTRAS COSAS)
 	void createCommandBuffers();
 	/// creates the needed semaphores
 	void createSyncObjects();
+
+	/// graphic cards offer different types of memory, so... (TODO ESTO ES SHADER)
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
 	/// chek if the device has swap chain support
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
