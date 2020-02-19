@@ -10,7 +10,7 @@ uniform mat4 viewMat;
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 
-#include ..\\..\\Shaders\\mandelBulb.c
+#include ..\\..\\Shaders\\mandelBox.c
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));

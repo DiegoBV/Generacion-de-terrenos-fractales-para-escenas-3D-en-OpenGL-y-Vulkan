@@ -1,183 +1,67 @@
-#version 330 core
+const float FRACTAL_DIST = 1.5;
+const float FRACTAL_STEPS = 7;
+const float FRACTAL_MIN_SCALE = 2;
+const float FRACTAL_MAX_SCALE = 4.2;
 
-// RAY MARCHING ALGORITHM
-uniform vec2 resolution;
-uniform float time;
-uniform vec3 cameraEye;
-uniform vec3 cameraFront;
-uniform vec3 worldUp;
-uniform mat4 viewMat;
+vec2 SDF(vec3 z);
 
-const int MAX_MARCHING_STEPS = 128;
-const float MIN_DIST = 0.0;
-const float MAX_DIST = 1000.0;
-const float EPSILON = 0.0001;
+#include ..\\..\\Shaders\\fractalFunctions.c
 
-const int MAX_FRACTAL_STEPS = 20;
-
-// predeclaramos las funciones por si las usan los archivos incluidos
-float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end);
-vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
-
-#include ..\\..\\Shaders\\scene0.c
-
-void sphereFold(inout vec3 p, inout float dz) {
-	float r2 = dot(p,p);
-    float minRadius = 0.5;
-    float fixedRadius = 1.0;
-
-	if (r2<minRadius) { 
-		// linear inner scaling
-		float temp = (fixedRadius/minRadius);
-		p *= temp;
-		dz*= temp;
-	} else if (r2<fixedRadius) { 
-		// this is the actual sphere inversion
-		float temp =(fixedRadius/r2);
-		p *= temp;
-		dz*= temp;
-	}
-}
-
-void boxFold(inout vec3 p, inout float dz) {
-	p = clamp(p *0.5+0.5, 0.0, 1.0) *4.0-2.0 - p;  
-}
-
-float DE(vec3 position) {
-    float scale = 2.0;
-    
-    // vec3 offset = p;
-	// float dr = 1.0;
-
-	// for (int n = 0; n < MAX_FRACTAL_STEPS; n++) {
-	// 	boxFold(p,dr);       // Reflect
-	// 	sphereFold(p,dr);    // Sphere Inversion
- 		
-    //     p=scale*p + offset;  // Scale & Translate
-    //     dr = dr*abs(scale)+1.0;
-	// }
-	// float r = length(p);
-	// return r/abs(dr);
-
-    // precomputed somewhere
-    float minRadius = 0.5;
-    float mR2 = minRadius * minRadius;
-    vec4 scalevec = vec4(scale, scale, scale, abs(scale)) / mR2;
-    float C1 = abs(scale-1.0), C2 = pow(abs(scale), float(1-MAX_FRACTAL_STEPS));
-
-    // distance estimate
-    vec4 p = vec4(position.xyz, 1.0), p0 = vec4(position.xyz, 1.0);  // p.w is knighty's DEfactor
-    for (int i=0; i<MAX_FRACTAL_STEPS; i++) {
-        p.xyz = clamp(p.xyz *0.5+0.5, 0.0, 1.0) *4.0-2.0 - p.xyz; // box fold: min3, max3, mad3
-        float r2 = dot(p.xyz, p.xyz);  // dp3
-        p.xyzw *= clamp(max(mR2/r2, mR2), 0.0, 1.0);  // sphere fold: div1, max1.sat, mul4
-        p.xyzw = p*scalevec + p0;  // mad4
-    }
-    return (length(p.xyz) - C1) / p.w - C2;
-
-//     float DEfactor = 0.0;
-//     float x = p.x;
-//     float y = p.y;
-//     float z = p.z;
-
-//     for (int n = 0; n < MAX_FRACTAL_STEPS; n++)
-//     {
-//         DEfactor = scale;
-
-//         float fixedRadius = 1.0;
-//         float fR2 = fixedRadius * fixedRadius;
-//         float minRadius = 0.5;
-//         float mR2 = minRadius * minRadius;
-
-//         if (x > 1.0)
-//             x = 2.0 - x;
-//         else if (x < -1.0)
-//             x = -2.0 - x;
-//         if (y > 1.0)
-//             y = 2.0 - y;
-//         else if (y < -1.0)
-//             y = -2.0 - y;
-//         if (z > 1.0)
-//             z = 2.0 - z;
-//         else if (z < -1.0)
-//             z = -2.0 - z;
-
-//         float r2 = x * x + y * y + z * z;
-
-//         if (r2 < mR2)
-//         {
-//             x = x * fR2 / mR2;
-//             y = y * fR2 / mR2;
-//             z = z * fR2 / mR2;
-//             DEfactor = DEfactor * fR2 / mR2;
-//         }
-//         else if (r2 < fR2)
-//         {
-//             x = x * fR2 / r2;
-//             y = y * fR2 / r2;
-//             z = z * fR2 / r2;
-//             DEfactor *= fR2 / r2;
-//         }
-
-//         x = x * scale + 0;
-//         y = y * scale + 0;
-//         z = z * scale + 0;
-//         DEfactor *= scale;
-//     }
-
-//     return sqrt(x * x + y * y + z * z) / abs(DEfactor);
-}
-
-float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end){
-    float depth = start;
-
-    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
-        float dist = min(sceneSDF(eye + depth * marchingDirection), DE(eye + depth * marchingDirection));
-        if (dist < EPSILON) {
-			return depth;
-        }
-        depth += 0.5*dist;
-        if (depth >= end) {
-            return end;
-        }
-    }
-
-    return end;
-}
-
-vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
-    vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
-    float z = size.y / tan(radians(fieldOfView) / 2.0);
-    return normalize(vec3(uv, -z));
-}
-
-void main()
+vec3 boxFold(vec3 z, vec3 r)
 {
-    vec2 pixelCoord = gl_FragCoord.xy;
-    vec3 rayOrigin = cameraEye;
-    vec3 rayDir = rayDirection(45.0, resolution, pixelCoord);
-    rayDir = (viewMat * vec4(rayDir, 0.0)).xyz; //works
+    return clamp(z.xyz, -r, r) * 2.0 - z.xyz;
+}
 
-    float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
+void sphereFold(inout vec3 z, inout float dz)
+{
+    float fixedRadius2 = 1.6;
+    float minRadius2 = 0.4;
+    float r2 = dot(z, z);
+    if (r2 < minRadius2)
+    {
+        float temp = (fixedRadius2 / minRadius2);
+        z *= temp;
+        dz *= temp;
+    }
+    else if (r2 < fixedRadius2)
+    {
+        float temp = (fixedRadius2 / r2);
+        z *= temp;
+        dz *= temp;
+    }
+}
 
-    vec3 p = rayOrigin + rayDir * distanceToSurface;
+vec3 mengerFold(vec3 z)
+{
+    float a = min(z.x - z.y, 0.0);
+    z.x -= a;
+    z.y += a;
+    a = min(z.x - z.z, 0.0);
+    z.x -= a;
+    z.z += a;
+    a = min(z.y - z.z, 0.0);
+    z.y -= a;
+    z.z += a;
+    return z;
+}
 
-    float dif = getLight(p);
-
-    if (distanceToSurface > MAX_DIST - EPSILON) {
-        // Didn't hit anything
-        gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
-		return;
+vec2 SDF(vec3 z)
+{
+    z *= rotateX(time / 8) * rotateZ(-time / 8);
+    float scale = FRACTAL_MAX_SCALE * abs(sin(time/16)) + FRACTAL_MIN_SCALE;
+    vec3 offset = z;
+    float dr = 1.0;
+    float trap = 1e10;
+    for (int i = 0; i < FRACTAL_STEPS; i++)
+    {
+        z = boxFold(z, vec3(0.8)); // Reflect
+        z = boxFold(z, vec3(1.1)); // Reflect
+        sphereFold(z, dr);         // Sphere Inversion
+        z = scale * z + offset;    // Scale & Translate
+        dr = dr * abs(scale) + 1.0;
+        trap = min(trap, length(z));
     }
 
-    // Use the surface normal as the ambient color of the material
-    vec3 K_a = (getNormal(p) + vec3(1.0)) / 2.0;
-    vec3 K_d = K_a;
-    vec3 K_s = vec3(1.0, 1.0, 1.0);
-    float shininess = 10.0;
-    
-    vec3 phongColor = phongIllumination(K_a, K_d, K_s, shininess, p, cameraEye);
-
-    vec3 lightColor = vec3(dif);
-    gl_FragColor = vec4(phongColor * lightColor, 1.0);
+    float r = length(z);
+    return vec2(r / abs(dr), 50.0*pow(dr,0.128/float(MAX_MARCHING_STEPS)));
 }

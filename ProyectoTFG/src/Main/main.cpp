@@ -61,7 +61,7 @@ int main()
 	appManager->setCursorCallback(motion);
 
 	Shader shader = Shader();
-	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\mandelBox.c");
+	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\fragment.c");
 	shader.use();
 	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());
 
