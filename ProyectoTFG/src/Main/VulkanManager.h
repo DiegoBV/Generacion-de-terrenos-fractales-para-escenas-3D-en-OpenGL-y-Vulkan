@@ -49,6 +49,12 @@ const std::vector<uint16_t> indices = {
 	0, 1, 2, 2, 3, 0
 };
 
+struct UniformBufferObject {
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 proj;
+};
+
 // end of test shader variables
 
 class GLFWwindow;
@@ -105,6 +111,8 @@ private:
 	std::vector<VkImageView> swapChainImageViews;
 	// info about render buffers
 	VkRenderPass renderPass;
+	// vertex descriptor
+	VkDescriptorSetLayout descriptorSetLayout;
 	// used for uniform variables
 	VkPipelineLayout pipelineLayout;
 	// handler of the pipeline
@@ -132,6 +140,11 @@ private:
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
+	// we want more than one uniform buffer (avoid reading and writing collision)
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {
@@ -170,6 +183,8 @@ private:
 	void createImageViews();
 	/// tells vulkan the information about our render buffers
 	void createRenderPass();
+	/// define the descriptor of the matrix (SHADER)
+	void createDescriptorSetLayout();
 	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
 	void createGraphicsPipeline();
 	/// fill the frameBuffer vector
@@ -180,6 +195,12 @@ private:
 	void createVertexBuffer();
 	/// an index buffer allows us to reuse existing data, reordenate the vertex buffer data (SHADER)
 	void createIndexBuffer();
+	/// fills the uniformBuffer vector
+	void createUniformBuffers();
+	/// descriptors cant be created directly, thera must be a descriptor pool
+	void createDescriptorPool();
+	/// creation of the descriptors
+	void createDescriptorSets();
 	/// creates the command buffers (one for each image of the swap chain) (SHADER + OTRAS COSAS)
 	void createCommandBuffers();
 	/// creates the needed semaphores
@@ -189,6 +210,7 @@ private:
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void updateUniformBuffer(uint32_t currentImage);
 
 	/// chek if the device has swap chain support
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
