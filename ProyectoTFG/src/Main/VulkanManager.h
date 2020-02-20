@@ -4,6 +4,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
+#include "Camera.h"
 
 // test shader variables
 
@@ -50,6 +51,12 @@ const std::vector<uint16_t> indices = {
 };
 
 struct UniformBufferObject {
+	//glm::vec2 resolution;
+	//float time;
+	//glm::vec3 cameraEye;
+	//glm::vec3 cameraFront;
+	//glm::vec3 worldUp;
+	//glm::mat4 viewMat;
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 proj;
@@ -80,7 +87,6 @@ private:
 		std::vector<VkSurfaceFormatKHR> formats;
 		std::vector<VkPresentModeKHR> presentModes;
 	};
-
 	static VulkanManager* instance;
 	GLFWwindow* window;
 	/// vulkan instance
@@ -244,6 +250,7 @@ private:
 	~VulkanManager();
 
 public:
+	Camera* camera;
 	static VulkanManager* GetSingleton();
 	static void ShutDownSingleton();
 

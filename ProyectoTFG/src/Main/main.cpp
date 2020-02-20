@@ -59,6 +59,7 @@ int main()
 	// Callback registration
 	appManager->setKeyCallback(key);
 	appManager->setCursorCallback(motion);
+	// static_cast<VulkanManager*>(appManager)->camera = &camera;
 
 	/*Shader shader = Shader();
 	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\mandelBox.c");
@@ -77,14 +78,6 @@ int main()
 		shader.setMat4("viewMat", transpose(camera.getViewMatrix()));
 		shader.setFloat("time", timeManager->getTimeSinceBeginning());
 		shader.use();*/
-
-		// pass projection matrix to shader (note that in this case it could change every frame)
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)appManager->getWindowWidth() / (float)appManager->getWindowHeight(), 0.1f, 100.0f);
-		//shader.setMat4("projection", projection);
-
-		// camera/view transformation
-		glm::mat4 view = camera.getViewMatrix();
-		//shader.setMat4("view", view);
 	}
 
 	appManager->waitUntilFinishEverything();
