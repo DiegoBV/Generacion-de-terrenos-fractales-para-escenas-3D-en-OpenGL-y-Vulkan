@@ -59,7 +59,7 @@ int main()
 	// Callback registration
 	appManager->setKeyCallback(key);
 	appManager->setCursorCallback(motion);
-	// static_cast<VulkanManager*>(appManager)->camera = &camera;
+	static_cast<VulkanManager*>(appManager)->camera = &camera;
 
 	/*Shader shader = Shader();
 	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\mandelBox.c");

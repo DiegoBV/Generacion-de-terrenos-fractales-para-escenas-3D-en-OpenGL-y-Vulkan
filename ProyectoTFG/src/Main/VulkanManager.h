@@ -40,10 +40,10 @@ struct Vertex {
 };
 
 const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f}, {0.5f, 0.0f, 0.0f}},
-	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+	{{-1.0f, -1.0f}, {0.5f, 0.0f, 0.0f}},
+	{{1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
+	{{1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
+	{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}}
 };
 
 const std::vector<uint16_t> indices = {
@@ -51,15 +51,12 @@ const std::vector<uint16_t> indices = {
 };
 
 struct UniformBufferObject {
-	//glm::vec2 resolution;
-	//float time;
-	//glm::vec3 cameraEye;
-	//glm::vec3 cameraFront;
-	//glm::vec3 worldUp;
-	//glm::mat4 viewMat;
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 proj;
+	glm::vec2 resolution;
+	float time;
+	glm::vec3 cameraEye;
+	glm::vec3 cameraFront;
+	glm::vec3 worldUp;
+	glm::mat4 viewMat;
 };
 
 // end of test shader variables

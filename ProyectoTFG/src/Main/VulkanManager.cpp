@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <gtc/matrix_transform.hpp>
 #include <chrono>
+#include "TimeManager.h"
 
 VulkanManager* VulkanManager::instance = nullptr;
 
@@ -489,7 +490,7 @@ void VulkanManager::createDescriptorSetLayout()
 	uboLayoutBinding.binding = 0; // number used in the shader
 	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	uboLayoutBinding.descriptorCount = 1;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // just fot the vertex shader
+	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // just for the fragment shader
 	uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
@@ -566,7 +567,7 @@ void VulkanManager::createGraphicsPipeline()
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
 
 	VkPipelineMultisampleStateCreateInfo multisampling = {};
@@ -921,23 +922,14 @@ void VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 
 void VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
 	UniformBufferObject ubo = {};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = camera->getViewMatrix();
-	ubo.proj = glm::perspective(glm::radians(45.0f), (float)getWindowWidth() / (float)getWindowHeight(), 0.1f, 100.0f);
-	ubo.proj[1][1] *= -1;
-	//ubo.cameraEye = camera->getEye();
-	//ubo.cameraFront = camera->getFront();
-	//ubo.resolution = {SRC_WIDTH, SRC_HEIGHT};
-	//ubo.time = time;
-	//ubo.worldUp = camera->getWorldUp();
-	//ubo.viewMat = camera->getViewMatrix();
-	// transfer the data! not efficient at all...
+	ubo.resolution = { SRC_WIDTH, SRC_HEIGHT };
+	ubo.time = TimeManager::GetSingleton()->getTimeSinceBeginning();
+	ubo.cameraEye = camera->getEye();
+	ubo.cameraFront = camera->getFront();
+	ubo.worldUp = camera->getWorldUp();
+	ubo.viewMat = transpose(camera->getViewMatrix());
+
 	void* data;
 	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
 	memcpy(data, &ubo, sizeof(ubo));
