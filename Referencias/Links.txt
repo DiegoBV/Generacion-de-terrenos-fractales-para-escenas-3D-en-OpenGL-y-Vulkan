@@ -23,6 +23,12 @@ https://imaginary.org/film/3d-fractal-trip-far-away
 -Sobre Mandelbox 1: http://blog.hvidtfeldts.net/index.php/2011/11/distance-estimated-3d-fractals-vi-the-mandelbox/
 -Sobre Mandelbox 2: http://www.fractalforums.com/3d-fractal-generation/a-mandelbox-distance-estimate-formula/
 
+-Sistema de coordenadas de Vulkan: 
+    https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+    https://stackoverflow.com/questions/45570326/flipping-the-viewport-in-vulkan
+    http://anki3d.org/vulkan-coordinate-system/
+    https://forum.unity.com/threads/fix-for-directx-flipping-vertical-screen-coordinates-in-image-effects-not-working.266455/
+    https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFrontFace.html
 
 -Mandelbulb 1: https://www.shadertoy.com/view/wdjGWR
 -Mandelbulb2: https://www.shadertoy.com/view/ltfSWn

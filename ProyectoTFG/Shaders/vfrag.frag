@@ -1,68 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-
-/*layout(binding = 0) uniform UniformBufferObject {
-    vec2 resolution;
-} ubo;
-
-layout(location = 0) out vec4 outColor;
-
-float getDistance(vec3 point){ //problem here
-    vec4 sphere = vec4(0, 0, 0, 300);
-    float sphereDist = length(point - sphere.xyz) - sphere.w;
-
-    return sphereDist;
-}
-
-bool isInsideSphere(vec3 point){
-    float dist = pow(point.x - 0, 2) + pow(point.y - 0, 2) + pow(point.z - 0, 2);
-    
-    return(sqrt(dist) <= 200);
-}
-
-float rayMarch(vec3 rayOrigin, vec3 rayDir){
-    float distanceFromOrigin = 0.0;
-
-    for(int i = 0; i < 100; i++){ //100 = MAX_STEPS
-        vec3 currentMarchingLocation = rayOrigin + rayDir * distanceFromOrigin;
-        float distanceToSurface = getDistance(currentMarchingLocation);
-        distanceFromOrigin = distanceFromOrigin + distanceToSurface;
-
-        if(distanceFromOrigin > 100.0 || distanceToSurface < 0.01)
-            break;       
-    }
-
-    return distanceFromOrigin;
-}
-
-void main()
-{
-    vec2 pixelCoord = gl_FragCoord.xy;
-    vec2 uv = vec2(pixelCoord.x - ubo.resolution.x/2, pixelCoord.y - ubo.resolution.y/2);
-
-    vec3 rayOrigin = vec3(0, 0, 0); 
-    vec3 rayDir = normalize(vec3(uv, 1.0f));
-
-    float distanceToSurface = rayMarch(rayOrigin, rayDir);
-    distanceToSurface = distanceToSurface / 6;
-
-    vec3 color = vec3(distanceToSurface, distanceToSurface, distanceToSurface);
-
-    outColor = vec4(color, 1.0);
-
-    if(isInsideSphere(vec3(uv, 1.0f))){
-        outColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
-    else{
-        outColor = vec4(0.0, 0.0, 1.0, 1.0);
-    }
-}
-
-
-
-#version 330 core*/
-
 layout(binding = 0) uniform UniformBufferObject {
     vec2 resolution;
     float time;
@@ -212,6 +150,7 @@ vec2 SDF(vec3 z)
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
+    uv.y = -uv.y;
     float z = size.y / tan(radians(fieldOfView) / 2.0);
     return normalize(vec3(uv, -z));
 }
