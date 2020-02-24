@@ -34,44 +34,24 @@ struct Sphere{
     vec3 center;
     mat3 rotation;
     vec4 color;
-
-    float SDF(vec3 point) {
-        return length(point - center) - radius;
-    }
-
-    void rotateFigX(float angle){
-        rotation = rotateX(angle, rotation);
-    }
-    void rotateFigY(float angle){
-        rotation = rotateY(angle, rotation);
-    }
-    void rotateFigZ(float angle){
-        rotation = rotateZ(angle, rotation);
-    }
 };
+
+float sphereSDF(Sphere sphere, vec3 point) {
+    return length(point - sphere.center) - sphere.radius;
+}
 
 struct Box{
     vec3 dimensions;
     vec3 center;
     mat3 rotation;
     vec4 color;
-
-    float SDF(vec3 point){
-        point = point * rotation;
-        vec3 q = (abs(point - center)) - dimensions;
-        return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
-    }
-
-    void rotateFigX(float angle){
-        rotation = rotateX(angle, rotation);
-    }
-    void rotateFigY(float angle){
-        rotation = rotateY(angle, rotation);
-    }
-    void rotateFigZ(float angle){
-        rotation = rotateZ(angle, rotation);
-    }
 };
+
+float boxSDF(Box box, vec3 point){
+    point = point * box.rotation;
+    vec3 q = (abs(point - box.center)) - box.dimensions;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
 
 struct Cylinder{
     vec3 center;
@@ -79,28 +59,18 @@ struct Cylinder{
     float height;
     mat3 rotation;
     vec4 color;
-
-    float SDF(vec3 point) {
-        point = (point - center) * rotation;
-        vec2 d = abs(vec2(length(point.xy),point.z)) - vec2(radius,height);
-        return min(max(d.x,d.y),0.0) + length(max(d,0.0));
-    }
-
-    void rotateFigX(float angle){
-        rotation = rotateX(angle, rotation);
-    }
-    void rotateFigY(float angle){
-        rotation = rotateY(angle, rotation);
-    }
-    void rotateFigZ(float angle){
-        rotation = rotateZ(angle, rotation);
-    }
 };
+
+float cylinderSDF(Cylinder cylinder, vec3 point) {
+    point = (point - cylinder.center) * cylinder.rotation;
+    vec2 d = abs(vec2(length(point.xy),point.z)) - vec2(cylinder.radius, cylinder.height);
+    return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
 
 struct Plane{
     float height;
-
-    float SDF(vec3 point){
-        return point.y + height;
-    }
 };
+
+float planeSDF(Plane plane, vec3 point){
+    return point.y + plane.height;
+}
