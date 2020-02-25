@@ -923,8 +923,8 @@ void VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 void VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
 	UniformBufferObject ubo = {};
-	ubo.resolution = { SRC_WIDTH, SRC_HEIGHT };
 	ubo.time = TimeManager::GetSingleton()->getTimeSinceBeginning();
+	ubo.resolution = { SRC_WIDTH, SRC_HEIGHT };
 	ubo.cameraEye = camera->getEye();
 	ubo.cameraFront = camera->getFront();
 	ubo.worldUp = camera->getWorldUp();

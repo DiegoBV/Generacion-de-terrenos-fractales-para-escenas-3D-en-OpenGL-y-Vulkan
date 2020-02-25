@@ -10,7 +10,6 @@
 
 struct Vertex {
 	glm::vec2 pos;
-	glm::vec3 color;
 
 	static VkVertexInputBindingDescription getBindingDescription() {
 		VkVertexInputBindingDescription bindingDescription = {};
@@ -20,30 +19,30 @@ struct Vertex {
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+	static std::array<VkVertexInputAttributeDescription, 1> getAttributeDescriptions() {
 		// how to extract a vertex attribute from a chunk of vertex data originating from a binding description
 		// position
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+		std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions = {};
 		attributeDescriptions[0].binding = 0; // from wich binding this comes
 		attributeDescriptions[0].location = 0; // location at vertex shader
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; // format. see vulkan help
 		attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 		// color
-		attributeDescriptions[1].binding = 0;
+		/*attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
+		attributeDescriptions[1].offset = 0;*/
 
 		return attributeDescriptions;
 	}
 };
 
 const std::vector<Vertex> vertices = {
-	{{-1.0f, -1.0f}, {0.5f, 0.0f, 0.0f}},
-	{{1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-	{{1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-	{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}}
+	{{-1.0f, -1.0f}},
+	{{1.0f, -1.0f}},
+	{{1.0f, 1.0f}},
+	{{-1.0f, 1.0f}}
 };
 
 const std::vector<uint16_t> indices = {
@@ -51,12 +50,12 @@ const std::vector<uint16_t> indices = {
 };
 
 struct UniformBufferObject {
-	glm::vec2 resolution;
-	float time;
-	glm::vec3 cameraEye;
-	glm::vec3 cameraFront;
-	glm::vec3 worldUp;
-	glm::mat4 viewMat;
+	alignas(4) float time;
+	alignas(8) glm::vec2 resolution;
+	alignas(16) glm::vec3 cameraEye;
+	alignas(16) glm::vec3 cameraFront;
+	alignas(16) glm::vec3 worldUp;
+	alignas(16) glm::mat4 viewMat;
 };
 
 // end of test shader variables

@@ -2,8 +2,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(binding = 0) uniform UniformBufferObject {
-    vec2 resolution;
     float time;
+    vec2 resolution;
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;

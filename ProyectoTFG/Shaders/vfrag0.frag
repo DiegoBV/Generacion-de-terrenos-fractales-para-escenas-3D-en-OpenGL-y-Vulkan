@@ -2,8 +2,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(binding = 0) uniform UniformBufferObject {
-    vec2 resolution;
     float time;
+    vec2 resolution;
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;
@@ -250,21 +250,9 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
     return color;
 }
 
-mat4 viewMatrix(vec3 eye, vec3 center, vec3 up) {
-    // Based on gluLookAt man page
-    vec3 f = normalize(center -eye);
-    vec3 s = normalize(cross(f, up));
-    vec3 u = cross(s, f);
-    return mat4(
-        vec4(s, 0.0),
-        vec4(u, 0.0),
-        vec4(-f, 0.0),
-        vec4(0.0, 0.0, 0.0, 1)
-    );
-}
-
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
+    uv.y = -uv.y;
     float z = size.y / tan(radians(fieldOfView) / 2.0);
     return normalize(vec3(uv, -z));
 }
@@ -275,7 +263,6 @@ void main()
     vec3 rayOrigin = ubo.cameraEye;
     vec3 rayDir = rayDirection(45.0, ubo.resolution, pixelCoord);
     rayDir = (ubo.viewMat * vec4(rayDir, 0.0)).xyz; //works
-
     float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
 
     vec3 p = rayOrigin + rayDir * distanceToSurface;
