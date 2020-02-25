@@ -505,6 +505,8 @@ void VulkanManager::createDescriptorSetLayout()
 
 void VulkanManager::createGraphicsPipeline()
 {
+	system("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShaders.bat vvert vfrag");
+
 	auto vertShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vvert.spv");
 	auto fragShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vfrag.spv");
 
