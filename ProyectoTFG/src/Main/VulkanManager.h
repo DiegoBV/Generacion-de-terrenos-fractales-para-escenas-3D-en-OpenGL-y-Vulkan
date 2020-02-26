@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
 #include "Camera.h"
+#include "Shader.h"
 
 // test shader variables
 
@@ -65,6 +66,8 @@ class GLFWwindow;
 class VulkanManager : public Manager
 {
 private:
+	Shader* vkShader;
+
 	// struct auxiliar para la familia de colas
 	struct QueueFamilyIndices {
 		// support graphics integration
@@ -193,26 +196,13 @@ private:
 	void createFramebuffers();
 	/// creates and fills the commandPool object
 	void createCommandPool();
-	/// variables that can be read by the graphic card (in attributes of the vertex shader) (SHADER)
-	void createVertexBuffer();
-	/// an index buffer allows us to reuse existing data, reordenate the vertex buffer data (SHADER)
-	void createIndexBuffer();
-	/// fills the uniformBuffer vector
-	void createUniformBuffers();
+	
 	/// descriptors cant be created directly, thera must be a descriptor pool
 	void createDescriptorPool();
-	/// creation of the descriptors
-	void createDescriptorSets();
 	/// creates the command buffers (one for each image of the swap chain) (SHADER + OTRAS COSAS)
 	void createCommandBuffers();
 	/// creates the needed semaphores
 	void createSyncObjects();
-
-	/// graphic cards offer different types of memory, so... (TODO ESTO ES SHADER)
-	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	void updateUniformBuffer(uint32_t currentImage);
 
 	/// chek if the device has swap chain support
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
@@ -224,8 +214,6 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	/// resolution of the swap chain images
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	/// helper function. Creates a VkShaderModule (maybe we could move this to our shader class)
-	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	/// checks if all the requested layers are available
 	bool checkValidationLayerSupport();
@@ -259,11 +247,31 @@ public:
 	void setCursorCallback(GLFWcursorposfun function);
 	void processInput(GLFWwindow* window);
 
+	void setShader(Shader* shader);
+
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	/// graphic cards offer different types of memory, so... (TODO ESTO ES SHADER)
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void updateUniformBuffer(uint32_t currentImage);
+	/// helper function. Creates a VkShaderModule (maybe we could move this to our shader class)
+	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	bool shouldClose();
 	inline GLFWwindow* getWindow() { return window; }
 	inline int getWindowWidth() { return SRC_WIDTH; }
 	inline int getWindowHeight() { return SRC_HEIGHT; }
+	VkDevice getLogicalDevice() { return logicalDevice; }
+	VkBuffer* getVertexBuffer() { return &vertexBuffer; }
+	VkDeviceMemory* getVertexBufferMemory() { return &vertexBufferMemory; }
+	VkBuffer* getIndexBuffer() { return &indexBuffer; }
+	VkDeviceMemory* getIndexBufferMemory() { return &indexBufferMemory; }
+	std::vector<VkBuffer> getUniformBuffers() { return uniformBuffers; }
+	std::vector<VkDeviceMemory> getUniformBuffersMemory() { return uniformBuffersMemory; }
+	std::vector<VkImage> getSwapChainImages() { return swapChainImages; }
+	VkDescriptorPool getDescriptorPool() { return descriptorPool; }
+	std::vector<VkDescriptorSet> getDescriptorSets() { return descriptorSets; }
+	VkDescriptorSetLayout getDescriptorSetLayout() { return descriptorSetLayout; }
 };
 

@@ -269,23 +269,26 @@
     <ClCompile Include="..\..\src\Main\glad.c" />
     <ClCompile Include="..\..\src\Main\GLManager.cpp" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
-    <ClCompile Include="..\..\src\Main\Shader.cpp" />
+    <ClCompile Include="..\..\src\Main\GLShader.cpp" />
     <ClCompile Include="..\..\src\Main\ShaderInclude.cpp" />
     <ClCompile Include="..\..\src\Main\TimeManager.cpp" />
     <ClCompile Include="..\..\src\Main\Timer.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanManager.cpp" />
+    <ClCompile Include="..\..\src\Main\VulkanShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Main\ApplicationManager.h" />
     <ClInclude Include="..\..\src\Main\Camera.h" />
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
     <ClInclude Include="..\..\src\Main\GLManager.h" />
+    <ClInclude Include="..\..\src\Main\Shader.h" />
     <ClInclude Include="..\..\src\Main\ShaderInclude.h" />
     <ClInclude Include="..\..\src\Main\Manager.h" />
-    <ClInclude Include="..\..\src\Main\Shader.h" />
+    <ClInclude Include="..\..\src\Main\GLShader.h" />
     <ClInclude Include="..\..\src\Main\TimeManager.h" />
     <ClInclude Include="..\..\src\Main\Timer.h" />
     <ClInclude Include="..\..\src\Main\VulkanManager.h" />
+    <ClInclude Include="..\..\src\Main\VulkanShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

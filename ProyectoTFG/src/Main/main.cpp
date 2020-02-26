@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
-#include "Shader.h"
 #include "Camera.h"
 #include "TimeManager.h"
 #include "ApplicationManager.h"
+#include "Shader.h"
 
 Camera camera;
 glm::dvec2 mCoord;
@@ -56,15 +56,16 @@ int main()
 
 	for (Manager* manager : managers) manager->init();
 
+	Shader shader = Shader();
+	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\fragment.c");
+	shader.use();
+	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());
+	appManager->setShader(&shader);
+
 	// Callback registration
 	appManager->setKeyCallback(key);
 	appManager->setCursorCallback(motion);
-	static_cast<VulkanManager*>(appManager)->camera = &camera;
-
-	/*Shader shader = Shader();
-	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\fragment.c");
-	shader.use();
-	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());*/
+	//static_cast<VulkanManager*>(appManager)->camera = &camera;
 
 	// render loop
 	// -----------
@@ -72,12 +73,12 @@ int main()
 	{
 		for (Manager* manager : managers) manager->update();
 
-		/*shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
+		shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
 		shader.setVec3("cameraFront", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 		shader.setVec3("worldUp", camera.getWorldUp().x, camera.getWorldUp().y, camera.getWorldUp().z);
 		shader.setMat4("viewMat", transpose(camera.getViewMatrix()));
 		shader.setFloat("time", timeManager->getTimeSinceBeginning());
-		shader.use();*/
+		shader.use();
 	}
 
 	appManager->waitUntilFinishEverything();
