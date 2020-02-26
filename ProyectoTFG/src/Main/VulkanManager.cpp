@@ -87,39 +87,27 @@ void VulkanManager::update()
 
 void VulkanManager::release()
 {
+	cleanupSwapChain();
+
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
 	}
+
 	vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
-	for (auto framebuffer : swapChainFramebuffers) {
-		vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
-	}
-	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
-	for (auto imageView : swapChainImageViews) {
-		vkDestroyImageView(logicalDevice, imageView, nullptr);
-	}
-	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
-	vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
-	for (size_t i = 0; i < swapChainImages.size(); i++) {
-		vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
-		vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
-	}
-	vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
-	vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
-	vkFreeMemory(logicalDevice, indexBufferMemory, nullptr);
-	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
-	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
+
 	vkDestroyDevice(logicalDevice, nullptr);
-	vkDestroySurfaceKHR(vkInstance, surface, nullptr);
+
 	if (enableValidationLayers) {
 		DestroyDebugUtilsMessengerEXT(vkInstance, debugMessenger, nullptr);
 	}
+
+	vkDestroySurfaceKHR(vkInstance, surface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
+
 	glfwDestroyWindow(window);
+
 	glfwTerminate();
 }
 
@@ -161,6 +149,20 @@ void VulkanManager::framebuffer_size_callback(GLFWwindow* window, int width, int
 bool VulkanManager::shouldClose()
 {
 	return glfwWindowShouldClose(getWindow());
+}
+
+void VulkanManager::recreateSwapChain()
+{
+	vkDeviceWaitIdle(logicalDevice);
+
+	cleanupSwapChain();
+
+	createSwapChain();
+	createImageViews();
+	createRenderPass();
+	createGraphicsPipeline();
+	createFramebuffers();
+	createCommandBuffers();
 }
 
 void VulkanManager::createInstance()
@@ -1054,6 +1056,25 @@ VulkanManager::VulkanManager()
 
 VulkanManager::~VulkanManager()
 {
+}
+
+void VulkanManager::cleanupSwapChain()
+{
+	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+		vkDestroyFramebuffer(logicalDevice, swapChainFramebuffers[i], nullptr);
+	}
+
+	vkFreeCommandBuffers(logicalDevice, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
+	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+
+	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+		vkDestroyImageView(logicalDevice, swapChainImageViews[i], nullptr);
+	}
+
+	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
 }
 
 #endif

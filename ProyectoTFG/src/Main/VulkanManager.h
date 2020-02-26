@@ -232,6 +232,7 @@ private:
 
 	VulkanManager();
 	~VulkanManager();
+	void cleanupSwapChain();
 
 public:
 	Camera* camera;
@@ -273,5 +274,7 @@ public:
 	VkDescriptorPool getDescriptorPool() { return descriptorPool; }
 	std::vector<VkDescriptorSet> getDescriptorSets() { return descriptorSets; }
 	VkDescriptorSetLayout getDescriptorSetLayout() { return descriptorSetLayout; }
+
+	void recreateSwapChain();
 };
 
