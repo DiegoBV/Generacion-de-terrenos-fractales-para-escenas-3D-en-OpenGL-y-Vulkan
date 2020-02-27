@@ -7,6 +7,7 @@
 #include <gtc/matrix_transform.hpp>
 #include <chrono>
 #include "TimeManager.h"
+#include "VulkanShader.h"
 
 VulkanManager* VulkanManager::instance = nullptr;
 
@@ -59,15 +60,6 @@ void VulkanManager::init()
 	createImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
-	createGraphicsPipeline();
-	createFramebuffers();
-	createCommandPool();
-	vkShader->createVertexBuffer();
-	vkShader->createIndexBuffer();
-	vkShader->createUniformBuffers();
-	createDescriptorPool();
-	vkShader->createDescriptorSets();
-	createCommandBuffers();
 	createSyncObjects();
 }
 
@@ -87,33 +79,58 @@ void VulkanManager::update()
 
 void VulkanManager::release()
 {
-	cleanupSwapChain();
-
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
 	}
-
 	vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
-
+	for (auto framebuffer : swapChainFramebuffers) {
+		vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
+	}
+	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
+	for (auto imageView : swapChainImageViews) {
+		vkDestroyImageView(logicalDevice, imageView, nullptr);
+	}
+	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
+	vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
+	for (size_t i = 0; i < swapChainImages.size(); i++) {
+		vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
+		vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
+	}
+	vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
+	vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
+	vkFreeMemory(logicalDevice, indexBufferMemory, nullptr);
+	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
+	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
-
+	vkDestroySurfaceKHR(vkInstance, surface, nullptr);
 	if (enableValidationLayers) {
 		DestroyDebugUtilsMessengerEXT(vkInstance, debugMessenger, nullptr);
 	}
-
-	vkDestroySurfaceKHR(vkInstance, surface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
-
 	glfwDestroyWindow(window);
-
 	glfwTerminate();
 }
 
 void VulkanManager::waitUntilFinishEverything()
 {
 	vkDeviceWaitIdle(logicalDevice);
+}
+
+void VulkanManager::setUpGraphicsPipeline()
+{
+	createGraphicsPipeline();
+	createFramebuffers();
+	createCommandPool();
+	createVertexBuffer();
+	createIndexBuffer();
+	createUniformBuffers();
+	createDescriptorPool();
+	createDescriptorSets();
+	createCommandBuffers();
 }
 
 void VulkanManager::setKeyCallback(GLFWkeyfun function)
@@ -134,35 +151,16 @@ void VulkanManager::processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 }
 
-void VulkanManager::setShader(Shader* shader)
-{
-	vkShader = shader;
-}
-
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void VulkanManager::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	
+
 }
 
 bool VulkanManager::shouldClose()
 {
 	return glfwWindowShouldClose(getWindow());
-}
-
-void VulkanManager::recreateSwapChain()
-{
-	vkDeviceWaitIdle(logicalDevice);
-
-	cleanupSwapChain();
-
-	createSwapChain();
-	createImageViews();
-	createRenderPass();
-	createGraphicsPipeline();
-	createFramebuffers();
-	createCommandBuffers();
 }
 
 void VulkanManager::createInstance()
@@ -374,7 +372,7 @@ void VulkanManager::createSwapChain()
 	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
 		imageCount = swapChainSupport.capabilities.maxImageCount;
 	}
-	
+
 	// informacion de la swap chain, as usual zzz
 	VkSwapchainCreateInfoKHR createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -512,6 +510,23 @@ void VulkanManager::createDescriptorSetLayout()
 
 void VulkanManager::createGraphicsPipeline()
 {
+	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+	for (VulkanShader* shader : shaders) {
+		shaderStages.push_back(shader->getVertexStageInfo());
+		shaderStages.push_back(shader->getFragmentStageInfo());
+	}
+
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -578,8 +593,8 @@ void VulkanManager::createGraphicsPipeline()
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
-	pipelineInfo.pStages = vkShader->getShaderStages();
-	pipelineInfo.pVertexInputState = vkShader->getVertexInputInfo();
+	pipelineInfo.pStages = shaderStages.data();
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;
 	pipelineInfo.pViewportState = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;
@@ -634,6 +649,60 @@ void VulkanManager::createCommandPool()
 	}
 }
 
+void VulkanManager::createVertexBuffer()
+{
+	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, vertices.data(), (size_t)bufferSize);
+	vkUnmapMemory(logicalDevice, stagingBufferMemory);
+
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+	copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+}
+
+void VulkanManager::createIndexBuffer()
+{
+	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, indices.data(), (size_t)bufferSize);
+	vkUnmapMemory(logicalDevice, stagingBufferMemory);
+
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+	copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+}
+
+void VulkanManager::createUniformBuffers()
+{
+	VkDeviceSize bufferSize = sizeof(VulkanShader::UniformBufferObject);
+
+	uniformBuffers.resize(swapChainImages.size());
+	uniformBuffersMemory.resize(swapChainImages.size());
+
+	for (size_t i = 0; i < swapChainImages.size(); i++) {
+		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+	}
+}
+
 void VulkanManager::createDescriptorPool()
 {
 	VkDescriptorPoolSize poolSize = {};
@@ -648,6 +717,39 @@ void VulkanManager::createDescriptorPool()
 
 	if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor pool!");
+	}
+}
+
+void VulkanManager::createDescriptorSets()
+{
+	std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
+	VkDescriptorSetAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = descriptorPool;
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size());
+	allocInfo.pSetLayouts = layouts.data();
+
+	descriptorSets.resize(swapChainImages.size());
+	if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+		throw std::runtime_error("failed to allocate descriptor sets!");
+	}
+
+	for (size_t i = 0; i < swapChainImages.size(); i++) {
+		VkDescriptorBufferInfo bufferInfo = {};
+		bufferInfo.buffer = uniformBuffers[i];
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(VulkanShader::UniformBufferObject);
+
+		VkWriteDescriptorSet descriptorWrite = {};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = descriptorSets[i];
+		descriptorWrite.dstBinding = 0;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.pBufferInfo = &bufferInfo;
+
+		vkUpdateDescriptorSets(logicalDevice, 1, &descriptorWrite, 0, nullptr);
 	}
 }
 
@@ -723,8 +825,8 @@ void VulkanManager::createSyncObjects()
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-					vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+			vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+			vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
 
 			throw std::runtime_error("failed to create synchronization objects for a frame!");
 		}
@@ -808,17 +910,9 @@ void VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 
 void VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
-	UniformBufferObject ubo = {};
-	ubo.time = TimeManager::GetSingleton()->getTimeSinceBeginning();
-	ubo.resolution = { SRC_WIDTH, SRC_HEIGHT };
-	ubo.cameraEye = camera->getEye();
-	ubo.cameraFront = camera->getFront();
-	ubo.worldUp = camera->getWorldUp();
-	ubo.viewMat = transpose(camera->getViewMatrix());
-
 	void* data;
-	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
-	memcpy(data, &ubo, sizeof(ubo));
+	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(shaders.front()->getStruct()), 0, &data);
+	memcpy(data, &shaders.front()->getStruct(), sizeof(shaders.front()->getStruct()));
 	vkUnmapMemory(logicalDevice, uniformBuffersMemory[currentImage]);
 }
 
@@ -899,22 +993,6 @@ VkExtent2D VulkanManager::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capab
 
 		return actualExtent;
 	}
-}
-
-VkShaderModule VulkanManager::createShaderModule(const std::vector<char>& code)
-{
-	// we need to specify the code and its length
-	VkShaderModuleCreateInfo createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = code.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create shader module!");
-	}
-
-	return shaderModule;
 }
 
 bool VulkanManager::checkValidationLayerSupport()
@@ -1056,25 +1134,6 @@ VulkanManager::VulkanManager()
 
 VulkanManager::~VulkanManager()
 {
-}
-
-void VulkanManager::cleanupSwapChain()
-{
-	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
-		vkDestroyFramebuffer(logicalDevice, swapChainFramebuffers[i], nullptr);
-	}
-
-	vkFreeCommandBuffers(logicalDevice, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
-
-	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
-	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-
-	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-		vkDestroyImageView(logicalDevice, swapChainImageViews[i], nullptr);
-	}
-
-	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
 }
 
 #endif

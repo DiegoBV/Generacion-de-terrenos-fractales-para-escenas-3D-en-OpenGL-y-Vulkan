@@ -4,11 +4,28 @@
 #include <glm.hpp>
 #include <vulkan.hpp>
 
+
 class VulkanShader
 {
+public:
+	struct UniformBufferObject {
+		alignas(4) float time;
+		alignas(8) glm::vec2 resolution;
+		alignas(16) glm::vec3 cameraEye;
+		alignas(16) glm::vec3 cameraFront;
+		alignas(16) glm::vec3 worldUp;
+		alignas(16) glm::mat4 viewMat;
+	};
+
 private:
-	VkPipelineShaderStageCreateInfo* shaderStages;
-	VkPipelineVertexInputStateCreateInfo vertexInputInfo;
+	/// helper function. Creates a VkShaderModule
+	VkShaderModule createShaderModule(const std::vector<char>& code);
+	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
+	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+	VkShaderModule vertShaderModule;
+	VkShaderModule fragShaderModule;
+	UniformBufferObject ubo;
+	void destroyModules();
 
 public:
 	VulkanShader();
@@ -20,17 +37,7 @@ public:
 	// ------------------------------------------------------------------------
 	void use();
 
-	VkPipelineShaderStageCreateInfo* getShaderStages();
-	VkPipelineVertexInputStateCreateInfo* getVertexInputInfo();
-
-	/// variables that can be read by the graphic card (in attributes of the vertex shader) (SHADER)
-	void createVertexBuffer();
-	/// an index buffer allows us to reuse existing data, reordenate the vertex buffer data (SHADER)
-	void createIndexBuffer();
-	/// fills the uniformBuffer vector
-	void createUniformBuffers();
-	/// creation of the descriptors
-	void createDescriptorSets();
+	void release();
 
 	// utility uniform functions
 	// ------------------------------------------------------------------------
@@ -65,5 +72,11 @@ public:
 
 	// ------------------------------------------------------------------------
 	void setMat4(const std::string& name, const glm::mat4& mat) const;
+
+	void setStruct(const UniformBufferObject value);
+
+	inline VkPipelineShaderStageCreateInfo getVertexStageInfo() { return vertShaderStageInfo; }
+	inline VkPipelineShaderStageCreateInfo getFragmentStageInfo() { return fragShaderStageInfo; }
+	inline UniformBufferObject getStruct() { return ubo; }
 };
 

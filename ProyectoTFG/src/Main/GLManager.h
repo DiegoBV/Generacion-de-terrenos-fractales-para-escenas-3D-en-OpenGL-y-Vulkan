@@ -2,9 +2,9 @@
 #include "Manager.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include "Shader.h"
 
 class GLFWwindow;
+class GLShader;
 
 class GLManager: public Manager 
 {
@@ -28,8 +28,8 @@ public:
 	virtual void update();
 	virtual void release();
 	virtual void waitUntilFinishEverything();
-
-	void setShader(Shader* shader) {}
+	void setUpGraphicsPipeline() {};
+	void addShader(GLShader* shader) {};
 
 	void setKeyCallback(GLFWkeyfun function);
 	void setCursorCallback(GLFWcursorposfun function);

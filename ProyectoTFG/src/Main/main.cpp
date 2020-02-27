@@ -56,33 +56,43 @@ int main()
 
 	for (Manager* manager : managers) manager->init();
 
+	std::list<Shader*> shaders;
 	Shader shader = Shader();
-	shader.init("..\\..\\Shaders\\vertex.c", "..\\..\\Shaders\\fragment.c");
+	shader.init("..\\..\\Shaders\\vertex.vert", "..\\..\\Shaders\\fragment.frag");
+	// shader.init("..\\..\\Shaders\\vvert.vert", "..\\..\\Shaders\\vfrag.frag");
 	shader.use();
 	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());
-	appManager->setShader(&shader);
+	appManager->addShader(&shader);
+	shaders.push_back(&shader);
+	appManager->GetSingleton()->setUpGraphicsPipeline();
 
 	// Callback registration
 	appManager->setKeyCallback(key);
 	appManager->setCursorCallback(motion);
-	//static_cast<VulkanManager*>(appManager)->camera = &camera;
+	Shader::UniformBufferObject ubo;
+	ubo.resolution = { appManager->getWindowWidth(), appManager->getWindowHeight() };
+	ubo.worldUp = camera.getWorldUp();
 
 	// render loop
 	// -----------
 	while (!appManager->shouldClose())
 	{
+		ubo.cameraEye = camera.getEye();
+		ubo.cameraFront = camera.getFront();
+		ubo.viewMat = transpose(camera.getViewMatrix());
+		ubo.time = timeManager->getTimeSinceBeginning();
+		for (Shader* shader : shaders) {
+			shader->setStruct(ubo);
+			shader->use();
+		}
 		for (Manager* manager : managers) manager->update();
-
-		shader.setVec3("cameraEye", camera.getEye().x, camera.getEye().y, camera.getEye().z);
-		shader.setVec3("cameraFront", camera.getFront().x, camera.getFront().y, camera.getFront().z);
-		shader.setVec3("worldUp", camera.getWorldUp().x, camera.getWorldUp().y, camera.getWorldUp().z);
-		shader.setMat4("viewMat", transpose(camera.getViewMatrix()));
-		shader.setFloat("time", timeManager->getTimeSinceBeginning());
-		shader.use();
 	}
-
+	for (Shader* shader : shaders) {
+		shader->release();
+	}
 	appManager->waitUntilFinishEverything();
 	appManager->ShutDownSingleton();
 	timeManager->ShutDownSingleton();
+	system("pause");
 	return 0;
 }

@@ -122,6 +122,19 @@ void GLShader::setMat4(const std::string & name, const glm::mat4 & mat) const
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
+void GLShader::setStruct(const UniformBufferObject value)
+{
+	ubo = value;
+
+	// temporal se supone
+	setVec2("resolution", ubo.resolution);
+	setVec3("cameraEye", ubo.cameraEye);
+	setVec3("cameraFront", ubo.cameraFront);
+	setVec3("worldUp", ubo.worldUp);
+	setMat4("viewMat", ubo.viewMat);
+	setFloat("time", ubo.time);
+}
+
 void GLShader::checkCompileErrors(unsigned int shader, std::string type)
 {
 	int success;
