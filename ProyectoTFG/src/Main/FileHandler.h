@@ -29,6 +29,8 @@ public:
 
 	static bool isFileOpen(const std::fstream& file);
 	static void closeFile(std::fstream& file);
+	/// delets the given file from disk
+	static void deleteFile(const char* filePath);
 
 private:
 	/// private constructor because it's a static class

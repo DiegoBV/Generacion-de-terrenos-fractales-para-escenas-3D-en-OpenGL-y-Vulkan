@@ -39,24 +39,19 @@ void VulkanShader::init(std::string vertexName, std::string fragmentName)
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
 
-	std::fstream rawVertex = FileHandler::openOutputTruncatedFile((pathName + rawVertexName + ".vert").c_str());
+	std::string rawVertexPath = pathName + rawVertexName + ".vert";
+	std::string rawFragmentPath = pathName + rawFragmentName + ".frag";
+	std::fstream rawVertex = FileHandler::openOutputTruncatedFile(rawVertexPath.c_str());
 	FileHandler::writeRawStringToOutputFile(rawVertex, vShaderCode);
 	FileHandler::closeFile(rawVertex);
-	std::fstream rawFragment = FileHandler::openOutputTruncatedFile((pathName + rawFragmentName + ".frag").c_str());
+	std::fstream rawFragment = FileHandler::openOutputTruncatedFile(rawFragmentPath.c_str());
 	FileHandler::writeRawStringToOutputFile(rawFragment, fShaderCode);
 	FileHandler::closeFile(rawFragment);
 
 	system(("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShaders.bat " + rawVertexName + " " + rawFragmentName).c_str());
 
-	// BORRAR
-
-	size_t dotPos = vertexName.find(".");
-	vertexName.erase(dotPos, vertexName.size());
-	dotPos = fragmentName.find(".");
-	fragmentName.erase(dotPos, fragmentName.size());
-
-	auto vertShaderCode = FileHandler::readBinaryFile((pathName + rawVertexName + ".spv").c_str());
-	auto fragShaderCode = FileHandler::readBinaryFile((pathName + rawFragmentName + ".spv").c_str());
+	auto vertShaderCode = FileHandler::readBinaryFile((pathName + rawVertexName + compiledExtension).c_str());
+	auto fragShaderCode = FileHandler::readBinaryFile((pathName + rawFragmentName + compiledExtension).c_str());
 
 	vertShaderModule = createShaderModule(vertShaderCode);
 	fragShaderModule = createShaderModule(fragShaderCode);
@@ -70,6 +65,10 @@ void VulkanShader::init(std::string vertexName, std::string fragmentName)
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	fragShaderStageInfo.module = fragShaderModule;
 	fragShaderStageInfo.pName = "main";
+
+	// delete unused files
+	FileHandler::deleteFile(rawVertexPath.c_str());
+	FileHandler::deleteFile(rawFragmentPath.c_str());
 }
 
 void VulkanShader::use()
@@ -79,6 +78,9 @@ void VulkanShader::use()
 void VulkanShader::release()
 {
 	destroyModules();
+	// delete compiled files
+	FileHandler::deleteFile((pathName + rawVertexName + compiledExtension).c_str());
+	FileHandler::deleteFile((pathName + rawFragmentName + compiledExtension).c_str());
 }
 
 void VulkanShader::setBool(const std::string& name, bool value) const

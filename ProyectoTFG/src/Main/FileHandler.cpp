@@ -116,6 +116,13 @@ void FileHandler::closeFile(std::fstream& file)
 	}
 }
 
+void FileHandler::deleteFile(const char* filePath)
+{
+	if (remove(filePath) != 0) {
+		_logMessageError("ERROR::" + std::string(filePath) + " ::FILE_NOT_SUCCESFULLY_DELETED");
+	}
+}
+
 std::fstream FileHandler::_openFilePrivate(const char* filePath, const int& permissions)
 {
 	std::fstream file;

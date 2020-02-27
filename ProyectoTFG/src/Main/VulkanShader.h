@@ -15,8 +15,9 @@ private:
 	VkShaderModule fragShaderModule;
 	UniformBufferObject ubo;
 
-	std::string rawVertexName = "rawVertex";
-	std::string rawFragmentName = "rawFragment";
+	const std::string rawVertexName = "rawVertex";
+	const std::string rawFragmentName = "rawFragment";
+	const std::string compiledExtension = ".spv";
 
 	void destroyModules();
 
