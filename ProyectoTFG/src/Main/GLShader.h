@@ -1,26 +1,18 @@
 #pragma once
 
 #include <string>
-#include <glm.hpp>
+#include "ShaderUtils.h"
 
 class GLShader
 {
 public:
-	struct UniformBufferObject {
-		alignas(4) float time;
-		alignas(8) glm::vec2 resolution;
-		alignas(16) glm::vec3 cameraEye;
-		alignas(16) glm::vec3 cameraFront;
-		alignas(16) glm::vec3 worldUp;
-		alignas(16) glm::mat4 viewMat;
-	};
 	// constructor generates the shader on the fly
 	// ------------------------------------------------------------------------
 	GLShader();
 
 	~GLShader();
 
-	void init(const char* vertexPath, const char* fragmentPath);
+	void init(std::string vertexName, std::string fragmentName);
 	// activate the shader
 	// ------------------------------------------------------------------------
 	void use();
@@ -65,6 +57,7 @@ public:
 private:
 	unsigned int ID;
 	UniformBufferObject ubo;
+
 	// utility function for checking shader compilation/linking errors.
 	// ------------------------------------------------------------------------
 	unsigned int compileShader(unsigned int type, const char* source);

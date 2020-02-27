@@ -58,8 +58,7 @@ int main()
 
 	std::list<Shader*> shaders;
 	Shader shader = Shader();
-	shader.init("..\\..\\Shaders\\vertex.vert", "..\\..\\Shaders\\fragment.frag");
-	// shader.init("..\\..\\Shaders\\vvert.vert", "..\\..\\Shaders\\vfrag.frag");
+	shader.init("vertex.c", "fragment.c");
 	shader.use();
 	shader.setVec2("resolution", appManager->getWindowWidth(), appManager->getWindowHeight());
 	appManager->addShader(&shader);
@@ -69,7 +68,7 @@ int main()
 	// Callback registration
 	appManager->setKeyCallback(key);
 	appManager->setCursorCallback(motion);
-	Shader::UniformBufferObject ubo;
+	UniformBufferObject ubo;
 	ubo.resolution = { appManager->getWindowWidth(), appManager->getWindowHeight() };
 	ubo.worldUp = camera.getWorldUp();
 

@@ -5,6 +5,8 @@
 #include "FileHandler.h"
 #include "ShaderInclude.h"
 
+std::string pathName = "..\\..\\Shaders\\";
+
 VkShaderModule VulkanShader::createShaderModule(const std::vector<char>& code)
 {
 	// we need to specify the code and its length
@@ -29,18 +31,32 @@ VulkanShader::~VulkanShader()
 {
 }
 
-void VulkanShader::init(const char* vertexPath, const char* fragmentPath)
+void VulkanShader::init(std::string vertexName, std::string fragmentName)
 {
-	std::string vertexCode = ShaderInclude::InterpretShader(vertexPath, "#include");
-	std::string fragmentCode = ShaderInclude::InterpretShader(fragmentPath, "#include");
+	std::string vertexCode = ShaderInclude::InterpretShader((pathName + vertexName).c_str(), "#include");
+	std::string fragmentCode = ShaderInclude::InterpretShader((pathName + fragmentName).c_str(), "#include");
 
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
 
-	system("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShaders.bat vvert vfrag");
+	std::fstream rawVertex = FileHandler::openOutputTruncatedFile((pathName + rawVertexName + ".vert").c_str());
+	FileHandler::writeRawStringToOutputFile(rawVertex, vShaderCode);
+	FileHandler::closeFile(rawVertex);
+	std::fstream rawFragment = FileHandler::openOutputTruncatedFile((pathName + rawFragmentName + ".frag").c_str());
+	FileHandler::writeRawStringToOutputFile(rawFragment, fShaderCode);
+	FileHandler::closeFile(rawFragment);
 
-	auto vertShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vvert.spv");
-	auto fragShaderCode = FileHandler::readBinaryFile("..\\..\\Shaders\\vfrag.spv");
+	system(("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShaders.bat " + rawVertexName + " " + rawFragmentName).c_str());
+
+	// BORRAR
+
+	size_t dotPos = vertexName.find(".");
+	vertexName.erase(dotPos, vertexName.size());
+	dotPos = fragmentName.find(".");
+	fragmentName.erase(dotPos, fragmentName.size());
+
+	auto vertShaderCode = FileHandler::readBinaryFile((pathName + rawVertexName + ".spv").c_str());
+	auto fragShaderCode = FileHandler::readBinaryFile((pathName + rawFragmentName + ".spv").c_str());
 
 	vertShaderModule = createShaderModule(vertShaderCode);
 	fragShaderModule = createShaderModule(fragShaderCode);
@@ -115,7 +131,8 @@ void VulkanShader::setMat4(const std::string& name, const glm::mat4& mat) const
 
 void VulkanShader::setStruct(const UniformBufferObject value)
 {
-	this->ubo = value;
+	ubo = value;
+	ubo.yDirection = -1;
 }
 
 void VulkanShader::destroyModules()

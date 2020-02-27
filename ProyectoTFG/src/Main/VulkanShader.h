@@ -1,22 +1,11 @@
 #pragma once
 
 #include <string>
-#include <glm.hpp>
 #include <vulkan.hpp>
-
+#include "ShaderUtils.h"
 
 class VulkanShader
 {
-public:
-	struct UniformBufferObject {
-		alignas(4) float time;
-		alignas(8) glm::vec2 resolution;
-		alignas(16) glm::vec3 cameraEye;
-		alignas(16) glm::vec3 cameraFront;
-		alignas(16) glm::vec3 worldUp;
-		alignas(16) glm::mat4 viewMat;
-	};
-
 private:
 	/// helper function. Creates a VkShaderModule
 	VkShaderModule createShaderModule(const std::vector<char>& code);
@@ -25,6 +14,10 @@ private:
 	VkShaderModule vertShaderModule;
 	VkShaderModule fragShaderModule;
 	UniformBufferObject ubo;
+
+	std::string rawVertexName = "rawVertex";
+	std::string rawFragmentName = "rawFragment";
+
 	void destroyModules();
 
 public:
@@ -32,7 +25,7 @@ public:
 
 	~VulkanShader();
 
-	void init(const char* vertexPath, const char* fragmentPath);
+	void init(std::string vertexPath, std::string fragmentPath);
 	// activate the shader
 	// ------------------------------------------------------------------------
 	void use();

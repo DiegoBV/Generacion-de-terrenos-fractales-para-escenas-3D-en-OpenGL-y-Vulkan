@@ -47,8 +47,8 @@ vec3 mengerFold(vec3 z)
 
 vec2 SDF(vec3 z)
 {
-    z *= rotateX(time / 8) * rotateZ(-time / 8);
-    float scale = FRACTAL_MAX_SCALE * abs(sin(time/16)) + FRACTAL_MIN_SCALE;
+    z *= rotateX(ubo.time / 8) * rotateZ(-ubo.time / 8);
+    float scale = FRACTAL_MAX_SCALE * abs(sin(ubo.time/16)) + FRACTAL_MIN_SCALE;
     vec3 offset = z;
     float dr = 1.0;
     float trap = 1e10;

@@ -285,6 +285,7 @@
     <ClInclude Include="..\..\src\Main\ShaderInclude.h" />
     <ClInclude Include="..\..\src\Main\Manager.h" />
     <ClInclude Include="..\..\src\Main\GLShader.h" />
+    <ClInclude Include="..\..\src\Main\ShaderUtils.h" />
     <ClInclude Include="..\..\src\Main\TimeManager.h" />
     <ClInclude Include="..\..\src\Main\Timer.h" />
     <ClInclude Include="..\..\src\Main\VulkanManager.h" />

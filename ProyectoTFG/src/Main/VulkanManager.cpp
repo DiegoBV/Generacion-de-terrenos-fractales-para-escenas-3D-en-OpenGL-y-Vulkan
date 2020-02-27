@@ -693,7 +693,7 @@ void VulkanManager::createIndexBuffer()
 
 void VulkanManager::createUniformBuffers()
 {
-	VkDeviceSize bufferSize = sizeof(VulkanShader::UniformBufferObject);
+	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
 	uniformBuffers.resize(swapChainImages.size());
 	uniformBuffersMemory.resize(swapChainImages.size());
@@ -738,7 +738,7 @@ void VulkanManager::createDescriptorSets()
 		VkDescriptorBufferInfo bufferInfo = {};
 		bufferInfo.buffer = uniformBuffers[i];
 		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(VulkanShader::UniformBufferObject);
+		bufferInfo.range = sizeof(UniformBufferObject);
 
 		VkWriteDescriptorSet descriptorWrite = {};
 		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

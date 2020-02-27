@@ -5,6 +5,8 @@
 #include "ShaderInclude.h"
 #include <iostream>
 
+std::string pathName = "..\\..\\Shaders\\";
+
 GLShader::GLShader()
 {
 }
@@ -13,10 +15,10 @@ GLShader::~GLShader()
 {
 }
 
-void GLShader::init(const char * vertexPath, const char * fragmentPath)
+void GLShader::init(std::string vertexName, std::string fragmentName)
 {
-	std::string vertexCode = ShaderInclude::InterpretShader(vertexPath, "#include");
-	std::string fragmentCode = ShaderInclude::InterpretShader(fragmentPath, "#include");
+	std::string vertexCode = ShaderInclude::InterpretShader((pathName + vertexName).c_str(), "#include");
+	std::string fragmentCode = ShaderInclude::InterpretShader((pathName + fragmentName).c_str(), "#include");
 
 	const char* vShaderCode = vertexCode.c_str();
 	const char * fShaderCode = fragmentCode.c_str();
@@ -125,14 +127,22 @@ void GLShader::setMat4(const std::string & name, const glm::mat4 & mat) const
 void GLShader::setStruct(const UniformBufferObject value)
 {
 	ubo = value;
+	ubo.yDirection = 1;
 
-	// temporal se supone
-	setVec2("resolution", ubo.resolution);
-	setVec3("cameraEye", ubo.cameraEye);
-	setVec3("cameraFront", ubo.cameraFront);
-	setVec3("worldUp", ubo.worldUp);
-	setMat4("viewMat", ubo.viewMat);
-	setFloat("time", ubo.time);
+	GLuint uniformBlockIndex = glGetUniformBlockIndex(ID, "ubo");
+	glUniformBlockBinding(ID, uniformBlockIndex, 0);
+
+	unsigned int uboMatrices;
+	glGenBuffers(1, &uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	// define the range of the buffer that links to a uniform binding point
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, sizeof(ubo));
+
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ubo), &ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void GLShader::checkCompileErrors(unsigned int shader, std::string type)
