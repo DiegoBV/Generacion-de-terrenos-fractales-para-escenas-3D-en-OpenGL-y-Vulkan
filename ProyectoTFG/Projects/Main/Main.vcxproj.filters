@@ -13,81 +13,102 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Vulkan">
+      <UniqueIdentifier>{116e2da7-aebc-46b9-aa7a-23005d180a42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL">
+      <UniqueIdentifier>{8e6c412c-582c-47db-b7ca-dfcef880ae78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{dc6f1dbc-3d20-4a42-809b-a0a060e15843}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inter">
+      <UniqueIdentifier>{87b27958-d86e-42e0-b5eb-0afb3c9d95cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera/Window">
+      <UniqueIdentifier>{02ba9d01-8926-4859-9509-12f73b3f61f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Main\main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Main\FileHandler.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Main\Camera.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Main\TimeManager.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Main\Timer.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Main\GLManager.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Main\ShaderInclude.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="..\..\src\Main\VulkanShader.cpp">
+      <Filter>Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Main\VulkanManager.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\GLManager.cpp">
+      <Filter>OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Main\glad.c">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Main\VulkanShader.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Main\GLShader.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\ShaderInclude.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\TimeManager.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\Timer.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\FileHandler.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\Camera.cpp">
+      <Filter>Camera/Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\Window.cpp">
+      <Filter>Camera/Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Main\FileHandler.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\Camera.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\TimeManager.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\Timer.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\GLManager.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\Manager.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\ShaderInclude.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="..\..\src\Main\VulkanShader.h">
+      <Filter>Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Main\VulkanManager.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Main\ApplicationManager.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Main\VulkanShader.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="..\..\src\Main\GLManager.h">
+      <Filter>OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Main\GLShader.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Main\Shader.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="..\..\src\Main\ShaderInclude.h">
+      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Main\ShaderUtils.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\TimeManager.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Timer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\FileHandler.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Shader.h">
+      <Filter>Inter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\ApplicationManager.h">
+      <Filter>Inter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Manager.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Camera.h">
+      <Filter>Camera/Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Window.h">
+      <Filter>Camera/Window</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

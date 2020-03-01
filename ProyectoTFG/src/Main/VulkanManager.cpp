@@ -1,13 +1,14 @@
 #if defined(VULKAN_DEBUG) || defined(VULKAN_RELEASE)
 #include "VulkanManager.h"
 #include "FileHandler.h"
+#include "TimeManager.h"
+#include "VulkanShader.h"
+#include "Window.h"
 #include <iostream>
 #include <set>
 #include <algorithm>
 #include <gtc/matrix_transform.hpp>
 #include <chrono>
-#include "TimeManager.h"
-#include "VulkanShader.h"
 
 VulkanManager* VulkanManager::instance = nullptr;
 
@@ -27,29 +28,7 @@ void VulkanManager::ShutDownSingleton()
 
 void VulkanManager::init()
 {
-	// glfw: initialize and configure
-	// ------------------------------
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // different from OPENGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
-#endif
-
-	// glfw window creation
-	// --------------------
-	window = glfwCreateWindow(SRC_WIDTH, SRC_HEIGHT, "Vulkan", nullptr, nullptr);
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return;
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-	glfwSetInputMode(getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	
 
 	createInstance();
 	setupDebugMessenger();
@@ -65,15 +44,6 @@ void VulkanManager::init()
 
 void VulkanManager::update()
 {
-	// input
-	// -----
-	//std::cout << camera.getFront().x << " " << camera.getFront().z << std::endl;
-	processInput(window);
-
-	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-	// -------------------------------------------------------------------------------
-	// glfwSwapBuffers(window);
-	glfwPollEvents();
 	drawFrame();
 }
 
@@ -111,8 +81,6 @@ void VulkanManager::release()
 		DestroyDebugUtilsMessengerEXT(vkInstance, debugMessenger, nullptr);
 	}
 	vkDestroyInstance(vkInstance, nullptr);
-	glfwDestroyWindow(window);
-	glfwTerminate();
 }
 
 void VulkanManager::waitUntilFinishEverything()
@@ -131,36 +99,6 @@ void VulkanManager::setUpGraphicsPipeline()
 	createDescriptorPool();
 	createDescriptorSets();
 	createCommandBuffers();
-}
-
-void VulkanManager::setKeyCallback(GLFWkeyfun function)
-{
-	glfwSetKeyCallback(getWindow(), function);
-}
-
-void VulkanManager::setCursorCallback(GLFWcursorposfun function)
-{
-	glfwSetCursorPosCallback(getWindow(), function);
-}
-
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void VulkanManager::processInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void VulkanManager::framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-
-}
-
-bool VulkanManager::shouldClose()
-{
-	return glfwWindowShouldClose(getWindow());
 }
 
 void VulkanManager::createInstance()
@@ -352,6 +290,7 @@ void VulkanManager::createLogicalDevice()
 
 void VulkanManager::createSurface()
 {
+	GLFWwindow* window = Window::GetSingleton()->getWindow();
 	if (glfwCreateWindowSurface(vkInstance, window, nullptr, &surface) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create window surface!");
 	}

@@ -267,6 +267,7 @@
     <ClCompile Include="..\..\src\Main\Camera.cpp" />
     <ClCompile Include="..\..\src\Main\FileHandler.cpp" />
     <ClCompile Include="..\..\src\Main\glad.c" />
+    <ClCompile Include="..\..\src\Main\Window.cpp" />
     <ClCompile Include="..\..\src\Main\GLManager.cpp" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
     <ClCompile Include="..\..\src\Main\GLShader.cpp" />
@@ -280,6 +281,7 @@
     <ClInclude Include="..\..\src\Main\ApplicationManager.h" />
     <ClInclude Include="..\..\src\Main\Camera.h" />
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
+    <ClInclude Include="..\..\src\Main\Window.h" />
     <ClInclude Include="..\..\src\Main\GLManager.h" />
     <ClInclude Include="..\..\src\Main\Shader.h" />
     <ClInclude Include="..\..\src\Main\ShaderInclude.h" />

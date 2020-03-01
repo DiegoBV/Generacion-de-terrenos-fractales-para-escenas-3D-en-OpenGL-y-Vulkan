@@ -78,7 +78,7 @@ private:
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 	static VulkanManager* instance;
-	GLFWwindow* window;
+
 	/// vulkan instance
 	VkInstance vkInstance;
 	/// debug and validation layers
@@ -247,16 +247,6 @@ public:
 	virtual void waitUntilFinishEverything();
 	void setUpGraphicsPipeline();
 
-	void setKeyCallback(GLFWkeyfun function);
-	void setCursorCallback(GLFWcursorposfun function);
-	void processInput(GLFWwindow* window);
-
-	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-	bool shouldClose();
-	inline GLFWwindow* getWindow() { return window; }
-	inline int getWindowWidth() { return SRC_WIDTH; }
-	inline int getWindowHeight() { return SRC_HEIGHT; }
 	inline VkDevice getLogicalDevice() { return logicalDevice; }
 	inline void addShader(VulkanShader* shader) { shaders.push_back(shader); }
 };
