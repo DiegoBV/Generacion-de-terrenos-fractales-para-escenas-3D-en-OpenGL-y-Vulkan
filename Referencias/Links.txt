@@ -35,3 +35,5 @@ https://imaginary.org/film/3d-fractal-trip-far-away
 
 -Fractal terrain 1: https://www.shadertoy.com/view/3lcGRX
 -Fractal terrain 2: https://www.shadertoy.com/view/3ldGRX
+-Fractal terrain 3: https://www.shadertoy.com/view/MdX3Rr
+-Fractal terrain 4: https://www.shadertoy.com/view/3ss3R4

@@ -15,7 +15,7 @@ layout(location = 0) out vec4 outColor;
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 
-#include ..\\..\\Shaders\\mandelBulb.c
+#include ..\\..\\Shaders\\snowTerrain.c
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
