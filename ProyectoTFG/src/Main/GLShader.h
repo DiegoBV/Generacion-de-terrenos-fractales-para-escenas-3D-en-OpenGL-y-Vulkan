@@ -58,6 +58,10 @@ private:
 	unsigned int ID;
 	UniformBufferObject ubo;
 
+	float data[5];
+
+	unsigned int ssbo;
+
 	// utility function for checking shader compilation/linking errors.
 	// ------------------------------------------------------------------------
 	unsigned int compileShader(unsigned int type, const char* source);

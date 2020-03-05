@@ -143,6 +143,43 @@ void GLShader::setStruct(const UniformBufferObject value)
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ubo), &ubo);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glGenBuffers(1, &ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(data), data, GL_DYNAMIC_COPY); //sizeof(data) only works for statically sized C/C++ arrays.
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	glUseProgram(ID);
+
+	glGetBufferSubData(ssbo, 0, sizeof(data), data);
+
+	std::cout << data[0] << std::endl;
+
+	/*GLuint texture, fbo_handle;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_1D, texture);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, sizeof(data), 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+	glGenFramebuffers(1, &fbo_handle);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
+	glFramebufferTexture1D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_1D, texture, 0);
+
+	glUseProgram(ID);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	int kk[5];
+	glGetTexImage(texture,
+		0,
+		GL_RGBA,
+		GL_UNSIGNED_INT,
+		&kk);
+	std::cout << kk[0] << std::endl;*/
 }
 
 void GLShader::checkCompileErrors(unsigned int shader, std::string type)
