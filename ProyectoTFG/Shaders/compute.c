@@ -7,5 +7,5 @@ layout(std430, binding=0) writeonly buffer Pos{
 };
 
 void main(){
-    Position[gl_GlobalInvocationID.x] = 1.0f;
+    Position[gl_GlobalInvocationID.x] = 8.0f;
 }

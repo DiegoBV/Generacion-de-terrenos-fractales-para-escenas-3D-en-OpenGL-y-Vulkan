@@ -20,28 +20,34 @@ void GLShader::init(std::string vertexName, std::string fragmentName)
 {
 	std::string vertexCode = ShaderInclude::InterpretShader((pathName + vertexName).c_str(), "#include");
 	std::string fragmentCode = ShaderInclude::InterpretShader((pathName + fragmentName).c_str(), "#include");
-
+	std::string computeCode = ShaderInclude::InterpretShader((pathName + "compute.c").c_str(), "#include");
+	
 	const char* vShaderCode = vertexCode.c_str();
 	const char * fShaderCode = fragmentCode.c_str();
+	const char* cShaderCode = computeCode.c_str();
+
 	// COMPILE SHADERS
-	unsigned int vertex, fragment;
+	unsigned int vertex, fragment, compute;
 	// vertex shader
 	vertex = compileShader(GL_VERTEX_SHADER, vShaderCode);
 	checkCompileErrors(vertex, "VERTEX");
 	// fragment Shader
 	fragment = compileShader(GL_FRAGMENT_SHADER, fShaderCode);
 	checkCompileErrors(fragment, "FRAGMENT");
+	// compute shader
+	compute = compileShader(GL_COMPUTE_SHADER, cShaderCode);
+	checkCompileErrors(compute, "COMPUTE");
 	// shader Program
 	ID = createGLProgram(vertex, fragment);
 	checkCompileErrors(ID, "PROGRAM");
-
-	storage.resize(5);
-	for (int i = 0; i < 5; i++)
-		storage[i] = 0;
+	// compute program
+	gComputeProgram = createComputeShaderProgram(compute);
+	checkCompileErrors(gComputeProgram, "PROGRAM");
 
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
+	glDeleteShader(compute);
 }
 
 unsigned int GLShader::compileShader(unsigned int type, const char* source)
@@ -60,59 +66,13 @@ unsigned int GLShader::createGLProgram(unsigned int vertexShader, unsigned int f
 	glAttachShader(programID, vertexShader);
 	glAttachShader(programID, fragmentShader);
 	glLinkProgram(programID);
-
-	// COMPUTE!!
-	// Create and compile the compute shader.
-	std::string computeShaderSrcCode = ShaderInclude::InterpretShader((pathName + "compute.c").c_str(), "#include");
-	unsigned int mComputeShader = compileShader(GL_COMPUTE_SHADER, computeShaderSrcCode.c_str());
-	checkCompileErrors(mComputeShader, "COMPUTE");
-	// Attach and link the shader against the compute program.
-	glAttachShader(gComputeProgram, mComputeShader);
-	glLinkProgram(gComputeProgram);
-
 	return programID;
 }
 
 void GLShader::use()
 {
-	glUseProgram(gComputeProgram);
+	checkMemorySharing();
 	glUseProgram(ID);
-
-	// compute shader
-	GLuint SSBO = 0;
-
-	std::vector<GLfloat> initPos;
-	int num_numeros = 12;
-
-	for (int i = 0; i < num_numeros; i++) {
-		initPos.push_back(0.0f);
-	}
-
-	glGenBuffers(1, &SSBO);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, num_numeros * sizeof(GLfloat), &initPos, GL_DYNAMIC_DRAW);
-
-	glDispatchCompute(num_numeros / 2, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
-
-
-	GLfloat* ptr;
-	ptr = (GLfloat*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-	initPos.clear();
-
-	// glGetNamedBufferSubData(SSBO, 0, 12 * sizeof(float), initPos.data());
-	for (int i = 0; i < num_numeros; i++) {
-		initPos.push_back(ptr[i]);
-	}
-
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-	for (int i = 0; i < num_numeros; i++) {
-		std::cout << "p" << i << ": " << initPos[i] << std::endl;
-	}
-	std::cout << std::endl;
 }
 
 void GLShader::setBool(const std::string & name, bool value) const
@@ -194,31 +154,6 @@ void GLShader::setStruct(const UniformBufferObject value)
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ubo), &ubo);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	/*GLuint texture, fbo_handle;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_1D, texture);
-	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, sizeof(data), 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-	glGenFramebuffers(1, &fbo_handle);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
-	glFramebufferTexture1D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_1D, texture, 0);
-
-	glUseProgram(ID);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	int kk[5];
-	glGetTexImage(texture,
-		0,
-		GL_RGBA,
-		GL_UNSIGNED_INT,
-		&kk);
-	std::cout << kk[0] << std::endl;*/
 }
 
 void GLShader::checkCompileErrors(unsigned int shader, std::string type)
@@ -243,5 +178,59 @@ void GLShader::checkCompileErrors(unsigned int shader, std::string type)
 			std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 		}
 	}
+}
+unsigned int GLShader::createComputeShaderProgram(unsigned int computeShader)
+{
+	// Create the compute program, to which the compute shader will be assigned
+	unsigned int computeProgramID = glCreateProgram();
+
+	// Attach and link the shader against to the compute program
+	glAttachShader(computeProgramID, computeShader);
+	glLinkProgram(computeProgramID);
+
+	checkCompileErrors(computeShader, "COMPUTE");
+
+	return computeProgramID;
+}
+
+void GLShader::checkMemorySharing()
+{
+	// compute shader
+	GLuint SSBO = 0;
+
+	std::vector<GLfloat> initPos;
+	int num_numeros = 12;
+
+	for (int i = 0; i < num_numeros; i++) {
+		initPos.push_back(0.0f);
+	}
+
+	glUseProgram(gComputeProgram);
+
+	glGenBuffers(1, &SSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, num_numeros * sizeof(GLfloat), &initPos, GL_DYNAMIC_DRAW);
+
+	glDispatchCompute(num_numeros / 2, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+
+
+	GLfloat* ptr;
+	ptr = (GLfloat*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+	initPos.clear();
+
+	// glGetNamedBufferSubData(SSBO, 0, 12 * sizeof(float), initPos.data());
+	for (int i = 0; i < num_numeros; i++) {
+		initPos.push_back(ptr[i]);
+	}
+
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+	for (int i = 0; i < num_numeros; i++) {
+		std::cout << "p" << i << ": " << initPos[i] << std::endl;
+	}
+	std::cout << std::endl;
 }
 #endif

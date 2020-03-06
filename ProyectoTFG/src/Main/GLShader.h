@@ -57,10 +57,7 @@ public:
 	void setStruct(const UniformBufferObject value);
 private:
 	unsigned int ID;
-	unsigned int gComputeProgram;
 	UniformBufferObject ubo;
-
-	std::vector<float> storage;
 
 	unsigned int ssbo;
 
@@ -71,4 +68,9 @@ private:
 	unsigned int createGLProgram(unsigned int vertexShader, unsigned int fragmentShader);
 
 	void checkCompileErrors(unsigned int shader, std::string type);
+
+	// COMPUTE SHADER (TODO:: REORDENAR O CAMBIAR DE SITIO ??)
+	unsigned int gComputeProgram;
+	unsigned int createComputeShaderProgram(unsigned int computeShader);
+	void checkMemorySharing();
 };
