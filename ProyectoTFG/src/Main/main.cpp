@@ -51,7 +51,6 @@ int main()
 	TimeManager* timeManager = TimeManager::GetSingleton();
 	ApplicationManager* appManager = ApplicationManager::GetSingleton();
 	Window* window = Window::GetSingleton();
-
 	std::vector<Manager*> managers;
 	managers.push_back(timeManager);
 	managers.push_back(appManager);

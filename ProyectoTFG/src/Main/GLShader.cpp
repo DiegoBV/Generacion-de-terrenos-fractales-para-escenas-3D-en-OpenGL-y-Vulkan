@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include "FileHandler.h"
 #include "ShaderInclude.h"
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 std::string pathName = "..\\..\\Shaders\\";
@@ -34,6 +35,10 @@ void GLShader::init(std::string vertexName, std::string fragmentName)
 	ID = createGLProgram(vertex, fragment);
 	checkCompileErrors(ID, "PROGRAM");
 
+	storage.resize(5);
+	for (int i = 0; i < 5; i++)
+		storage[i] = 0;
+
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
@@ -56,12 +61,57 @@ unsigned int GLShader::createGLProgram(unsigned int vertexShader, unsigned int f
 	glAttachShader(programID, fragmentShader);
 	glLinkProgram(programID);
 
+	// COMPUTE!!
+	// Create and compile the compute shader.
+	std::string computeShaderSrcCode = ShaderInclude::InterpretShader((pathName + "compute.c").c_str(), "#include");
+	unsigned int mComputeShader = compileShader(GL_COMPUTE_SHADER, computeShaderSrcCode.c_str());
+	checkCompileErrors(mComputeShader, "COMPUTE");
+	// Attach and link the shader against the compute program.
+	glAttachShader(gComputeProgram, mComputeShader);
+	glLinkProgram(gComputeProgram);
+
 	return programID;
 }
 
 void GLShader::use()
 {
+	glUseProgram(gComputeProgram);
 	glUseProgram(ID);
+
+	// compute shader
+	GLuint SSBO = 0;
+
+	std::vector<GLfloat> initPos;
+	int num_numeros = 12;
+
+	for (int i = 0; i < num_numeros; i++) {
+		initPos.push_back(0.0f);
+	}
+
+	glGenBuffers(1, &SSBO);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, num_numeros * sizeof(GLfloat), &initPos, GL_DYNAMIC_DRAW);
+
+	glDispatchCompute(num_numeros / 2, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+
+	GLfloat* ptr;
+	ptr = (GLfloat*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+	initPos.clear();
+
+	for (int i = 0; i < num_numeros; i++) {
+		initPos.push_back(ptr[i]);
+	}
+
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+	for (int i = 0; i < num_numeros; i++) {
+		std::cout << "p" << i << ": " << initPos[i] << std::endl;
+	}
+	std::cout << std::endl;
 }
 
 void GLShader::setBool(const std::string & name, bool value) const
@@ -131,7 +181,7 @@ void GLShader::setStruct(const UniformBufferObject value)
 
 	GLuint uniformBlockIndex = glGetUniformBlockIndex(ID, "ubo");
 	glUniformBlockBinding(ID, uniformBlockIndex, 0);
-
+	
 	unsigned int uboMatrices;
 	glGenBuffers(1, &uboMatrices);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -143,18 +193,6 @@ void GLShader::setStruct(const UniformBufferObject value)
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ubo), &ubo);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glGenBuffers(1, &ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(data), data, GL_DYNAMIC_COPY); //sizeof(data) only works for statically sized C/C++ arrays.
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-	glUseProgram(ID);
-
-	glGetBufferSubData(ssbo, 0, sizeof(data), data);
-
-	std::cout << data[0] << std::endl;
 
 	/*GLuint texture, fbo_handle;
 	glGenTextures(1, &texture);

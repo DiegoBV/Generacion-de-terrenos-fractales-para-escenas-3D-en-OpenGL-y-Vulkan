@@ -2,6 +2,7 @@
 
 #include <string>
 #include "ShaderUtils.h"
+#include <vector>
 
 class GLShader
 {
@@ -56,9 +57,10 @@ public:
 	void setStruct(const UniformBufferObject value);
 private:
 	unsigned int ID;
+	unsigned int gComputeProgram;
 	UniformBufferObject ubo;
 
-	float data[5];
+	std::vector<float> storage;
 
 	unsigned int ssbo;
 
