@@ -42,9 +42,6 @@
     <ClCompile Include="..\..\src\Main\GLManager.cpp">
       <Filter>OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Main\glad.c">
-      <Filter>OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Main\GLShader.cpp">
       <Filter>OpenGL</Filter>
     </ClCompile>
@@ -65,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Main\Window.cpp">
       <Filter>Camera/Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\glad.c">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -12,10 +12,6 @@ layout(binding = 0) uniform UniformBufferObject {
 } ubo;
 
 layout(location = 0) out vec4 outColor;
-layout(std430, binding = 3) buffer ssbo
-{
-    int data_SSBO[];
-};
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 
@@ -38,10 +34,6 @@ void main()
     //tracing the ray (getting the distance of the closest object in the ray direction)
 	
     float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
-
-    data_SSBO[0] = 1;
-    data_SSBO[1] = 1;
-    data_SSBO[2] = 1;
 
     vec3 p = rayOrigin + rayDir * distanceToSurface;
 

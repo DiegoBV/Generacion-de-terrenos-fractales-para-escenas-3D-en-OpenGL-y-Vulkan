@@ -11,12 +11,15 @@ private:
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+	VkComputePipelineCreateInfo compShaderStageInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
 	VkShaderModule vertShaderModule;
 	VkShaderModule fragShaderModule;
+	VkShaderModule compShaderModule;
 	UniformBufferObject ubo;
 
 	const std::string rawVertexName = "rawVertex";
 	const std::string rawFragmentName = "rawFragment";
+	const std::string rawComputeName = "rawCompute";
 	const std::string compiledExtension = ".spv";
 
 	void destroyModules();
@@ -71,6 +74,7 @@ public:
 
 	inline VkPipelineShaderStageCreateInfo getVertexStageInfo() { return vertShaderStageInfo; }
 	inline VkPipelineShaderStageCreateInfo getFragmentStageInfo() { return fragShaderStageInfo; }
+	inline VkComputePipelineCreateInfo getcompShaderStageInfo() { return compShaderStageInfo; }
 	inline UniformBufferObject getStruct() { return ubo; }
 };
 

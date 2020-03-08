@@ -109,10 +109,16 @@ private:
 	VkRenderPass renderPass;
 	// vertex descriptor
 	VkDescriptorSetLayout descriptorSetLayout;
+	// compute descriptor
+	VkDescriptorSetLayout compDescriptorSetLayout;
 	// used for uniform variables
 	VkPipelineLayout pipelineLayout;
+	// used for uniform variables in compute shader
+	VkPipelineLayout compPipelineLayout;
 	// handler of the pipeline
 	VkPipeline graphicsPipeline;
+	// handler of the compute pipeline
+	VkPipeline computePipeline;
 	// one frame buffer for each swap chain image
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	// command Pool, needs to be created in order to use command buffers
@@ -140,7 +146,9 @@ private:
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	VkDescriptorPool descriptorPool;
+	VkDescriptorPool computeDescriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
+	std::vector<VkDescriptorSet> computeDescriptorSets;
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {
@@ -181,8 +189,16 @@ private:
 	void createRenderPass();
 	/// define the descriptor of the matrix (SHADER)
 	void createDescriptorSetLayout();
+	/// define the computer descriptor of the matrix (SHADER)
+	void createComputeDescriptorSetLayout();
 	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
 	void createGraphicsPipeline();
+
+	void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask,
+		VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask,
+		VkPipelineStageFlags dstStageMask);
+
+	void createComputePipeline();
 	/// fill the frameBuffer vector
 	void createFramebuffers();
 	/// creates and fills the commandPool object
@@ -195,8 +211,11 @@ private:
 	void createUniformBuffers();
 	/// descriptors cant be created directly, thera must be a descriptor pool
 	void createDescriptorPool();
+	void createComputeDescriptorPool();
 	/// creation of the descriptors
 	void createDescriptorSets();
+	/// creation of the compute descriptors
+	void createComputeDescriptorSets();
 	/// creates the command buffers (one for each image of the swap chain) (SHADER + OTRAS COSAS)
 	void createCommandBuffers();
 	/// creates the needed semaphores
@@ -248,6 +267,7 @@ public:
 	void setUpGraphicsPipeline();
 
 	inline VkDevice getLogicalDevice() { return logicalDevice; }
+	inline VkPipelineLayout getComputePipelineLayout() { return compPipelineLayout; }
 	inline void addShader(VulkanShader* shader) { shaders.push_back(shader); }
 };
 
