@@ -16,6 +16,7 @@ private:
 	VkShaderModule fragShaderModule;
 	VkShaderModule compShaderModule;
 	UniformBufferObject ubo;
+	StorageBufferObject ssbo;
 
 	const std::string rawVertexName = "rawVertex";
 	const std::string rawFragmentName = "rawFragment";
@@ -76,5 +77,6 @@ public:
 	inline VkPipelineShaderStageCreateInfo getFragmentStageInfo() { return fragShaderStageInfo; }
 	inline VkComputePipelineCreateInfo getcompShaderStageInfo() { return compShaderStageInfo; }
 	inline UniformBufferObject getStruct() { return ubo; }
+	inline StorageBufferObject getSsbo() { return ssbo; }
 };
 

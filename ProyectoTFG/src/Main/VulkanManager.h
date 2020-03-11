@@ -145,6 +145,8 @@ private:
 	// we want more than one uniform buffer (avoid reading and writing collision)
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<VkBuffer> storageBuffers;
+	std::vector<VkDeviceMemory> storageBuffersMemory;
 	VkDescriptorPool descriptorPool;
 	VkDescriptorPool computeDescriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
@@ -209,6 +211,8 @@ private:
 	void createIndexBuffer();
 	/// fills the uniformBuffer vector
 	void createUniformBuffers();
+	/// fills the storageBuffer vector
+	void createStorageBuffers();
 	/// descriptors cant be created directly, thera must be a descriptor pool
 	void createDescriptorPool();
 	void createComputeDescriptorPool();

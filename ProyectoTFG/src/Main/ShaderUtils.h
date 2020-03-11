@@ -10,3 +10,7 @@ struct UniformBufferObject {
 	alignas(16) glm::vec3 worldUp;
 	alignas(16) glm::mat4 viewMat;
 };
+
+struct StorageBufferObject {
+	alignas(4) float position[12];
+};

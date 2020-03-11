@@ -201,10 +201,6 @@ void GLShader::checkMemorySharing()
 	std::vector<GLfloat> initPos;
 	int num_numeros = 12;
 
-	for (int i = 0; i < num_numeros; i++) {
-		initPos.push_back(0.0f);
-	}
-
 	glUseProgram(gComputeProgram);
 
 	glGenBuffers(1, &SSBO);

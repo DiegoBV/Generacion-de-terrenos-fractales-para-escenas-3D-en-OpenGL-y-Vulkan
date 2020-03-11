@@ -96,6 +96,7 @@ void VulkanManager::setUpGraphicsPipeline()
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
+	createStorageBuffers();
 	createDescriptorPool();
 	createComputeDescriptorPool();
 	createDescriptorSets();
@@ -616,7 +617,7 @@ void VulkanManager::createCommandPool()
 	VkCommandPoolCreateInfo poolInfo = {};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily; // just for the graphicCommandQueue (drawing commands)
-	poolInfo.flags = 0; // TODO: VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; // Optional (antes ponia un 0)
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; // TODO: VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; // Optional (antes ponia un 0)
 
 	if (vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create command pool!");
@@ -674,6 +675,18 @@ void VulkanManager::createUniformBuffers()
 
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
 		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+	}
+}
+
+void VulkanManager::createStorageBuffers()
+{
+	VkDeviceSize bufferSize = sizeof(StorageBufferObject);
+
+	storageBuffers.resize(swapChainImages.size());
+	storageBuffersMemory.resize(swapChainImages.size());
+
+	for (size_t i = 0; i < swapChainImages.size(); i++) {
+		createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, storageBuffers[i], storageBuffersMemory[i]);
 	}
 }
 
@@ -746,23 +759,23 @@ void VulkanManager::createDescriptorSets()
 
 void VulkanManager::createComputeDescriptorSets()
 {
-	std::vector<VkDescriptorSetLayout> layouts(1, compDescriptorSetLayout);
+	std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), compDescriptorSetLayout);
 	VkDescriptorSetAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	allocInfo.descriptorPool = computeDescriptorPool;
-	allocInfo.descriptorSetCount = static_cast<uint32_t>(1);
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size());
 	allocInfo.pSetLayouts = layouts.data();
 
-	computeDescriptorSets.resize(1);
+	computeDescriptorSets.resize(swapChainImages.size());
 	if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, computeDescriptorSets.data()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate descriptor sets!");
 	}
 
 	for (size_t i = 0; i < computeDescriptorSets.size(); i++) {
 		VkDescriptorBufferInfo bufferInfo = {};
-		bufferInfo.buffer = uniformBuffers[i];
+		bufferInfo.buffer = storageBuffers[i];
 		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(UniformBufferObject);
+		bufferInfo.range = sizeof(StorageBufferObject);
 
 		VkWriteDescriptorSet descriptorWrite = {};
 		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1139,7 +1152,52 @@ void VulkanManager::drawFrame()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
+	/*VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo);*/
+
 	vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+
+	//memoryBarrier(commandBuffers[imageIndex], 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+	// Bind the compute pipeline.
+	vkCmdBindPipeline(commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+	// Bind descriptor set.
+	vkCmdBindDescriptorSets(commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_COMPUTE, compPipelineLayout, 0, 1,
+		&computeDescriptorSets[0], 0, nullptr);
+	// Dispatch compute job.
+	vkCmdDispatch(commandBuffers[imageIndex], 6, 1, 1);
+	// Barrier between compute and vertex shading.
+	//memoryBarrier(commandBuffers[imageIndex], VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
+		//VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+
+	std::vector<float> initPos;
+	int num_numeros = 12;
+
+	/*positionBuffer = createBuffer(positions.data(), positions.size() * sizeof(vec2),
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);*/
+
+	void* data;
+	auto kk = &shaders.front()->getSsbo();
+	vkMapMemory(logicalDevice, storageBuffersMemory[imageIndex], 0, sizeof(kk), 0, &data);
+	memcpy(kk, data, sizeof(kk));
+
+	initPos.clear();
+
+	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
+	float* ptr = (float*)kk;
+
+	for (int i = 0; i < num_numeros; i++) {
+		initPos.push_back(ptr[i]);
+	}
+
+	vkUnmapMemory(logicalDevice, storageBuffersMemory[imageIndex]);
+
+	for (int i = 0; i < num_numeros; i++) {
+		std::cout << "p" << i << ": " << initPos[i] << std::endl;
+	}
+	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
+
+	//vkEndCommandBuffer(commandBuffers[imageIndex]);
 
 	if (vkQueueSubmit(graphicsCommandQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
@@ -1159,31 +1217,6 @@ void VulkanManager::drawFrame()
 	presentInfo.pImageIndices = &imageIndex;
 
 	vkQueuePresentKHR(presentCommandQueue, &presentInfo);
-
-	//VkCommandBufferBeginInfo beginInfo = {};
-	//beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	//vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo);
-	//memoryBarrier(commandBuffers[imageIndex], 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-	// Bind the compute pipeline.
-	vkCmdBindPipeline(commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
-	// Bind descriptor set.
-	vkCmdBindDescriptorSets(commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_COMPUTE, compPipelineLayout, 0, 1,
-		&computeDescriptorSets[0], 0, nullptr);
-	// Dispatch compute job.
-	vkCmdDispatch(commandBuffers[imageIndex], 6, 1, 1);
-	// Barrier between compute and vertex shading.
-	//memoryBarrier(commandBuffers[imageIndex], VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
-		//VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
-
-	/*std::vector<float> initPos;
-	int num_numeros = 12;
-
-	for (int i = 0; i < num_numeros; i++) {
-		initPos.push_back(0.0f);
-	}*/
-	//positionBuffer = createBuffer(positions.data(), positions.size() * sizeof(vec2),
-		//VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-	//vkEndCommandBuffer(commandBuffers[imageIndex]);
 
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
