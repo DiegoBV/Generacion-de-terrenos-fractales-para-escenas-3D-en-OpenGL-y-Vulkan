@@ -38,6 +38,7 @@ void VulkanManager::init()
 	createRenderPass();
 	createDescriptorSetLayout();
 	createComputeDescriptorSetLayout();
+	createComputePipelineLayout();
 	createSyncObjects();
 }
 
@@ -54,26 +55,33 @@ void VulkanManager::release()
 		vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
 	}
 	vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+	vkDestroyCommandPool(logicalDevice, computeCommandPool, nullptr);
 	for (auto framebuffer : swapChainFramebuffers) {
 		vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
 	}
 	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+	vkDestroyPipeline(logicalDevice, computePipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
+	vkDestroyPipelineLayout(logicalDevice, computePipelineLayout, nullptr);
 	for (auto imageView : swapChainImageViews) {
 		vkDestroyImageView(logicalDevice, imageView, nullptr);
 	}
 	vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
 	vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(logicalDevice, computeDescriptorSetLayout, nullptr);
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
 		vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
 		vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
 	}
 	vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
+	vkDestroyDescriptorPool(logicalDevice, computeDescriptorPool, nullptr);
 	vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
 	vkFreeMemory(logicalDevice, indexBufferMemory, nullptr);
 	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
+	vkDestroyBuffer(logicalDevice, storageBuffer, nullptr);
+	vkFreeMemory(logicalDevice, storageBufferMemory, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, surface, nullptr);
 	if (enableValidationLayers) {
@@ -93,6 +101,7 @@ void VulkanManager::setUpGraphicsPipeline()
 	createComputePipeline();
 	createFramebuffers();
 	createCommandPool();
+	createComputeCommandPool();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -102,6 +111,7 @@ void VulkanManager::setUpGraphicsPipeline()
 	createDescriptorSets();
 	createComputeDescriptorSets();
 	createCommandBuffers();
+	createComputeCommandBuffer();
 }
 
 void VulkanManager::createInstance()
@@ -249,6 +259,7 @@ void VulkanManager::createLogicalDevice()
 {
 	// especifica las colas que van a ser creadas. Solo necesitaremos una en nuestro caso, con capacidades graficas
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+	_indices = indices;
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily, indices.presentFamily };
@@ -288,6 +299,7 @@ void VulkanManager::createLogicalDevice()
 	}
 
 	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily, 0, &graphicsCommandQueue);
+	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily, 0, &computeCommandQueue); // ?????????
 	vkGetDeviceQueue(logicalDevice, indices.presentFamily, 0, &presentCommandQueue);
 }
 
@@ -452,26 +464,29 @@ void VulkanManager::createDescriptorSetLayout()
 
 void VulkanManager::createComputeDescriptorSetLayout()
 {
-	VkDescriptorSetLayoutBinding bindings[2] = { { 0 } };
-	bindings[0].binding = 0;
-	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bindings[0].descriptorCount = 1;
-	bindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-	bindings[1].binding = 1;
-	bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bindings[1].descriptorCount = 1;
-	bindings[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-	VkDescriptorSetLayoutCreateInfo info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-	info.bindingCount = 2;
-	info.pBindings = bindings;
-	if (vkCreateDescriptorSetLayout(logicalDevice, &info, nullptr, &compDescriptorSetLayout) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create compute pipeline!");
-	}
-	VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	layoutInfo.setLayoutCount = 1;
-	layoutInfo.pSetLayouts = &compDescriptorSetLayout;
-	if (vkCreatePipelineLayout(logicalDevice, &layoutInfo, nullptr, &compPipelineLayout) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create compute pipeline!");
+	// create descriptor layout
+	const VkDescriptorSetLayoutBinding descriptor_set_layout_bindings[]
+	{
+		{
+			0,
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			1,
+			VK_SHADER_STAGE_COMPUTE_BIT,
+			nullptr
+		}
+	};
+
+	VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info
+	{
+		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		nullptr,
+		0,
+		1,
+		descriptor_set_layout_bindings
+	};
+	if (vkCreateDescriptorSetLayout(logicalDevice, &descriptor_set_layout_create_info, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS)
+	{
+		throw std::runtime_error("compute descriptor layout creation failed");
 	}
 }
 
@@ -579,9 +594,35 @@ void VulkanManager::createGraphicsPipeline()
 
 void VulkanManager::createComputePipeline()
 {
-	if (vkCreateComputePipelines(logicalDevice,
-		VK_NULL_HANDLE, 1, &shaders.front()->getcompShaderStageInfo(), nullptr, &computePipeline) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create compute pipeline!");
+	// create pipelines
+	// first
+	VkShaderModule compute_density_pressure_shader_module = shaders.front()->compShaderModule;
+
+	VkPipelineShaderStageCreateInfo compute_shader_stage_create_info
+	{
+		VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+		nullptr,
+		0,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		compute_density_pressure_shader_module,
+		"main",
+		nullptr
+	};
+
+	VkComputePipelineCreateInfo compute_pipeline_create_info
+	{
+		VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		nullptr,
+		0,
+		compute_shader_stage_create_info,
+		computePipelineLayout,
+		VK_NULL_HANDLE,
+		-1
+	};
+
+	if (vkCreateComputePipelines(logicalDevice, pipelineCache, 1, &compute_pipeline_create_info, nullptr, &computePipeline) != VK_SUCCESS)
+	{
+		throw std::runtime_error("first compute pipeline creation failed");
 	}
 }
 
@@ -682,12 +723,12 @@ void VulkanManager::createStorageBuffers()
 {
 	VkDeviceSize bufferSize = sizeof(StorageBufferObject);
 
-	storageBuffers.resize(swapChainImages.size());
-	storageBuffersMemory.resize(swapChainImages.size());
+	/*storageBuffers.resize(swapChainImages.size());
+	storageBuffersMemory.resize(swapChainImages.size());*/
 
-	for (size_t i = 0; i < swapChainImages.size(); i++) {
-		createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, storageBuffers[i], storageBuffersMemory[i]);
-	}
+	//for (size_t i = 0; i < swapChainImages.size(); i++) {
+	createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, storageBuffer, storageBufferMemory);
+	//}
 }
 
 void VulkanManager::createDescriptorPool()
@@ -759,35 +800,44 @@ void VulkanManager::createDescriptorSets()
 
 void VulkanManager::createComputeDescriptorSets()
 {
-	std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), compDescriptorSetLayout);
-	VkDescriptorSetAllocateInfo allocInfo = {};
-	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	allocInfo.descriptorPool = computeDescriptorPool;
-	allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size());
-	allocInfo.pSetLayouts = layouts.data();
-
-	computeDescriptorSets.resize(swapChainImages.size());
-	if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, computeDescriptorSets.data()) != VK_SUCCESS) {
-		throw std::runtime_error("failed to allocate descriptor sets!");
+	// allocate descriptor sets
+	VkDescriptorSetAllocateInfo descriptor_set_allocation_info
+	{
+		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+		nullptr,
+		computeDescriptorPool,
+		1,
+		&computeDescriptorSetLayout
+	};
+	if (vkAllocateDescriptorSets(logicalDevice, &descriptor_set_allocation_info, &computeDescriptorSets) != VK_SUCCESS)
+	{
+		throw std::runtime_error("compute descriptor set allocation failed");
 	}
-
-	for (size_t i = 0; i < computeDescriptorSets.size(); i++) {
-		VkDescriptorBufferInfo bufferInfo = {};
-		bufferInfo.buffer = storageBuffers[i];
-		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(StorageBufferObject);
-
-		VkWriteDescriptorSet descriptorWrite = {};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.dstSet = computeDescriptorSets[i];
-		descriptorWrite.dstBinding = 0;
-		descriptorWrite.dstArrayElement = 0;
-		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrite.descriptorCount = 1;
-		descriptorWrite.pBufferInfo = &bufferInfo;
-
-		vkUpdateDescriptorSets(logicalDevice, 1, &descriptorWrite, 0, nullptr);
-	}
+	VkDescriptorBufferInfo descriptor_buffer_infos[]
+	{
+		{
+			storageBuffer,
+			0,
+			sizeof(StorageBufferObject)
+		}
+	};
+	// write descriptor sets
+	VkWriteDescriptorSet write_descriptor_sets[]
+	{
+		{
+			VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			nullptr,
+			computeDescriptorSets,
+			0,
+			0,
+			1,
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			nullptr,
+			descriptor_buffer_infos,
+			nullptr
+		}
+	};
+	vkUpdateDescriptorSets(logicalDevice, 1, write_descriptor_sets, 0, nullptr);
 }
 
 void VulkanManager::createCommandBuffers()
@@ -1152,52 +1202,48 @@ void VulkanManager::drawFrame()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	/*VkCommandBufferBeginInfo beginInfo = {};
+	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo);*/
+	vkBeginCommandBuffer(computeCommandBuffer, &beginInfo);
 
 	vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
-	//memoryBarrier(commandBuffers[imageIndex], 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+	memoryBarrier(computeCommandBuffer, 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 	// Bind the compute pipeline.
-	vkCmdBindPipeline(commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+	vkCmdBindPipeline(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
 	// Bind descriptor set.
-	vkCmdBindDescriptorSets(commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_COMPUTE, compPipelineLayout, 0, 1,
-		&computeDescriptorSets[0], 0, nullptr);
+	vkCmdBindDescriptorSets(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1,
+		&computeDescriptorSets, 0, nullptr);
 	// Dispatch compute job.
-	vkCmdDispatch(commandBuffers[imageIndex], 6, 1, 1);
+	vkCmdDispatch(computeCommandBuffer, 6, 1, 1);
 	// Barrier between compute and vertex shading.
-	//memoryBarrier(commandBuffers[imageIndex], VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
+	//memoryBarrier(computeCommandBuffer, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
 		//VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+	vkEndCommandBuffer(computeCommandBuffer);
 
-	std::vector<float> initPos;
-	int num_numeros = 12;
+	VkSubmitInfo submitInfo2 = {
+	  VK_STRUCTURE_TYPE_SUBMIT_INFO,
+	  0,
+	  0,
+	  0,
+	  0,
+	  1,
+	  & computeCommandBuffer,
+	  0,
+	  0
+	};
 
-	/*positionBuffer = createBuffer(positions.data(), positions.size() * sizeof(vec2),
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);*/
+	vkQueueSubmit(computeCommandQueue, 1, &submitInfo2, 0);
+
+	vkQueueWaitIdle(computeCommandQueue);
 
 	void* data;
-	auto kk = &shaders.front()->getSsbo();
-	vkMapMemory(logicalDevice, storageBuffersMemory[imageIndex], 0, sizeof(kk), 0, &data);
-	memcpy(kk, data, sizeof(kk));
+	vkMapMemory(logicalDevice, storageBufferMemory, 0, 5, 0, &data);
+	StorageBufferObject* kk = (StorageBufferObject*)data;
+	std::cout << kk->position[0] << std::endl << std::endl << std::endl << std::endl;
+	StorageBufferObject* ptr = (StorageBufferObject*)kk;
+	vkUnmapMemory(logicalDevice, storageBufferMemory);
 
-	initPos.clear();
-
-	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
-	float* ptr = (float*)kk;
-
-	for (int i = 0; i < num_numeros; i++) {
-		initPos.push_back(ptr[i]);
-	}
-
-	vkUnmapMemory(logicalDevice, storageBuffersMemory[imageIndex]);
-
-	for (int i = 0; i < num_numeros; i++) {
-		std::cout << "p" << i << ": " << initPos[i] << std::endl;
-	}
-	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
-
-	//vkEndCommandBuffer(commandBuffers[imageIndex]);
 
 	if (vkQueueSubmit(graphicsCommandQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
@@ -1219,6 +1265,105 @@ void VulkanManager::drawFrame()
 	vkQueuePresentKHR(presentCommandQueue, &presentInfo);
 
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void VulkanManager::createComputePipelineLayout()
+{
+	// create pipeline layout
+	VkPipelineLayoutCreateInfo pipeline_layout_create_info
+	{
+		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+		nullptr,
+		0,
+		1,
+		&computeDescriptorSetLayout,
+		0,
+		nullptr
+	};
+	if (vkCreatePipelineLayout(logicalDevice, &pipeline_layout_create_info, nullptr, &computePipelineLayout) != VK_SUCCESS)
+	{
+		throw std::runtime_error("compute pipeline layout creation failed");
+	}
+}
+
+void VulkanManager::createPipelineCache()
+{
+	VkPipelineCacheCreateInfo pipeline_cache_create_info
+	{
+		VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
+		nullptr,
+		0,
+		0,
+		nullptr
+	};
+	if (vkCreatePipelineCache(logicalDevice, &pipeline_cache_create_info, nullptr, &pipelineCache) != VK_SUCCESS)
+	{
+		throw std::runtime_error("pipeline cache creation failed");
+	}
+}
+
+void VulkanManager::createComputeCommandPool()
+{
+	// create compute command pool
+	VkCommandPoolCreateInfo command_pool_create_info
+	{
+		VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		nullptr,
+		VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+		_indices.graphicsFamily
+	};
+	if (vkCreateCommandPool(logicalDevice, &command_pool_create_info, nullptr, &computeCommandPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("command pool creation failed");
+	}
+}
+
+void VulkanManager::createComputeCommandBuffer()
+{
+	// allocate command buffer
+	VkCommandBufferAllocateInfo command_buffer_allocate_info
+	{
+		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		nullptr,
+		computeCommandPool,
+		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		1
+	};
+	if (vkAllocateCommandBuffers(logicalDevice, &command_buffer_allocate_info, &computeCommandBuffer) != VK_SUCCESS)
+	{
+		throw std::runtime_error("buffer allocation failed");
+	}
+
+	// build command buffer
+	VkCommandBufferBeginInfo command_buffer_begin_info
+	{
+		VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		nullptr,
+		VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
+		nullptr
+	};
+	if (vkBeginCommandBuffer(computeCommandBuffer, &command_buffer_begin_info) != VK_SUCCESS)
+	{
+		throw std::runtime_error("command buffer begin failed");
+	}
+
+	vkCmdBindDescriptorSets(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1, &computeDescriptorSets, 0, nullptr);
+
+	// First dispatch
+	vkCmdBindPipeline(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+	vkCmdDispatch(computeCommandBuffer, 6, 1, 1);
+
+	// Barrier: compute to compute dependencies
+	// First dispatch writes to a storage buffer, second dispatch reads from that storage buffer
+	vkCmdPipelineBarrier(computeCommandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
+
+	// Second dispatch
+	vkCmdBindPipeline(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+	vkCmdDispatch(computeCommandBuffer, 6, 1, 1);
+
+	vkCmdPipelineBarrier(computeCommandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
+
+	vkEndCommandBuffer(computeCommandBuffer);
 }
 
 VulkanManager::VulkanManager()

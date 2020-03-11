@@ -14,7 +14,6 @@ private:
 	VkComputePipelineCreateInfo compShaderStageInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
 	VkShaderModule vertShaderModule;
 	VkShaderModule fragShaderModule;
-	VkShaderModule compShaderModule;
 	UniformBufferObject ubo;
 	StorageBufferObject ssbo;
 
@@ -26,6 +25,7 @@ private:
 	void destroyModules();
 
 public:
+	VkShaderModule compShaderModule;
 	VulkanShader();
 
 	~VulkanShader();

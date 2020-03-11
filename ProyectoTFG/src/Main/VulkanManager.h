@@ -65,11 +65,12 @@ private:
 		uint32_t graphicsFamily = UINT32_MAX;
 		// support device window presentation
 		uint32_t presentFamily = UINT32_MAX;
-
 		bool isValid() {
 			return graphicsFamily != UINT32_MAX && presentFamily != UINT32_MAX;
 		}
 	};
+
+	QueueFamilyIndices _indices;
 
 	// struct auxiliar para el swap chain
 	struct SwapChainSupportDetails {
@@ -110,11 +111,11 @@ private:
 	// vertex descriptor
 	VkDescriptorSetLayout descriptorSetLayout;
 	// compute descriptor
-	VkDescriptorSetLayout compDescriptorSetLayout;
+	VkDescriptorSetLayout computeDescriptorSetLayout;
 	// used for uniform variables
 	VkPipelineLayout pipelineLayout;
 	// used for uniform variables in compute shader
-	VkPipelineLayout compPipelineLayout;
+	VkPipelineLayout computePipelineLayout;
 	// handler of the pipeline
 	VkPipeline graphicsPipeline;
 	// handler of the compute pipeline
@@ -145,12 +146,17 @@ private:
 	// we want more than one uniform buffer (avoid reading and writing collision)
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
-	std::vector<VkBuffer> storageBuffers;
-	std::vector<VkDeviceMemory> storageBuffersMemory;
+	VkBuffer storageBuffer;
+	VkDeviceMemory storageBufferMemory;
 	VkDescriptorPool descriptorPool;
 	VkDescriptorPool computeDescriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
-	std::vector<VkDescriptorSet> computeDescriptorSets;
+	VkDescriptorSet computeDescriptorSets;
+	// Compute shader
+	VkPipelineCache pipelineCache;
+	VkCommandPool computeCommandPool;
+	VkQueue computeCommandQueue;
+	VkCommandBuffer computeCommandBuffer;
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {
@@ -257,6 +263,12 @@ private:
 	/// acquire image from swap chain, execute the next command and returns the modified image to the swap chain for presentation. Maybe this is not the place for this.
 	void drawFrame();
 
+	// compute shaders
+	void createComputePipelineLayout();
+	void createPipelineCache();
+	void createComputeCommandPool();
+	void createComputeCommandBuffer();
+
 	VulkanManager();
 	~VulkanManager();
 
@@ -271,7 +283,7 @@ public:
 	void setUpGraphicsPipeline();
 
 	inline VkDevice getLogicalDevice() { return logicalDevice; }
-	inline VkPipelineLayout getComputePipelineLayout() { return compPipelineLayout; }
+	inline VkPipelineLayout getComputePipelineLayout() { return computePipelineLayout; }
 	inline void addShader(VulkanShader* shader) { shaders.push_back(shader); }
 };
 
