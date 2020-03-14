@@ -12,5 +12,5 @@ struct UniformBufferObject {
 };
 
 struct StorageBufferObject {
-	alignas(4) float position[12];
+	alignas(16) glm::vec3 position;
 };

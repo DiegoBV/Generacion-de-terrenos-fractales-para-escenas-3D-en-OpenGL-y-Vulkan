@@ -267,6 +267,10 @@
     <ClCompile Include="..\..\src\Main\Camera.cpp" />
     <ClCompile Include="..\..\src\Main\FileHandler.cpp" />
     <ClCompile Include="..\..\src\Main\glad.c" />
+    <ClCompile Include="..\..\src\Main\GLComputeShader.cpp" />
+    <ClCompile Include="..\..\src\Main\GLRenderShader.cpp" />
+    <ClCompile Include="..\..\src\Main\VulkanComputeShader.cpp" />
+    <ClCompile Include="..\..\src\Main\VulkanRenderShader.cpp" />
     <ClCompile Include="..\..\src\Main\Window.cpp" />
     <ClCompile Include="..\..\src\Main\GLManager.cpp" />
     <ClCompile Include="..\..\src\Main\main.cpp" />
@@ -281,6 +285,10 @@
     <ClInclude Include="..\..\src\Main\ApplicationManager.h" />
     <ClInclude Include="..\..\src\Main\Camera.h" />
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
+    <ClInclude Include="..\..\src\Main\GLComputeShader.h" />
+    <ClInclude Include="..\..\src\Main\GLRenderShader.h" />
+    <ClInclude Include="..\..\src\Main\VulkanComputeShader.h" />
+    <ClInclude Include="..\..\src\Main\VulkanRenderShader.h" />
     <ClInclude Include="..\..\src\Main\Window.h" />
     <ClInclude Include="..\..\src\Main\GLManager.h" />
     <ClInclude Include="..\..\src\Main\Shader.h" />

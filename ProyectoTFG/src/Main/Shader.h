@@ -1,9 +1,13 @@
 #pragma once
 
 #if defined(GL_DEBUG) || defined(GL_RELEASE)
-#include "GLShader.h"
-using Shader = GLShader;
+#include "GLRenderShader.h"
+#include "GLComputeShader.h"
+using RenderShader = GLRenderShader;
+using ComputeShader = GLComputeShader;
 #elif defined(VULKAN_DEBUG) || defined(VULKAN_RELEASE)
-#include "VulkanShader.h"
-using Shader = VulkanShader;
+#include "VulkanRenderShader.h"
+#include "VulkanComputeShader.h"
+using RenderShader = VulkanRenderShader;
+using ComputeShader = VulkanComputeShader;
 #endif

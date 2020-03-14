@@ -1,7 +1,9 @@
 #pragma once
 #include "Manager.h"
 
-class GLShader;
+class GLRenderShader;
+class GLComputeShader;
+
 class GLManager: public Manager 
 {
 private:
@@ -21,6 +23,7 @@ public:
 	virtual void release();
 	virtual void waitUntilFinishEverything();
 	void setUpGraphicsPipeline() {};
-	void addShader(GLShader* shader) {};
+	void addRenderShader(GLRenderShader* shader) {};
+	void addComputeShader(GLComputeShader* shader) {};
 };
 

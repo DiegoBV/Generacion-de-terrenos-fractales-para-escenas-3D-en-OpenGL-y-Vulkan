@@ -52,12 +52,14 @@ const std::vector<uint16_t> indices = {
 // end of test shader variables
 
 class GLFWwindow;
-class VulkanShader;
+class VulkanRenderShader;
+class VulkanComputeShader;
 
 class VulkanManager : public Manager
 {
 private:
-	std::list<VulkanShader*> shaders;
+	std::list<VulkanRenderShader*> renderShaders;
+	std::list<VulkanComputeShader*> computeShaders;
 
 	// struct auxiliar para la familia de colas
 	struct QueueFamilyIndices {
@@ -281,9 +283,12 @@ public:
 	virtual void release();
 	virtual void waitUntilFinishEverything();
 	void setUpGraphicsPipeline();
+	//void setStorageBuffer(StorageBufferObject ssbo);
+	//StorageBufferObject getStorageBuffer();
 
 	inline VkDevice getLogicalDevice() { return logicalDevice; }
 	inline VkPipelineLayout getComputePipelineLayout() { return computePipelineLayout; }
-	inline void addShader(VulkanShader* shader) { shaders.push_back(shader); }
+	inline void addRenderShader(VulkanRenderShader* shader) { renderShaders.push_back(shader); }
+	inline void addComputeShader(VulkanComputeShader* shader) { computeShaders.push_back(shader); }
 };
 

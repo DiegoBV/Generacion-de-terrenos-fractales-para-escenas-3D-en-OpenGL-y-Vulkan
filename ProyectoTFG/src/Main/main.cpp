@@ -58,21 +58,34 @@ int main()
 	window->init();
 	for (Manager* manager : managers) manager->init();
 
-	std::list<Shader*> shaders;
-	Shader shader = Shader();
-	shader.init("vertex.c", "fragment.c");
-	shader.use();
-	shader.setVec2("resolution", window->getWindowWidth(), window->getWindowHeight());
-	appManager->addShader(&shader);
-	shaders.push_back(&shader);
+	std::list<RenderShader*> renderShaders;
+	std::list<ComputeShader*> computeShaders;
+
+	RenderShader renderShader = RenderShader();
+	renderShader.init("vertex.c", "fragment.c");
+	renderShader.use();
+	appManager->addRenderShader(&renderShader);
+	renderShaders.push_back(&renderShader);
+
+	ComputeShader computeShader = ComputeShader();
+	computeShader.init("compute.c");
+	computeShader.use();
+	appManager->addComputeShader(&computeShader);
+	computeShaders.push_back(&computeShader);
+
 	appManager->GetSingleton()->setUpGraphicsPipeline();
 
 	// Callback registration
 	window->setKeyCallback(key);
 	window->setCursorCallback(motion);
+
 	UniformBufferObject ubo;
 	ubo.resolution = { window->getWindowWidth(), window->getWindowHeight() };
 	ubo.worldUp = camera.getWorldUp();
+
+	StorageBufferObject ssbo;
+	ssbo.position = { 10.0f, 0.0f, 0.0f };
+	computeShader.setSSBO(ssbo);
 
 	// render loop
 	// -----------
@@ -82,8 +95,17 @@ int main()
 		ubo.cameraFront = camera.getFront();
 		ubo.viewMat = transpose(camera.getViewMatrix());
 		ubo.time = timeManager->getTimeSinceBeginning();
-		for (Shader* shader : shaders) {
-			shader->setStruct(ubo);
+
+		// update
+		for (ComputeShader* shader : computeShaders) {
+			//shader->setSSBO(ssbo);
+			shader->use();
+			std::cout << shader->getSSBO().position.x << std::endl;
+		}
+
+		// render
+		for (RenderShader* shader : renderShaders) {
+			shader->setUBO(ubo);
 			shader->use();
 		}
 
@@ -91,13 +113,18 @@ int main()
 		for (Manager* manager : managers) manager->update();
 	}
 
-	for (Shader* shader : shaders) {
+	for (RenderShader* shader : renderShaders) {
 		shader->release();
 	}
+	for (ComputeShader* shader : computeShaders) {
+		shader->release();
+	}
+
 	appManager->waitUntilFinishEverything();
 	appManager->ShutDownSingleton();
 	timeManager->ShutDownSingleton();
 	window->ShutDownSingleton();
+
 	system("pause");
 	return 0;
 }

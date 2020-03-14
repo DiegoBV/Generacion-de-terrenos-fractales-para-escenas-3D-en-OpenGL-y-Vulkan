@@ -2,7 +2,8 @@
 #include "VulkanManager.h"
 #include "FileHandler.h"
 #include "TimeManager.h"
-#include "VulkanShader.h"
+#include "VulkanRenderShader.h"
+#include "VulkanComputeShader.h"
 #include "Window.h"
 #include <iostream>
 #include <set>
@@ -493,7 +494,7 @@ void VulkanManager::createComputeDescriptorSetLayout()
 void VulkanManager::createGraphicsPipeline()
 {
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-	for (VulkanShader* shader : shaders) {
+	for (VulkanRenderShader* shader : renderShaders) {
 		shaderStages.push_back(shader->getVertexStageInfo());
 		shaderStages.push_back(shader->getFragmentStageInfo());
 	}
@@ -596,7 +597,7 @@ void VulkanManager::createComputePipeline()
 {
 	// create pipelines
 	// first
-	VkShaderModule compute_density_pressure_shader_module = shaders.front()->compShaderModule;
+	VkShaderModule compute_density_pressure_shader_module = computeShaders.front()->getComputeShaderModule();
 
 	VkPipelineShaderStageCreateInfo compute_shader_stage_create_info
 	{
@@ -999,10 +1000,27 @@ void VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 void VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
 	void* data;
-	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(shaders.front()->getStruct()), 0, &data);
-	memcpy(data, &shaders.front()->getStruct(), sizeof(shaders.front()->getStruct()));
+	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(renderShaders.front()->getUBO()), 0, &data);
+	memcpy(data, &renderShaders.front()->getUBO(), sizeof(renderShaders.front()->getUBO()));
 	vkUnmapMemory(logicalDevice, uniformBuffersMemory[currentImage]);
 }
+
+//void VulkanManager::setStorageBuffer(StorageBufferObject ssbo)
+//{
+//	void* data;
+//	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(ssbo), 0, &data);
+//	memcpy(data, &ssbo, sizeof(ssbo));
+//	vkUnmapMemory(logicalDevice, storageBufferMemory);
+//}
+//
+//StorageBufferObject VulkanManager::getStorageBuffer()
+//{
+//	void* data;
+//	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(computeShaders.front()->getSSBO()), 0, &data);
+//	StorageBufferObject* ssbo = (StorageBufferObject*)data;
+//	vkUnmapMemory(logicalDevice, storageBufferMemory);
+//	return *ssbo;
+//}
 
 bool VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
@@ -1238,12 +1256,9 @@ void VulkanManager::drawFrame()
 	vkQueueWaitIdle(computeCommandQueue);
 
 	void* data;
-	vkMapMemory(logicalDevice, storageBufferMemory, 0, 5, 0, &data);
-	StorageBufferObject* kk = (StorageBufferObject*)data;
-	std::cout << kk->position[0] << std::endl << std::endl << std::endl << std::endl;
-	StorageBufferObject* ptr = (StorageBufferObject*)kk;
+	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(computeShaders.front()->getSSBO()), 0, &data);
+	computeShaders.front()->setSSBO(*(StorageBufferObject*)data);
 	vkUnmapMemory(logicalDevice, storageBufferMemory);
-
 
 	if (vkQueueSubmit(graphicsCommandQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
