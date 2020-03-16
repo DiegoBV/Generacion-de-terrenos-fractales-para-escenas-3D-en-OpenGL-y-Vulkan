@@ -45,6 +45,11 @@ void VulkanManager::init()
 
 void VulkanManager::update()
 {
+	runComputeShader();
+}
+
+void VulkanManager::render()
+{
 	drawFrame();
 }
 
@@ -1005,22 +1010,22 @@ void VulkanManager::updateUniformBuffer(uint32_t currentImage)
 	vkUnmapMemory(logicalDevice, uniformBuffersMemory[currentImage]);
 }
 
-//void VulkanManager::setStorageBuffer(StorageBufferObject ssbo)
-//{
-//	void* data;
-//	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(ssbo), 0, &data);
-//	memcpy(data, &ssbo, sizeof(ssbo));
-//	vkUnmapMemory(logicalDevice, storageBufferMemory);
-//}
-//
-//StorageBufferObject VulkanManager::getStorageBuffer()
-//{
-//	void* data;
-//	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(computeShaders.front()->getSSBO()), 0, &data);
-//	StorageBufferObject* ssbo = (StorageBufferObject*)data;
-//	vkUnmapMemory(logicalDevice, storageBufferMemory);
-//	return *ssbo;
-//}
+void VulkanManager::updateStorageBuffer()
+{
+	void* data;
+	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(StorageBufferObject), 0, &data);
+	memcpy(data, &computeShaders.front()->getSSBO(), sizeof(StorageBufferObject));
+	vkUnmapMemory(logicalDevice, storageBufferMemory);
+}
+
+StorageBufferObject VulkanManager::getStorageBuffer()
+{
+	void* data;
+	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(computeShaders.front()->getSSBO()), 0, &data);
+	StorageBufferObject* ssbo = (StorageBufferObject*)data;
+	vkUnmapMemory(logicalDevice, storageBufferMemory);
+	return *ssbo;
+}
 
 bool VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
@@ -1220,45 +1225,7 @@ void VulkanManager::drawFrame()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	VkCommandBufferBeginInfo beginInfo = {};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	vkBeginCommandBuffer(computeCommandBuffer, &beginInfo);
-
 	vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
-
-	memoryBarrier(computeCommandBuffer, 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-	// Bind the compute pipeline.
-	vkCmdBindPipeline(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
-	// Bind descriptor set.
-	vkCmdBindDescriptorSets(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1,
-		&computeDescriptorSets, 0, nullptr);
-	// Dispatch compute job.
-	vkCmdDispatch(computeCommandBuffer, 6, 1, 1);
-	// Barrier between compute and vertex shading.
-	//memoryBarrier(computeCommandBuffer, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
-		//VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
-	vkEndCommandBuffer(computeCommandBuffer);
-
-	VkSubmitInfo submitInfo2 = {
-	  VK_STRUCTURE_TYPE_SUBMIT_INFO,
-	  0,
-	  0,
-	  0,
-	  0,
-	  1,
-	  & computeCommandBuffer,
-	  0,
-	  0
-	};
-
-	vkQueueSubmit(computeCommandQueue, 1, &submitInfo2, 0);
-
-	vkQueueWaitIdle(computeCommandQueue);
-
-	void* data;
-	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(computeShaders.front()->getSSBO()), 0, &data);
-	computeShaders.front()->setSSBO(*(StorageBufferObject*)data);
-	vkUnmapMemory(logicalDevice, storageBufferMemory);
 
 	if (vkQueueSubmit(graphicsCommandQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
@@ -1280,6 +1247,46 @@ void VulkanManager::drawFrame()
 	vkQueuePresentKHR(presentCommandQueue, &presentInfo);
 
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void VulkanManager::runComputeShader()
+{
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	vkBeginCommandBuffer(computeCommandBuffer, &beginInfo);
+
+	memoryBarrier(computeCommandBuffer, 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+	// Bind the compute pipeline.
+	vkCmdBindPipeline(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+	// Bind descriptor set.
+	vkCmdBindDescriptorSets(computeCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1,
+		&computeDescriptorSets, 0, nullptr);
+	// Dispatch compute job.
+	vkCmdDispatch(computeCommandBuffer, 2, 1, 1);
+	// Barrier between compute and vertex shading.
+	//memoryBarrier(computeCommandBuffer, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
+		//VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+	vkEndCommandBuffer(computeCommandBuffer);
+
+	VkSubmitInfo submitInfo2 = {
+	  VK_STRUCTURE_TYPE_SUBMIT_INFO,
+	  0,
+	  0,
+	  0,
+	  0,
+	  1,
+	  &computeCommandBuffer,
+	  0,
+	  0
+	};
+
+	updateStorageBuffer();
+
+	vkQueueSubmit(computeCommandQueue, 1, &submitInfo2, 0);
+
+	vkQueueWaitIdle(computeCommandQueue);
+
+	computeShaders.front()->setSSBO(getStorageBuffer());
 }
 
 void VulkanManager::createComputePipelineLayout()

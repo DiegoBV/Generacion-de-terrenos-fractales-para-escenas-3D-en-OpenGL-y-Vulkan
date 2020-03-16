@@ -47,18 +47,6 @@ void VulkanComputeShader::release()
 	FileHandler::deleteFile((pathName + rawComputeName + compiledExtension).c_str());
 }
 
-void VulkanComputeShader::setSSBO(const StorageBufferObject value)
-{
-	ssbo = value;
-	//VulkanManager::GetSingleton()->setStorageBuffer(ssbo);
-}
-
-StorageBufferObject VulkanComputeShader::getSSBO()
-{
-	//ssbo = VulkanManager::GetSingleton()->getStorageBuffer(); 
-	return ssbo;
-}
-
 void VulkanComputeShader::destroyModules()
 {
 	vkDestroyShaderModule(VulkanManager::GetSingleton()->getLogicalDevice(), compShaderModule, nullptr);

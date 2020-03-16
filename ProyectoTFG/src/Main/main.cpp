@@ -8,6 +8,7 @@
 
 Camera camera;
 glm::dvec2 mCoord;
+StorageBufferObject ssbo;
 
 //calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
 //callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
@@ -41,6 +42,12 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 	case 'A'://izquierda
 		camera.handleMovement(Camera_Movement::LEFT, deltaTime);
 		break;
+	case 'I':
+		ssbo.position.x += 10.0f;
+		break;
+	case 'K':
+		ssbo.position.x -= 10.0f;
+		break;
 	default:
 		break;
 	}//switch
@@ -51,15 +58,12 @@ int main()
 	TimeManager* timeManager = TimeManager::GetSingleton();
 	ApplicationManager* appManager = ApplicationManager::GetSingleton();
 	Window* window = Window::GetSingleton();
-	std::vector<Manager*> managers;
-	managers.push_back(timeManager);
-	managers.push_back(appManager);
 
 	window->init();
-	for (Manager* manager : managers) manager->init();
+	timeManager->init();
+	appManager->init();
 
 	std::list<RenderShader*> renderShaders;
-	std::list<ComputeShader*> computeShaders;
 
 	RenderShader renderShader = RenderShader();
 	renderShader.init("vertex.c", "fragment.c");
@@ -71,7 +75,6 @@ int main()
 	computeShader.init("compute.c");
 	computeShader.use();
 	appManager->addComputeShader(&computeShader);
-	computeShaders.push_back(&computeShader);
 
 	appManager->GetSingleton()->setUpGraphicsPipeline();
 
@@ -83,42 +86,40 @@ int main()
 	ubo.resolution = { window->getWindowWidth(), window->getWindowHeight() };
 	ubo.worldUp = camera.getWorldUp();
 
-	StorageBufferObject ssbo;
-	ssbo.position = { 10.0f, 0.0f, 0.0f };
+	ssbo.position = { 0.0f, 0.0f, 0.0f };
 	computeShader.setSSBO(ssbo);
 
 	// render loop
 	// -----------
 	while (!window->shouldClose())
 	{
+		// input callbacks...
+		window->update();
+		timeManager->update();
+
+		// update
+		computeShader.setSSBO(ssbo);
+		appManager->update();
+		ssbo = computeShader.getSSBO();
+		std::cout << computeShader.getSSBO().position.x << std::endl;
+
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
 		ubo.viewMat = transpose(camera.getViewMatrix());
 		ubo.time = timeManager->getTimeSinceBeginning();
-
-		// update
-		for (ComputeShader* shader : computeShaders) {
-			//shader->setSSBO(ssbo);
-			shader->use();
-			std::cout << shader->getSSBO().position.x << std::endl;
-		}
-
-		// render
+		//ubo.pos = ssbo.position;
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);
-			shader->use();
 		}
 
-		window->update();
-		for (Manager* manager : managers) manager->update();
+		appManager->render();
 	}
 
 	for (RenderShader* shader : renderShaders) {
 		shader->release();
 	}
-	for (ComputeShader* shader : computeShaders) {
-		shader->release();
-	}
+	
+	computeShader.release();
 
 	appManager->waitUntilFinishEverything();
 	appManager->ShutDownSingleton();

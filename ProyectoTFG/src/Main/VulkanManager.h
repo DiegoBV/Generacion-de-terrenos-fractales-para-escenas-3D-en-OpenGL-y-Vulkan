@@ -1,5 +1,4 @@
 #pragma once
-#include "Manager.h"
 #include <vulkan.hpp>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -7,6 +6,7 @@
 #include <list>
 
 // test shader variables
+class StorageBufferObject;
 
 struct Vertex {
 	glm::vec2 pos;
@@ -55,7 +55,7 @@ class GLFWwindow;
 class VulkanRenderShader;
 class VulkanComputeShader;
 
-class VulkanManager : public Manager
+class VulkanManager
 {
 private:
 	std::list<VulkanRenderShader*> renderShaders;
@@ -264,12 +264,16 @@ private:
 
 	/// acquire image from swap chain, execute the next command and returns the modified image to the swap chain for presentation. Maybe this is not the place for this.
 	void drawFrame();
+	void runComputeShader();
 
 	// compute shaders
 	void createComputePipelineLayout();
 	void createPipelineCache();
 	void createComputeCommandPool();
 	void createComputeCommandBuffer();
+
+	void updateStorageBuffer();
+	StorageBufferObject getStorageBuffer();
 
 	VulkanManager();
 	~VulkanManager();
@@ -278,13 +282,12 @@ public:
 	static VulkanManager* GetSingleton();
 	static void ShutDownSingleton();
 
-	virtual void init();
-	virtual void update();
-	virtual void release();
-	virtual void waitUntilFinishEverything();
+	void init();
+	void update();
+	void render();
+	void release();
+	void waitUntilFinishEverything();
 	void setUpGraphicsPipeline();
-	//void setStorageBuffer(StorageBufferObject ssbo);
-	//StorageBufferObject getStorageBuffer();
 
 	inline VkDevice getLogicalDevice() { return logicalDevice; }
 	inline VkPipelineLayout getComputePipelineLayout() { return computePipelineLayout; }

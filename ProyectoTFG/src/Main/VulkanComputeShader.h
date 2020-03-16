@@ -21,10 +21,10 @@ public:
 	virtual void use() {};
 	virtual void release();
 
-	void setSSBO(const StorageBufferObject value);
+	inline void setSSBO(const StorageBufferObject value) { ssbo = value; }
+	inline StorageBufferObject getSSBO() { return ssbo; }
 
 	inline VkComputePipelineCreateInfo getCompShaderStageInfo() { return compShaderStageInfo; }
 	inline VkShaderModule getComputeShaderModule() { return compShaderModule; }
-	StorageBufferObject getSSBO();
 };
 

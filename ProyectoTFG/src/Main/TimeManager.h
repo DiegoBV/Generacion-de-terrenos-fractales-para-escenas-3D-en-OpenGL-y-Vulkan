@@ -1,9 +1,8 @@
 #pragma once
 #include <list>
-#include "Manager.h"
 
 class Timer;
-class TimeManager: public Manager
+class TimeManager
 {
 private:
 	static TimeManager* instance;
@@ -25,7 +24,6 @@ public:
 	/// updates timers and calculates deltaTime and currentTime. Must be called before anything else.
 	virtual void update();
 	virtual void release();
-	virtual void waitUntilFinishEverything() {}; // esto a lo mejor no deberia estar aqui heredado, al hacer la interfaz entre managers de la app se solucionaria
 
 	/// returns time since glfwInit()
 	double getTimeSinceBeginning();

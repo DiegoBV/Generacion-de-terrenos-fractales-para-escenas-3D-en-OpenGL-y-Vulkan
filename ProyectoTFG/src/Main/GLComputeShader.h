@@ -13,7 +13,7 @@ public:
 	virtual void use();
 	virtual void release() {};
 
-	void setSSBO(const StorageBufferObject value);
+	inline void setSSBO(const StorageBufferObject value) { ssbo = value; }
 	inline StorageBufferObject getSSBO() { return ssbo; }
 
 private:

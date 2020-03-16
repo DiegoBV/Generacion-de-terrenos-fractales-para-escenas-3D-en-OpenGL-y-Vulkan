@@ -1,13 +1,15 @@
 #pragma once
-#include "Manager.h"
+#include <list>
 
 class GLRenderShader;
 class GLComputeShader;
 
-class GLManager: public Manager 
+class GLManager
 {
 private:
 	static GLManager* instance;
+	std::list<GLRenderShader*> renderShaders;
+	std::list<GLComputeShader*> computeShaders;
 
 	unsigned int VBO, VAO, EBO;
 
@@ -18,12 +20,13 @@ public:
 	static GLManager* GetSingleton();
 	static void ShutDownSingleton();
 
-	virtual void init();
-	virtual void update();
-	virtual void release();
-	virtual void waitUntilFinishEverything();
+	void init();
+	void update();
+	void render();
+	void release();
+	void waitUntilFinishEverything();
 	void setUpGraphicsPipeline() {};
-	void addRenderShader(GLRenderShader* shader) {};
-	void addComputeShader(GLComputeShader* shader) {};
+	inline void addRenderShader(GLRenderShader* shader) { renderShaders.push_back(shader); };
+	inline void addComputeShader(GLComputeShader* shader) { computeShaders.push_back(shader); };
 };
 
