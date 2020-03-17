@@ -39,7 +39,7 @@ float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end)
         t += MARCHING_STEP * dist;
     }
 
-    dist < EPSILON * t ? (sceneDist = t) : (sceneDist = -1.);
+    dist < EPSILON * t ? (sceneDist = t) : (sceneDist = MAX_DIST);
 
     return sceneDist;
 }

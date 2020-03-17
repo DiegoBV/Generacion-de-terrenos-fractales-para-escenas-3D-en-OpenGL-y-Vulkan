@@ -8,6 +8,7 @@ layout(binding = 0) uniform UniformBufferObject {
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;
+    vec3 playerPos;
     mat4 viewMat;
 } ubo;
 
@@ -15,6 +16,7 @@ layout(location = 0) out vec4 outColor;
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 
+#include ..\\..\\Shaders\\geometries.c
 #include ..\\..\\Shaders\\snowTerrain.c
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
@@ -24,24 +26,55 @@ vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     return normalize(vec3(uv, -z));
 }
 
+float rayMarchDebug(vec3 eye, vec3 marchingDirection, float start, float end, Sphere sphere){
+    float depth = start;
+
+    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
+        float dist = sphereSDF(sphere, eye + depth * marchingDirection);
+        if (dist < EPSILON) {
+			break;
+        }
+        depth += 0.5 * dist;
+        if (depth >= end) {
+            break;
+        }
+    }
+
+    return depth;
+}
+
 void main()
 {
     vec2 pixelCoord = gl_FragCoord.xy;
     vec3 rayOrigin = ubo.cameraEye;
     vec3 rayDir = rayDirection(45.0, ubo.resolution, pixelCoord);
     rayDir = (ubo.viewMat * vec4(rayDir, 0.0)).xyz; //works
+
+    mat3 identity = mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+    Sphere sphere; sphere.center = ubo.playerPos; sphere.radius = 0.1; sphere.color = vec4(1.0, 0.0, 0.0, 1.0);
+    sphere.rotation = identity;
     
     //tracing the ray (getting the distance of the closest object in the ray direction)
 	
-    float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
+    float fractal = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
+
+    float pelota = rayMarchDebug(rayOrigin, rayDir, MIN_DIST, MAX_DIST, sphere);
+
+    float distanceToSurface = min(fractal, pelota);
+    
+    //DEBUG
+    if(pelota < fractal){
+        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+		return;
+    }
 
     vec3 p = rayOrigin + rayDir * distanceToSurface;
 
-    if (distanceToSurface > MAX_DIST - EPSILON) {
-        // Didn't hit anything
-        outColor = vec4(0.1, 0.1, 0.1, 1.0);
-		return;
-    }
+    // if (distanceToSurface > MAX_DIST - EPSILON) {
+    //     // Didn't hit anything
+    //     outColor = vec4(0.1, 0.1, 0.1, 1.0);
+	// 	return;
+    // }
 
     outColor = vec4(getColor(p), 1);
 }

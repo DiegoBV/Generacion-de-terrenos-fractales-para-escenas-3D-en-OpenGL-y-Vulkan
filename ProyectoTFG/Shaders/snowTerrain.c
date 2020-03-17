@@ -194,7 +194,7 @@ vec3 getColor(vec3 p)
     vec3 rayDir = rayDirection(45.0, ubo.resolution, gl_FragCoord.xy);
     rayDir = (ubo.viewMat * vec4(rayDir, 0.0)).xyz; //works
 
-    if (sceneDist > -1.)
+    if (sceneDist < MAX_DIST)
     {
         light light1 = light(
             ubo.cameraEye + vec3(10., 150., 100.),                            // light position
