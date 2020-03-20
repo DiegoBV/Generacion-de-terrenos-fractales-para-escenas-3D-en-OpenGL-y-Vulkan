@@ -17,4 +17,5 @@ struct StorageBufferObject {
 	alignas(4) float velocity;
 	alignas(16) glm::vec3 direction;
 	alignas(16) glm::vec3 position;
+	alignas(16) glm::vec3 debug;
 };
