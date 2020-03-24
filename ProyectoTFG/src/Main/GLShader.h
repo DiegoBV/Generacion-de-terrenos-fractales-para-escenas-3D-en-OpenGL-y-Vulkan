@@ -2,7 +2,6 @@
 
 #include <string>
 #include "ShaderUtils.h"
-#include <vector>
 
 class GLShader
 {

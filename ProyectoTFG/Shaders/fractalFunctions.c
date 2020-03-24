@@ -61,7 +61,7 @@ float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end)
     return t;
 }
 
-vec3 getColor(vec3 p)
+vec3 getColor(vec3 p, vec3 cameraEye, vec3 rayDir, vec2 resolution, vec2 fragCoord, mat4 viewMat, float yDirection, float time)
 {
     return color;
 }

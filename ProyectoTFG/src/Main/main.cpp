@@ -1,10 +1,11 @@
 #include <iostream>
-#include <vector>
 #include "Camera.h"
 #include "TimeManager.h"
 #include "ApplicationManager.h"
 #include "Shader.h"
 #include "Window.h"
+#include <math.h>
+#include <vector>
 
 Camera camera;
 glm::dvec2 mCoord;
@@ -89,6 +90,30 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		ssbo.direction = { 0.0f,0.0f,0.0f };
 }
 
+// VECTORES DIRECTORES PARA LAS COLISIONES
+std::vector<glm::vec3> fibonacci_sphere() {
+	float rnd = ((float)rand() / (RAND_MAX)) + 1;
+
+	std::vector<glm::vec3> dirs;
+	float offset = 2.0 / COLLISION_SAMPLES;
+
+	float increment = M_PI * (3.0 - sqrt(5.0));
+
+	for (int i = 0; i < COLLISION_SAMPLES; i++) {
+		float y = ((i * offset) - 1) + (offset / 2);
+		float r = sqrt(1 - pow(y, 2));
+
+		float phi = (int(i + rnd) % COLLISION_SAMPLES) * increment;
+
+		float x = cos(phi) * r;
+		float z = sin(phi) * r;
+
+		dirs.push_back(glm::normalize(glm::vec3(x, y, z)));
+	}
+
+	return dirs;
+}
+
 int main()
 {
 	TimeManager* timeManager = TimeManager::GetSingleton();
@@ -121,10 +146,16 @@ int main()
 	UniformBufferObject ubo;
 	ubo.resolution = { window->getWindowWidth(), window->getWindowHeight() };
 	ubo.worldUp = camera.getWorldUp();
+	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
 	ssbo.velocity = 1.0f;
+	ssbo.radius = 0.05f;
+	ssbo.gravity = { 0.0f, -0.8f, 0.0f };
 	ssbo.position = { 0.0f, 3.0f, 50.0f };
 	ssbo.direction = { 0.0f, 0.0f, 0.0f };
+	std::vector<glm::vec3> dirs = fibonacci_sphere();
+	std::copy(dirs.begin(), dirs.end(), ssbo.collisionDirs);
+
 	computeShader.setSSBO(ssbo);
 
 	// render loop
@@ -147,6 +178,8 @@ int main()
 		ubo.viewMat = transpose(camera.getViewMatrix());
 		ubo.time = timeManager->getTimeSinceBeginning();
 		ubo.playerPos = ssbo.position;
+		ubo.playerRadius = ssbo.radius;
+
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);
 		}

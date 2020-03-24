@@ -127,7 +127,7 @@ mat2 mm2(in float a){float c = cos(a), s = sin(a);return mat2(c,s,-s,c);}
 float tri(in float x){return clamp(abs(fract(x)-.5),0.01,0.49);}
 vec2 tri2(in vec2 p){return vec2(tri(p.x)+tri(p.y),tri(p.y+tri(p.x)));}
 
-float fbmAurora(vec2 p, float spd) {
+float fbmAurora(vec2 p, float spd, float time) {
     float z = 1.8;
     float z2 = 2.5;
 	float rz = 0.;
@@ -135,7 +135,7 @@ float fbmAurora(vec2 p, float spd) {
     vec2 bp = p;
 	for (float i = 0.; i < 5.; i++ ) {
         vec2 dg = tri2(bp*1.85)*.75;
-        dg *= mm2(ubo.time*spd);
+        dg *= mm2(time*spd);
         p -= dg/z2;
 
         bp *= 1.3;
@@ -144,23 +144,23 @@ float fbmAurora(vec2 p, float spd) {
 		p *= 1.21 + (rz-1.0)*.02;
         
         rz += tri(p.x+tri(p.y))*z;
-        p*= sin(ubo.time * 0.05) * cos(ubo.time * 0.01);
+        p*= sin(time * 0.05) * cos(time * 0.01);
 	}
     return clamp(1. / pow(rz * 20., 1.3), 0.,1.);
 }
 
 
-vec4 aurora( vec3 rd) {
+vec4 aurora( vec3 rd, vec2 fragCoord, float time) {
     vec4 col = vec4(0);
     vec4 avgCol = vec4(0);    
 
     for (float i=0.; i < 50.; i++) {
-        float of = 0.006*random(gl_FragCoord.xy)*smoothstep(0.,15., i);
+        float of = 0.006*random(fragCoord)*smoothstep(0.,15., i);
         float pt = ((.8+pow(i,1.4)*.002)) / (rd.y * 2. + 0.4);
         pt -= of;
     	vec3 bpos = 5.5 + pt * rd;
         vec2 p = bpos.zx;
-        float rzt = fbmAurora(p, 0.06);
+        float rzt = fbmAurora(p, 0.06, time);
         vec4 col2 = vec4(0,0,0, rzt);
         col2.rgb = (sin(1.-vec3(2.15,-.5, 1.2) +i * 0.043) * 0.5 + 0.5)*rzt;
         avgCol = mix(avgCol, col2, .5);
@@ -177,10 +177,10 @@ vec3 stars(vec2 p) {
     return vec3(r) * isStar;
 }
 
-void setSkyColor(vec2 uv, out vec3 color, vec3 dir) {
+void setSkyColor(vec2 uv, vec2 fragCoord, out vec3 color, vec3 dir, float time) {
    color = mix(vec3(0.006,0.026,0.095), vec3(0.007,0.011,0.035), uv.y);
    color += stars(dir.xz / dir.y);
-   color += aurora(dir).rgb;
+   color += aurora(dir, fragCoord, time).rgb;
 }
 
 void setColor(vec3 p, vec3 n, out vec3 color) {
@@ -189,15 +189,12 @@ void setColor(vec3 p, vec3 n, out vec3 color) {
   color = mix(vec3(1.), ground, a);  
 }
 
-vec3 getColor(vec3 p)
+vec3 getColor(vec3 p, vec3 cameraEye, vec3 rayDir, vec2 resolution, vec2 fragCoord, mat4 viewMat, float yDirection, float time)
 {
-    vec3 rayDir = rayDirection(45.0, ubo.resolution, gl_FragCoord.xy);
-    rayDir = (ubo.viewMat * vec4(rayDir, 0.0)).xyz; //works
-
     if (sceneDist < MAX_DIST)
     {
         light light1 = light(
-            ubo.cameraEye + vec3(10., 150., 100.),                            // light position
+            cameraEye + vec3(10., 150., 100.),                            // light position
             vec3(0.931, 0.975, 0.906), 0.412,                      // ambient color - ambient intencity
             vec3(0.254, 1.000, 0.777), vec3(0.162, 0.555, 0.560)); // direct light color - direct light intencity
 
@@ -205,13 +202,13 @@ vec3 getColor(vec3 p)
 
         setColor(p, nor, color);
 
-        color *= calcLights(light1, p, ubo.cameraEye);
+        color *= calcLights(light1, p, cameraEye);
     }
     else
     {
-        vec2 uv = gl_FragCoord.xy / ubo.resolution.xy;
-        uv.y = ubo.yDirection * uv.y;
-        setSkyColor(uv, color, rayDir);
+        vec2 uv = fragCoord / resolution;
+        uv.y = yDirection * uv.y;
+        setSkyColor(uv, fragCoord, color, rayDir, time);
     }
 
     color = pow(color, vec3(1. / 2.2)); // gamma correction

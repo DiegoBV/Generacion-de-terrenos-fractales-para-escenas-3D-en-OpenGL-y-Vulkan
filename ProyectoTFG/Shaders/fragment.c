@@ -4,11 +4,13 @@
 layout(binding = 0) uniform UniformBufferObject {
     float time;
     float yDirection;
+    float playerRadius;
     vec2 resolution;
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;
     vec3 playerPos;
+    vec4 playerColor;
     mat4 viewMat;
 } ubo;
 
@@ -26,6 +28,7 @@ vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     return normalize(vec3(uv, -z));
 }
 
+// TODO: quitar(?)
 float rayMarchDebug(vec3 eye, vec3 marchingDirection, float start, float end, Sphere sphere){
     float depth = start;
 
@@ -51,7 +54,7 @@ void main()
     rayDir = (ubo.viewMat * vec4(rayDir, 0.0)).xyz; //works
 
     mat3 identity = mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
-    Sphere sphere; sphere.center = ubo.playerPos; sphere.radius = 0.1; sphere.color = vec4(1.0, 0.0, 0.0, 1.0);
+    Sphere sphere; sphere.center = ubo.playerPos; sphere.radius = ubo.playerRadius; sphere.color = ubo.playerColor;
     sphere.rotation = identity;
     
     //tracing the ray (getting the distance of the closest object in the ray direction)
@@ -62,9 +65,9 @@ void main()
 
     float distanceToSurface = min(fractal, pelota);
     
-    //DEBUG
+    //DEBUG (modelo)
     if(pelota < fractal){
-        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+        outColor = sphere.color;
 		return;
     }
 
@@ -76,5 +79,5 @@ void main()
 	// 	return;
     // }
 
-    outColor = vec4(getColor(p), 1);
+    outColor = vec4(getColor(p, ubo.cameraEye, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
 }
