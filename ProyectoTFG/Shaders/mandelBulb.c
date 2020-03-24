@@ -5,8 +5,8 @@ vec2 SDF(vec3 z);
 
 #include ..\\..\\Shaders\\fractalFunctions.c
 
-vec2 SDF(vec3 pos) {
-    float Power = 3.0+4.0*(sin(ubo.time/15.0)+1.0);
+vec2 SDF(vec3 pos, float time) {
+    float Power = 3.0+4.0*(sin(time/15.0)+1.0);
 	vec3 z = pos;
 	float dr = 1.0;
 	float r = 0.0;
