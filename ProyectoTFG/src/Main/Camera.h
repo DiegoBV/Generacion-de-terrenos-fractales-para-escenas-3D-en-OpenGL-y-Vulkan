@@ -56,6 +56,8 @@ public:
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void handleZoom(float yoffset);
 
+    void lookAtTarget(glm::vec3 target, float offset);
+
     // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 getViewMatrix();
     inline glm::vec3 getEye() { return eye; };
@@ -70,5 +72,7 @@ public:
     inline void setMovementSpeed(float value) { movementSpeed = value; };
     inline void setMouseSensitivity(float value) { mouseSensitivity = value; };
     inline void setZoom(float value) { zoom = value; };
+    inline void setEye(glm::vec3 value) { eye = value; };
+    inline void setFront(glm::vec3 value) { front = value; };
 };
 #endif

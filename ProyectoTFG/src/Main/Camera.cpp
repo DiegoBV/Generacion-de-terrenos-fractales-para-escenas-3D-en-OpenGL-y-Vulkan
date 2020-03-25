@@ -71,6 +71,15 @@ void Camera::handleZoom(float yoffset)
         zoom = 45.0f;
 }
 
+void Camera::lookAtTarget(glm::vec3 target, float offset)
+{
+    glm::vec3 nextPoint = eye + (front * offset);
+    glm::vec3 moveDir = target - nextPoint;
+    float dist = glm::length(moveDir);
+    moveDir = normalize(moveDir);
+    eye += moveDir * dist;
+}
+
 glm::mat4 Camera::getViewMatrix()
 {
     return glm::lookAt(eye, eye + front, worldUp);
