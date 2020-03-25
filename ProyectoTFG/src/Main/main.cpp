@@ -10,6 +10,8 @@
 Camera camera;
 glm::dvec2 mCoord;
 StorageBufferObject ssbo;
+float velocity = 3.0f; //TODO: llevar a sus clases personales
+float pivotOffset = 2.0f;
 
 //calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
 //callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
@@ -19,7 +21,6 @@ void motion(GLFWwindow* window, double xpos, double ypos) {
 	mCoord = glm::dvec2(xpos, Window::GetSingleton()->getWindowHeight() - ypos);//actualizamos mCoord invirtiendo el eje y
 	mOffset = (mCoord - mOffset) * 0.05; // sensitivity. mOffset vale la diferencia (desplazamiento -> nuevas coord del raton - coord anteriores)
 	camera.handleOrientation(mOffset.x, mOffset.y);//mandamos que se mueva con el desplazamiento
-	camera.lookAtTarget(ssbo.position, 2.0f);
 }
 
 //actualiza las coordenadas del raton invirtiendo el eje y; callback llamado cada vez que clicamos
@@ -36,41 +37,41 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 	if (state == GLFW_PRESS) {
 		switch (key) {
 		case 'W'://si pulsamos "w" acercamos la camara
-			ssbo.velocity = 1.0f;
+			ssbo.velocity = velocity;
 			ssbo.direction.z = camera.getFront().z;
 			ssbo.direction.x = camera.getFront().x;
 			ssbo.direction.y = 0.0f;
 			ssbo.direction = normalize(ssbo.direction);
 			break;
 		case 'S'://"s" la alejamos
-			ssbo.velocity = 1.0f;
+			ssbo.velocity = velocity;
 			ssbo.direction.z = -camera.getFront().z;
 			ssbo.direction.x = -camera.getFront().x;
 			ssbo.direction.y = 0.0f;
 			ssbo.direction = normalize(ssbo.direction);
 			break;
 		case 'D'://derecha
-			ssbo.velocity = 1.0f;
+			ssbo.velocity = velocity;
 			ssbo.direction.x = -camera.getFront().z;
 			ssbo.direction.z = camera.getFront().x;
 			ssbo.direction.y = 0.0f;
 			ssbo.direction = normalize(ssbo.direction);
 			break;
 		case 'A'://izquierda
-			ssbo.velocity = 1.0f;
+			ssbo.velocity = velocity;
 			ssbo.direction.x = camera.getFront().z;
 			ssbo.direction.z = -camera.getFront().x;
 			ssbo.direction.y = 0.0f;
 			ssbo.direction = normalize(ssbo.direction);
 			break;
 		case 'Q':
-			ssbo.velocity = 3.0f;
+			ssbo.velocity = velocity;
 			ssbo.direction.y = 1.0f;
 			ssbo.direction.z = 0.0f;
 			ssbo.direction.x = 0.0f;
 			break;
 		case 'E':
-			ssbo.velocity = 3.0f;
+			ssbo.velocity = velocity;
 			ssbo.direction.y = -1.0f;
 			ssbo.direction.z = 0.0f;
 			ssbo.direction.x = 0.0f;
@@ -150,7 +151,6 @@ int main()
 	std::copy(dirs.begin(), dirs.end(), ssbo.collisionDirs);
 
 	computeShader.setSSBO(ssbo);
-	camera.setEye(ssbo.position - (glm::vec3(0.0f, 0.0f, -1.0f) * 2.0f));
 	// render loop
 	// -----------
 	while (!window->shouldClose())
@@ -165,7 +165,7 @@ int main()
 		appManager->update();
 		ssbo = computeShader.getSSBO();
 
-		camera.setEye(ssbo.position - (camera.getFront() * 2.0f));
+		camera.pivotTarget(ssbo.position, pivotOffset);
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();

@@ -56,7 +56,7 @@ public:
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void handleZoom(float yoffset);
 
-    void lookAtTarget(glm::vec3 target, float offset);
+    void pivotTarget(glm::vec3 target, float offset);
 
     // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 getViewMatrix();
