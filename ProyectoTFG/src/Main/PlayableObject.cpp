@@ -73,7 +73,7 @@ void PlayableObject::handleMovement(const char& key, const glm::vec3& direction)
 
 void PlayableObject::update(float deltaTime)
 {
-	addForce(gravity * ssbo.mass);
+	addForce(gravity);
 	ssbo.deltaTime = deltaTime;
 
 	//DEBUG
