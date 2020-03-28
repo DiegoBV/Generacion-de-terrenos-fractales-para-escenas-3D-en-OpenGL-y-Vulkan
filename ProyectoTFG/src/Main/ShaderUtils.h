@@ -19,10 +19,10 @@ struct UniformBufferObject {
 
 struct StorageBufferObject {
 	alignas(4) float deltaTime;
-	alignas(4) float velocity;
 	alignas(4) float radius;
-	alignas(16) glm::vec3 gravity;
-	alignas(16) glm::vec3 direction;
+	alignas(4) float mass;
+	alignas(16) glm::vec3 velocity;
+	alignas(16) glm::vec3 force;
 	alignas(16) glm::vec3 position;
 	alignas(16) glm::vec3 debug;
 	alignas(16) glm::vec3 collisionDirs[COLLISION_SAMPLES];

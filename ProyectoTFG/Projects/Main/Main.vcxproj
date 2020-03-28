@@ -269,6 +269,8 @@
     <ClCompile Include="..\..\src\Main\glad.c" />
     <ClCompile Include="..\..\src\Main\GLComputeShader.cpp" />
     <ClCompile Include="..\..\src\Main\GLRenderShader.cpp" />
+    <ClCompile Include="..\..\src\Main\PlayableObject.cpp" />
+    <ClCompile Include="..\..\src\Main\PlayableSphere.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanComputeShader.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanRenderShader.cpp" />
     <ClCompile Include="..\..\src\Main\Window.cpp" />
@@ -287,6 +289,8 @@
     <ClInclude Include="..\..\src\Main\FileHandler.h" />
     <ClInclude Include="..\..\src\Main\GLComputeShader.h" />
     <ClInclude Include="..\..\src\Main\GLRenderShader.h" />
+    <ClInclude Include="..\..\src\Main\PlayableObject.h" />
+    <ClInclude Include="..\..\src\Main\PlayableSphere.h" />
     <ClInclude Include="..\..\src\Main\VulkanComputeShader.h" />
     <ClInclude Include="..\..\src\Main\VulkanRenderShader.h" />
     <ClInclude Include="..\..\src\Main\Window.h" />

@@ -4,14 +4,14 @@
 #include "ApplicationManager.h"
 #include "Shader.h"
 #include "Window.h"
+#include "PlayableSphere.h"
 #include <math.h>
 #include <vector>
 
 Camera camera;
 glm::dvec2 mCoord;
-StorageBufferObject ssbo;
-float velocity = 3.0f; //TODO: llevar a sus clases personales
 float pivotOffset = 2.0f;
+PlayableSphere player;
 
 //calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
 //callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
@@ -30,82 +30,10 @@ void mouse(GLFWwindow* window, double xpos, double ypos) {
 
 void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
-
 	int state = glfwGetKey(window, key);
-
 	if (state == GLFW_PRESS) {
-		switch (key) {
-		case 'W'://si pulsamos "w" acercamos la camara
-			ssbo.velocity = velocity;
-			ssbo.direction.z = camera.getFront().z;
-			ssbo.direction.x = camera.getFront().x;
-			ssbo.direction.y = 0.0f;
-			ssbo.direction = normalize(ssbo.direction);
-			break;
-		case 'S'://"s" la alejamos
-			ssbo.velocity = velocity;
-			ssbo.direction.z = -camera.getFront().z;
-			ssbo.direction.x = -camera.getFront().x;
-			ssbo.direction.y = 0.0f;
-			ssbo.direction = normalize(ssbo.direction);
-			break;
-		case 'D'://derecha
-			ssbo.velocity = velocity;
-			ssbo.direction.x = -camera.getFront().z;
-			ssbo.direction.z = camera.getFront().x;
-			ssbo.direction.y = 0.0f;
-			ssbo.direction = normalize(ssbo.direction);
-			break;
-		case 'A'://izquierda
-			ssbo.velocity = velocity;
-			ssbo.direction.x = camera.getFront().z;
-			ssbo.direction.z = -camera.getFront().x;
-			ssbo.direction.y = 0.0f;
-			ssbo.direction = normalize(ssbo.direction);
-			break;
-		case 'Q':
-			ssbo.velocity = velocity;
-			ssbo.direction.y = 1.0f;
-			ssbo.direction.z = 0.0f;
-			ssbo.direction.x = 0.0f;
-			break;
-		case 'E':
-			ssbo.velocity = velocity;
-			ssbo.direction.y = -1.0f;
-			ssbo.direction.z = 0.0f;
-			ssbo.direction.x = 0.0f;
-			break;
-		default:
-			break;
-		}//switch
+		player.handleMovement(key, camera.getFront());
 	}
-	else if (state == GLFW_RELEASE)
-		ssbo.velocity = 0.0f;
-}
-
-// VECTORES DIRECTORES PARA LAS COLISIONES
-std::vector<glm::vec3> fibonacci_sphere() {
-	float rnd = ((float)rand() / (RAND_MAX)) + 1;
-
-	std::vector<glm::vec3> dirs;
-	float offset = 2.0 / COLLISION_SAMPLES;
-
-	float increment = M_PI * (3.0 - sqrt(5.0));
-
-	for (int i = 0; i < COLLISION_SAMPLES; i++) {
-		float y = ((i * offset) - 1) + (offset / 2);
-		float r = sqrt(1 - pow(y, 2));
-
-		float phi = (int(i + rnd) % COLLISION_SAMPLES) * increment;
-
-		float x = cos(phi) * r;
-		float z = sin(phi) * r;
-
-		dirs.push_back(glm::normalize(glm::vec3(x, y, z)));
-	}
-
-	return dirs;
 }
 
 int main()
@@ -142,13 +70,17 @@ int main()
 	ubo.worldUp = camera.getWorldUp();
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-	ssbo.velocity = 0.0f;
+	player = PlayableSphere({ 0.0f, -0.8f, 0.0f }, 5.0f);
+
+	// quitar esto de aqui y llevarlo a la clase playable object
+	StorageBufferObject ssbo = player.getSSBO();
+	ssbo.velocity = glm::vec3(0, 0, 0);
 	ssbo.radius = 0.05f;
-	ssbo.gravity = { 0.0f, -0.8f, 0.0f };
 	ssbo.position = { 0.0f, 0.75f, 50.0f };
-	ssbo.direction = { 0.0f, 0.0f, -1.0f };
-	std::vector<glm::vec3> dirs = fibonacci_sphere();
+	std::vector<glm::vec3> dirs = player.getHitboxPoints();
 	std::copy(dirs.begin(), dirs.end(), ssbo.collisionDirs);
+	ssbo.mass = 1.5f;
+	player.setSSBO(ssbo);
 
 	computeShader.setSSBO(ssbo);
 	// render loop
@@ -158,21 +90,21 @@ int main()
 		// input callbacks...
 		window->update();
 		timeManager->update();
+		player.update(timeManager->getDeltaTime());
 
 		// update
-		ssbo.deltaTime = timeManager->getDeltaTime();
-		computeShader.setSSBO(ssbo);
+		computeShader.setSSBO(player.getSSBO());
 		appManager->update();
-		ssbo = computeShader.getSSBO();
+		player.setSSBO(computeShader.getSSBO());
 
-		camera.pivotTarget(ssbo.position, pivotOffset);
+		camera.pivotTarget(player.getSSBO().position, pivotOffset);
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
 		ubo.viewMat = transpose(camera.getViewMatrix());
 		ubo.time = timeManager->getTimeSinceBeginning();
-		ubo.playerPos = ssbo.position;
-		ubo.playerRadius = ssbo.radius;
+		ubo.playerPos = player.getSSBO().position;
+		ubo.playerRadius = player.getSSBO().radius;
 
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);

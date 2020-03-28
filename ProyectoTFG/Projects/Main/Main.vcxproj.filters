@@ -28,6 +28,9 @@
     <Filter Include="Camera/Window">
       <UniqueIdentifier>{02ba9d01-8926-4859-9509-12f73b3f61f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PlayableObjects">
+      <UniqueIdentifier>{a942fb7a-4f34-461a-ab2e-f2399761de27}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Main\main.cpp">
@@ -77,6 +80,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Main\VulkanRenderShader.cpp">
       <Filter>Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\PlayableSphere.cpp">
+      <Filter>PlayableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\PlayableObject.cpp">
+      <Filter>PlayableObjects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +142,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Main\VulkanRenderShader.h">
       <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\PlayableObject.h">
+      <Filter>PlayableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\PlayableSphere.h">
+      <Filter>PlayableObjects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
