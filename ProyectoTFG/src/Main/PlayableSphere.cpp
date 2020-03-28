@@ -1,5 +1,18 @@
 #include "PlayableSphere.h"
 
+PlayableSphere::PlayableSphere() : PlayableObject()
+{
+	ssbo.radius = 0.05f;
+	calculateHitboxPoints();
+}
+
+PlayableSphere::PlayableSphere(glm::vec3 gravity, glm::vec3 velocity, glm::vec3 position, float mass, float acceleration, float damping, float radius)
+	: PlayableObject(gravity, velocity, position, mass, acceleration, damping)
+{
+	ssbo.radius = radius;
+	calculateHitboxPoints();
+}
+
 void PlayableSphere::calculateHitboxPoints()
 {
 	// fibonacci sphere
@@ -21,4 +34,6 @@ void PlayableSphere::calculateHitboxPoints()
 
 		hitboxPoints.push_back(glm::normalize(glm::vec3(x, y, z)));
 	}
+
+	std::copy(hitboxPoints.begin(), hitboxPoints.end(), ssbo.collisionDirs);
 }

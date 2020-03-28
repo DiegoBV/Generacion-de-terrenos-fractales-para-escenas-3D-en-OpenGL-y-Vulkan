@@ -12,8 +12,8 @@ protected:
 	virtual void calculateHitboxPoints() = 0;
 
 public:
-	PlayableObject() : gravity({0.0f, -0.8, 0.0f}), acceleration(5.0f) { };
-	PlayableObject(glm::vec3 gravity, float acceleration) : gravity(gravity), acceleration(acceleration) { };
+	PlayableObject();
+	PlayableObject(glm::vec3 gravity, glm::vec3 velocity, glm::vec3 position, float mass, float acceleration, float damping);
 	~PlayableObject() {};
 
 	void handleMovement(const char& key, const glm::vec3& direction);

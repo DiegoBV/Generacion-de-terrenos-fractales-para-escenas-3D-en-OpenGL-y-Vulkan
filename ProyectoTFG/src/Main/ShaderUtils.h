@@ -1,7 +1,7 @@
 #pragma once
 #include <glm.hpp>
 
-const int COLLISION_SAMPLES = 100;
+const int COLLISION_SAMPLES = 200;
 const float M_PI = 3.1415926535897932384626433832795;
 
 struct UniformBufferObject {
@@ -21,6 +21,7 @@ struct StorageBufferObject {
 	alignas(4) float deltaTime;
 	alignas(4) float radius;
 	alignas(4) float mass;
+	alignas(4) float damping;
 	alignas(16) glm::vec3 velocity;
 	alignas(16) glm::vec3 force;
 	alignas(16) glm::vec3 position;

@@ -6,7 +6,12 @@ class PlayableSphere : public PlayableObject
 private:
 	virtual void calculateHitboxPoints();
 public:
-	PlayableSphere() : PlayableObject() { calculateHitboxPoints(); };
-	PlayableSphere(glm::vec3 gravity, float acceleration) : PlayableObject(gravity, acceleration) { calculateHitboxPoints(); };
+	PlayableSphere();
+	PlayableSphere(glm::vec3 gravity, glm::vec3 velocity, glm::vec3 position, float mass, float acceleration, float damping, float radius);
+
+	//DEBUG?
+	void setRadius(float rad) { ssbo.radius = rad; }
+	float getRadius() { return ssbo.radius; }
+	//DEBUG?
 };
 

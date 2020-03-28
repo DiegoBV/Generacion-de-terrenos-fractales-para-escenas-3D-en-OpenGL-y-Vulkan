@@ -2,13 +2,13 @@
 
 layout  (local_size_x  =  2)  in;
 
-const int COLLISION_SAMPLES = 100;
-const float DAMPING = 0.1f;
+const int COLLISION_SAMPLES = 200;
 
 layout(std430, binding=0) buffer Pos{
     float deltaTime;
     float radius;
     float mass;
+    float damping;
     vec3 velocity;
     vec3 force;
     vec3 position;
@@ -23,7 +23,7 @@ void main(){
 
     vec3 totalAcceleration = force / mass;
     velocity += totalAcceleration * deltaTime;
-    velocity *= pow(DAMPING, deltaTime);
+    velocity *= pow(damping, deltaTime);
 
     // reset de las fuerzas
     force.x = force.y = force.z = 0;

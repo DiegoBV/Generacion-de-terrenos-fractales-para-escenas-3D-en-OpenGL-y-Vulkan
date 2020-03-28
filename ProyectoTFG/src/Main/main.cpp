@@ -32,7 +32,13 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	int state = glfwGetKey(window, key);
 	if (state == GLFW_PRESS) {
-		player.handleMovement(key, camera.getFront());
+		//DEBUG
+		if (key == 'Z') pivotOffset -= 0.1f;
+		else if (key == 'X') pivotOffset += 0.1f;
+		else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
+		else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
+		//DEBUG
+		else player.handleMovement(key, camera.getFront());
 	}
 }
 
@@ -70,19 +76,9 @@ int main()
 	ubo.worldUp = camera.getWorldUp();
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-	player = PlayableSphere({ 0.0f, -0.8f, 0.0f }, 5.0f);
+	player = PlayableSphere({ 0.0f, -1.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.75f, 50.0f }, 1.5f, 10.0f, 0.1f, 0.01f);
 
-	// quitar esto de aqui y llevarlo a la clase playable object
-	StorageBufferObject ssbo = player.getSSBO();
-	ssbo.velocity = glm::vec3(0, 0, 0);
-	ssbo.radius = 0.05f;
-	ssbo.position = { 0.0f, 0.75f, 50.0f };
-	std::vector<glm::vec3> dirs = player.getHitboxPoints();
-	std::copy(dirs.begin(), dirs.end(), ssbo.collisionDirs);
-	ssbo.mass = 1.5f;
-	player.setSSBO(ssbo);
-
-	computeShader.setSSBO(ssbo);
+	computeShader.setSSBO(player.getSSBO());
 	// render loop
 	// -----------
 	while (!window->shouldClose())

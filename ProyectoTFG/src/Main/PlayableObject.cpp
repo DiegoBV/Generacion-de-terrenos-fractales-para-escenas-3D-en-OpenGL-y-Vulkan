@@ -1,4 +1,24 @@
 #include "PlayableObject.h"
+//DEBUG
+#include <iostream>
+//DEBUG
+
+PlayableObject::PlayableObject() : gravity({ 0.0f, -0.8, 0.0f }), acceleration(5.0f)
+{
+	ssbo.position = { 0.0f, 0.75f, 50.0f };
+	ssbo.velocity = { 0.0f, 0.0f, 0.0f };
+	ssbo.mass = 1.0f;
+	ssbo.damping = 0.1f;
+}
+
+PlayableObject::PlayableObject(glm::vec3 gravity, glm::vec3 velocity, glm::vec3 position, float mass, float acceleration, float damping)
+	: gravity(gravity), acceleration(acceleration)
+{
+	ssbo.position = position;
+	ssbo.velocity = velocity;
+	ssbo.mass = mass;
+	ssbo.damping = damping;
+}
 
 void PlayableObject::handleMovement(const char& key, const glm::vec3& direction)
 {
@@ -53,6 +73,10 @@ void PlayableObject::handleMovement(const char& key, const glm::vec3& direction)
 
 void PlayableObject::update(float deltaTime)
 {
-	addForce(gravity);
+	addForce(gravity * ssbo.mass);
 	ssbo.deltaTime = deltaTime;
+
+	//DEBUG
+	std::cout << "velocity X: " << ssbo.velocity.x << " Y: " << ssbo.velocity.y << " Z: " << ssbo.velocity.z << std::endl;
+	//DEBUG
 }
