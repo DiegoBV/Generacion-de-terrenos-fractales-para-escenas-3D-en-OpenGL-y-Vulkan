@@ -24,8 +24,8 @@ vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     vec2 uv = vec2(fragCoord.x - (size.x/2.0), fragCoord.y - (size.y/2.0));
     uv.y = ubo.yDirection * uv.y;
-    float z = size.y / tan(radians(fieldOfView) / 2.0);
-    return normalize(vec3(uv, -z));
+    float nearPlane = size.y / tan(radians(fieldOfView) / 2.0);
+    return normalize(vec3(uv, -nearPlane));
 }
 
 // TODO: quitar(?)

@@ -66,7 +66,7 @@ std::string FileHandler::readLineFromInputFile(std::fstream& inputFile)
 		std::getline(inputFile, fileLine);
 	}
 	catch (std::fstream::failure exception) {
-		_logMessageError("ERROR::LINE_NOT_SUCCESFULLY_READ::MAYBE_YOU_HAVE_REACHED_EOF");
+		_logMessageError("LOG::REACHED_EOF");
 		fileLine = "EOF";
 	}
 
