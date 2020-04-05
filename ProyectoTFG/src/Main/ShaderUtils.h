@@ -15,6 +15,8 @@ struct UniformBufferObject {
 	alignas(16) glm::vec3 playerPos;
 	alignas(16) glm::vec4 playerColor;
 	alignas(16) glm::mat4 viewMat;
+	alignas(16) glm::mat4 model;
+	alignas(16) glm::mat4 projection;
 };
 
 struct StorageBufferObject {

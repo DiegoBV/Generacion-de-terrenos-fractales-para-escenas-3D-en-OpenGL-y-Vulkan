@@ -7,6 +7,7 @@
 #include "PlayableSphere.h"
 #include <math.h>
 #include <vector>
+//#include "Model.h"
 
 Camera camera;
 glm::dvec2 mCoord;
@@ -79,6 +80,15 @@ int main()
 	player = PlayableSphere({ 0.0f, -1.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.75f, 50.0f }, 1.5f, 10.0f, 0.1f, 0.01f);
 
 	computeShader.setSSBO(player.getSSBO());
+
+	/*RenderShader ourShader = RenderShader();
+	ourShader.init("vmodel.c", "fmodel.c");
+	ourShader.use();
+	appManager->addRenderShader(&ourShader);
+	renderShaders.push_back(&ourShader);*/
+
+	// Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
+
 	// render loop
 	// -----------
 	while (!window->shouldClose())
@@ -102,11 +112,20 @@ int main()
 		ubo.playerPos = player.getSSBO().position;
 		ubo.playerRadius = player.getSSBO().radius;
 
+		ubo.projection = glm::perspective(glm::radians(camera.getZoom()), (float)window->getWindowWidth() / (float)window->getWindowHeight(), 0.1f, 100.0f);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+		ubo.model = model;
+
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);
 		}
 
+
 		appManager->render();
+		// ourModel.Draw(&ourShader);
 	}
 
 	for (RenderShader* shader : renderShaders) {

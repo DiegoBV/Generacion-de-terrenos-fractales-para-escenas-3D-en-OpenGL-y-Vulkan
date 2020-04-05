@@ -14,7 +14,7 @@ public:
 
 	virtual void use() = 0;
 	virtual void release() = 0;
-
+	inline const unsigned int getId() const { return ID; }
 protected:
 	unsigned int ID;
 	std::string pathName = "..\\..\\Shaders\\";

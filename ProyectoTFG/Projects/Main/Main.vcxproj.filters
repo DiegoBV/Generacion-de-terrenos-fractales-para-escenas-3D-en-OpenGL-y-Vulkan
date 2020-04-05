@@ -31,6 +31,9 @@
     <Filter Include="PlayableObjects">
       <UniqueIdentifier>{a942fb7a-4f34-461a-ab2e-f2399761de27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="OpenGL\extern">
+      <UniqueIdentifier>{10808b00-1d5f-4e52-a13c-844075c935df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Main\main.cpp">
@@ -66,9 +69,6 @@
     <ClCompile Include="..\..\src\Main\Window.cpp">
       <Filter>Camera/Window</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Main\glad.c">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Main\GLComputeShader.cpp">
       <Filter>OpenGL</Filter>
     </ClCompile>
@@ -86,6 +86,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Main\PlayableObject.cpp">
       <Filter>PlayableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\Mesh.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\Model.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\glad.c">
+      <Filter>OpenGL\extern</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +157,15 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Main\PlayableSphere.h">
       <Filter>PlayableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Mesh.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Model.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\stb_image.h">
+      <Filter>OpenGL\extern</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
