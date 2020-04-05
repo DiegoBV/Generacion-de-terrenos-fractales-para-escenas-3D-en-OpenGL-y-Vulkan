@@ -7,7 +7,7 @@
 #include "PlayableSphere.h"
 #include <math.h>
 #include <vector>
-//#include "Model.h"
+#include "Model.h"
 
 Camera camera;
 glm::dvec2 mCoord;
@@ -41,6 +41,27 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		//DEBUG
 		else player.handleMovement(key, camera.getFront());
 	}
+
+	/*
+	double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
+
+	switch (key) {
+	case 'W'://si pulsamos "w" acercamos la camara
+		camera.handleMovement(Camera_Movement::FORWARD, deltaTime);
+		break;
+	case 'S'://"s" la alejamos
+		camera.handleMovement(Camera_Movement::BACKWARD, deltaTime);
+		break;
+	case 'D'://derecha
+		camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
+		break;
+	case 'A'://izquierda
+		camera.handleMovement(Camera_Movement::LEFT, deltaTime);
+		break;
+	default:
+		break;
+	}//switch
+	*/
 }
 
 int main()
@@ -81,13 +102,13 @@ int main()
 
 	computeShader.setSSBO(player.getSSBO());
 
-	/*RenderShader ourShader = RenderShader();
+	RenderShader ourShader = RenderShader();
 	ourShader.init("vmodel.c", "fmodel.c");
 	ourShader.use();
 	appManager->addRenderShader(&ourShader);
-	renderShaders.push_back(&ourShader);*/
+	renderShaders.push_back(&ourShader);
 
-	// Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
+	Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
 
 	// render loop
 	// -----------
@@ -103,7 +124,7 @@ int main()
 		appManager->update();
 		player.setSSBO(computeShader.getSSBO());
 
-		camera.pivotTarget(player.getSSBO().position, pivotOffset);
+		//camera.pivotTarget(player.getSSBO().position, pivotOffset);
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
@@ -115,7 +136,7 @@ int main()
 		ubo.projection = glm::perspective(glm::radians(camera.getZoom()), (float)window->getWindowWidth() / (float)window->getWindowHeight(), 0.1f, 100.0f);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.0f)); // translate it down so it's at the center of the scene
+		model = glm::translate(model, glm::vec3(0.0f, -10.5f, -0.7f)); // translate it down so it's at the center of the scene
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
@@ -125,7 +146,7 @@ int main()
 
 
 		appManager->render();
-		// ourModel.Draw(&ourShader);
+		ourModel.Draw(&ourShader);
 	}
 
 	for (RenderShader* shader : renderShaders) {
