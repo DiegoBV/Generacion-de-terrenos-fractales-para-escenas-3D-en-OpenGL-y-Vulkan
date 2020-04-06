@@ -90,11 +90,14 @@
     <ClCompile Include="..\..\src\Main\Mesh.cpp">
       <Filter>OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Main\Model.cpp">
-      <Filter>OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Main\glad.c">
       <Filter>OpenGL\extern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\VulkanModel.cpp">
+      <Filter>Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Main\GLModel.cpp">
+      <Filter>OpenGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -161,11 +164,17 @@
     <ClInclude Include="..\..\src\Main\Mesh.h">
       <Filter>OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Main\Model.h">
-      <Filter>OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Main\stb_image.h">
       <Filter>OpenGL\extern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\VulkanModel.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\GLModel.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Main\Model.h">
+      <Filter>Inter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

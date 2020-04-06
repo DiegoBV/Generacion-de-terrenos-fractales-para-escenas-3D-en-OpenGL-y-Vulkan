@@ -53,6 +53,8 @@ void GLManager::init()
 		1, 2, 3   // second Triangle
 	};
 
+	glEnable(GL_DEPTH_TEST);
+
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);

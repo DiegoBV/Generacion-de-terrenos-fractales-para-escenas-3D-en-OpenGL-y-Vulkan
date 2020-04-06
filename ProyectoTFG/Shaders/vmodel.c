@@ -18,8 +18,8 @@ layout(binding = 0) uniform UniformBufferObject {
     vec3 playerPos;
     vec4 playerColor;
     mat4 viewMat;
-    mat4 projection;
     mat4 model;
+    mat4 projection;
 } ubo;
 
 mat4 viewMatrix(vec3 eye, vec3 front, vec3 up) {
@@ -38,5 +38,5 @@ mat4 viewMatrix(vec3 eye, vec3 front, vec3 up) {
 void main()
 {
     TexCoords = aTexCoords;    
-    gl_Position = ubo.projection * viewMatrix(ubo.cameraEye, ubo.cameraFront, ubo.worldUp) * ubo.model * vec4(aPos, 1.0);
+    gl_Position = ubo.projection * transpose(ubo.viewMat) * ubo.model * vec4(aPos, 1.0);
 }

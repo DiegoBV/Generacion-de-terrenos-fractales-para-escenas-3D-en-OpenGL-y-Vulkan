@@ -119,7 +119,7 @@
     <OutDir>$(SolutionDir)exes\Vulkan\</OutDir>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
-    <IncludePath>$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\tiny_obj_library\include;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='GLDebug|Win32'">
     <OutDir>$(SolutionDir)exes\OpenGL\</OutDir>
@@ -136,7 +136,7 @@
     <OutDir>$(SolutionDir)exes\Vulkan\</OutDir>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
-    <IncludePath>$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\tiny_obj_library\include;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='GLDebug|x64'">
     <OutDir>$(SolutionDir)exes\OpenGL\</OutDir>
@@ -144,12 +144,12 @@
     <IncludePath>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='VulkanRelease|Win32'">
-    <IncludePath>$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\tiny_obj_library\include;$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)exes\Vulkan\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='VulkanRelease|x64'">
-    <IncludePath>$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\tiny_obj_library\include;$(SolutionDir)Dependencies\Vulkan\Include\vulkan;$(SolutionDir)Dependencies\glfw-3.3\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\glm-0.9.9.6\glm\</IncludePath>
     <IntDir>$(SolutionDir)Inter\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)exes\Vulkan\</OutDir>
   </PropertyGroup>
@@ -270,10 +270,11 @@
     <ClCompile Include="..\..\src\Main\GLComputeShader.cpp" />
     <ClCompile Include="..\..\src\Main\GLRenderShader.cpp" />
     <ClCompile Include="..\..\src\Main\Mesh.cpp" />
-    <ClCompile Include="..\..\src\Main\Model.cpp" />
+    <ClCompile Include="..\..\src\Main\GLModel.cpp" />
     <ClCompile Include="..\..\src\Main\PlayableObject.cpp" />
     <ClCompile Include="..\..\src\Main\PlayableSphere.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanComputeShader.cpp" />
+    <ClCompile Include="..\..\src\Main\VulkanModel.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanRenderShader.cpp" />
     <ClCompile Include="..\..\src\Main\Window.cpp" />
     <ClCompile Include="..\..\src\Main\GLManager.cpp" />
@@ -292,11 +293,13 @@
     <ClInclude Include="..\..\src\Main\GLComputeShader.h" />
     <ClInclude Include="..\..\src\Main\GLRenderShader.h" />
     <ClInclude Include="..\..\src\Main\Mesh.h" />
+    <ClInclude Include="..\..\src\Main\GLModel.h" />
     <ClInclude Include="..\..\src\Main\Model.h" />
     <ClInclude Include="..\..\src\Main\PlayableObject.h" />
     <ClInclude Include="..\..\src\Main\PlayableSphere.h" />
     <ClInclude Include="..\..\src\Main\stb_image.h" />
     <ClInclude Include="..\..\src\Main\VulkanComputeShader.h" />
+    <ClInclude Include="..\..\src\Main\VulkanModel.h" />
     <ClInclude Include="..\..\src\Main\VulkanRenderShader.h" />
     <ClInclude Include="..\..\src\Main\Window.h" />
     <ClInclude Include="..\..\src\Main\GLManager.h" />

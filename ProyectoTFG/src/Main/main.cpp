@@ -31,18 +31,17 @@ void mouse(GLFWwindow* window, double xpos, double ypos) {
 
 void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	int state = glfwGetKey(window, key);
-	if (state == GLFW_PRESS) {
-		//DEBUG
-		if (key == 'Z') pivotOffset -= 0.1f;
-		else if (key == 'X') pivotOffset += 0.1f;
-		else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
-		else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
-		//DEBUG
-		else player.handleMovement(key, camera.getFront());
-	}
+	//int state = glfwGetKey(window, key);
+	//if (state == GLFW_PRESS) {
+	//	//DEBUG
+	//	if (key == 'Z') pivotOffset -= 0.1f;
+	//	else if (key == 'X') pivotOffset += 0.1f;
+	//	else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
+	//	else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
+	//	//DEBUG
+	//	else player.handleMovement(key, camera.getFront());
+	//}
 
-	/*
 	double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
 
 	switch (key) {
@@ -61,7 +60,6 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 	default:
 		break;
 	}//switch
-	*/
 }
 
 int main()
@@ -137,13 +135,16 @@ int main()
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -10.5f, -0.7f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);
 		}
 
+		// GLTHIS IS TEMPORARY, BUT DOOM IS ETERNAL
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		appManager->render();
 		ourModel.Draw(&ourShader);

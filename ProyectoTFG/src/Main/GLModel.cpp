@@ -1,21 +1,21 @@
 #if defined (GL_DEBUG) || defined (GL_RELEASE)
 
-#include "Model.h"
+#include "GLModel.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Model::Model(string const& path, bool gamma) : gammaCorrection(gamma)
+GLModel::GLModel(string const& path, bool gamma) : gammaCorrection(gamma)
 {
     loadModel(path);
 }
 
-void Model::Draw(RenderShader* shader)
+void GLModel::Draw(RenderShader* shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 		meshes[i].Draw(shader);
 }
 
-void Model::loadModel(string const& path)
+void GLModel::loadModel(string const& path)
 {
     // read file via ASSIMP
     Assimp::Importer importer;
@@ -33,7 +33,7 @@ void Model::loadModel(string const& path)
     processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene)
+void GLModel::processNode(aiNode* node, const aiScene* scene)
 {
     // process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -50,7 +50,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     }
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh GLModel::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     // data to fill
     vector<Vertex> vertices;
@@ -130,7 +130,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     return Mesh(vertices, indices, textures);
 }
 
-vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
+vector<Texture> GLModel::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
 {
     vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -161,7 +161,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
     return textures;
 }
 
-unsigned int Model::TextureFromFile(const char* path, const string& directory, bool gamma)
+unsigned int GLModel::TextureFromFile(const char* path, const string& directory, bool gamma)
 {
     string filename = string(path);
     filename = directory + "\\" + filename;
