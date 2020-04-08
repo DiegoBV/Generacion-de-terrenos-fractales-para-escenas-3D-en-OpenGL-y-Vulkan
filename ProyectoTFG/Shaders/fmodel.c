@@ -14,8 +14,6 @@ float far  = 100.0;
 
 void main()
 {    
-    //gl_FragDepth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
-    //FragColor = texture(texture_diffuse1, TexCoords);
-    gl_FragDepth = 0.5;
-    FragColor = vec4(1.0,0.0,0.0,1.0);
+    gl_FragDepth = LinearizeDepth(gl_FragCoord.z)/far; // divide by far for demonstration
+    FragColor = texture(texture_diffuse1, TexCoords);
 }

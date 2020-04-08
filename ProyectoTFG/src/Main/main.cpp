@@ -142,12 +142,8 @@ int main()
 			shader->setUBO(ubo);
 		}
 
-		/*// GLTHIS IS TEMPORARY, BUT DOOM IS ETERNAL
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
-
 		appManager->render();
-		//ourModel.Draw(&modelShader);
+		ourModel.Draw(&modelShader);
 	}
 
 	for (RenderShader* shader : renderShaders) {

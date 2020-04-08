@@ -82,7 +82,7 @@ void main()
 	// 	return;
     // }
 
-    gl_FragDepth = 0.3; // divide by far for demonstration
+    gl_FragDepth = distanceToSurface/101.0; // divide by far for demonstration
 
     outColor = vec4(getColor(p, ubo.cameraEye, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
 }

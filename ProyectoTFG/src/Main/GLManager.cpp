@@ -87,11 +87,9 @@ void GLManager::render()
 
 	for (GLRenderShader* shader : renderShaders) {
 		shader->use();
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
-
-	glBindVertexArray(VAO);
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void GLManager::release()
