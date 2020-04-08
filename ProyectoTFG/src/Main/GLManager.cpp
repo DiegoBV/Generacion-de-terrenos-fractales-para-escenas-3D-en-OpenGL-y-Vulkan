@@ -83,6 +83,8 @@ void GLManager::update()
 
 void GLManager::render()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	for (GLRenderShader* shader : renderShaders) {
 		shader->use();
 	}

@@ -75,8 +75,4 @@ void PlayableObject::update(float deltaTime)
 {
 	addForce(gravity);
 	ssbo.deltaTime = deltaTime;
-
-	//DEBUG
-	std::cout << "velocity X: " << ssbo.velocity.x << " Y: " << ssbo.velocity.y << " Z: " << ssbo.velocity.z << std::endl;
-	//DEBUG
 }

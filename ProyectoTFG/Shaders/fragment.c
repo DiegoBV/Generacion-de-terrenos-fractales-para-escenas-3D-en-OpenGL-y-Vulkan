@@ -18,6 +18,9 @@ layout(location = 0) out vec4 outColor;
 
 vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord);
 
+float near = 0.1; 
+float far  = 100.0; 
+
 #include ..\\..\\Shaders\\geometries.c
 #include ..\\..\\Shaders\\snowTerrain.c
 
@@ -78,6 +81,8 @@ void main()
     //     outColor = vec4(0.1, 0.1, 0.1, 1.0);
 	// 	return;
     // }
+
+    gl_FragDepth = 0.3; // divide by far for demonstration
 
     outColor = vec4(getColor(p, ubo.cameraEye, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
 }

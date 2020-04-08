@@ -100,11 +100,11 @@ int main()
 
 	computeShader.setSSBO(player.getSSBO());
 
-	RenderShader ourShader = RenderShader();
-	ourShader.init("vmodel.c", "fmodel.c");
-	ourShader.use();
-	appManager->addRenderShader(&ourShader);
-	renderShaders.push_back(&ourShader);
+	RenderShader modelShader = RenderShader();
+	modelShader.init("vmodel.c", "fmodel.c");
+	modelShader.use();
+	appManager->addRenderShader(&modelShader);
+	renderShaders.push_back(&modelShader);
 
 	Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
 
@@ -135,19 +135,19 @@ int main()
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -10.5f, -0.7f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);
 		}
 
-		// GLTHIS IS TEMPORARY, BUT DOOM IS ETERNAL
+		/*// GLTHIS IS TEMPORARY, BUT DOOM IS ETERNAL
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
 
 		appManager->render();
-		ourModel.Draw(&ourShader);
+		//ourModel.Draw(&modelShader);
 	}
 
 	for (RenderShader* shader : renderShaders) {

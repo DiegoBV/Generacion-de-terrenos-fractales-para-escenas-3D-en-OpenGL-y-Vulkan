@@ -7,7 +7,15 @@ in vec2 TexCoords;
 
 uniform sampler2D texture_diffuse1;
 
+float near = 0.1; 
+float far  = 100.0; 
+
+#include ..\\..\\Shaders\\geometries.c
+
 void main()
 {    
-    FragColor = texture(texture_diffuse1, TexCoords);
+    //gl_FragDepth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
+    //FragColor = texture(texture_diffuse1, TexCoords);
+    gl_FragDepth = 0.5;
+    FragColor = vec4(1.0,0.0,0.0,1.0);
 }

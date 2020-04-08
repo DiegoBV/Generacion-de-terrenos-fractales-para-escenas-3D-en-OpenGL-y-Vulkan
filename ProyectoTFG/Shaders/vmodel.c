@@ -22,21 +22,8 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 projection;
 } ubo;
 
-mat4 viewMatrix(vec3 eye, vec3 front, vec3 up) {
-    // Based on gluLookAt man page
-    vec3 f = front;
-    vec3 s = normalize(cross(f, up));
-    vec3 u = cross(s, f);
-    return mat4(
-        vec4(s, 0.0),
-        vec4(u, 0.0),
-        vec4(-f, 0.0),
-        vec4(0.0, 0.0, 0.0, 1)
-    );
-}
-
 void main()
 {
     TexCoords = aTexCoords;    
-    gl_Position = ubo.projection * transpose(ubo.viewMat) * ubo.model * vec4(aPos, 1.0);
+    gl_Position = vec4(aPos, 1.0);
 }
