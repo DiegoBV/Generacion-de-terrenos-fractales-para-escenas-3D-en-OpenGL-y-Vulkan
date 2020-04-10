@@ -31,35 +31,35 @@ void mouse(GLFWwindow* window, double xpos, double ypos) {
 
 void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	//int state = glfwGetKey(window, key);
-	//if (state == GLFW_PRESS) {
-	//	//DEBUG
-	//	if (key == 'Z') pivotOffset -= 0.1f;
-	//	else if (key == 'X') pivotOffset += 0.1f;
-	//	else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
-	//	else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
-	//	//DEBUG
-	//	else player.handleMovement(key, camera.getFront());
-	//}
+	int state = glfwGetKey(window, key);
+	if (state == GLFW_PRESS) {
+		//DEBUG
+		if (key == 'Z') pivotOffset -= 0.1f;
+		else if (key == 'X') pivotOffset += 0.1f;
+		else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
+		else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
+		//DEBUG
+		else player.handleMovement(key, camera.getFront());
+	}
 
-	double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
+	//double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
 
-	switch (key) {
-	case 'W'://si pulsamos "w" acercamos la camara
-		camera.handleMovement(Camera_Movement::FORWARD, deltaTime);
-		break;
-	case 'S'://"s" la alejamos
-		camera.handleMovement(Camera_Movement::BACKWARD, deltaTime);
-		break;
-	case 'D'://derecha
-		camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
-		break;
-	case 'A'://izquierda
-		camera.handleMovement(Camera_Movement::LEFT, deltaTime);
-		break;
-	default:
-		break;
-	}//switch
+	//switch (key) {
+	//case 'W'://si pulsamos "w" acercamos la camara
+	//	camera.handleMovement(Camera_Movement::FORWARD, deltaTime);
+	//	break;
+	//case 'S'://"s" la alejamos
+	//	camera.handleMovement(Camera_Movement::BACKWARD, deltaTime);
+	//	break;
+	//case 'D'://derecha
+	//	camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
+	//	break;
+	//case 'A'://izquierda
+	//	camera.handleMovement(Camera_Movement::LEFT, deltaTime);
+	//	break;
+	//default:
+	//	break;
+	//}//switch
 }
 
 int main()
@@ -96,7 +96,7 @@ int main()
 	ubo.worldUp = camera.getWorldUp();
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-	player = PlayableSphere({ 0.0f, -1.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.75f, 50.0f }, 1.5f, 10.0f, 0.1f, 0.01f);
+	player = PlayableSphere({ 0.0f, -1.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.75f, 50.0f }, 1.5f, 5.0f, 0.1f, 0.01f);
 
 	computeShader.setSSBO(player.getSSBO());
 
@@ -108,6 +108,9 @@ int main()
 
 	Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
 
+	glm::mat4 unityMatrix = glm::mat4(1.0f);
+	glm::mat4 model = unityMatrix;
+	ubo.projection = glm::perspective(glm::radians(camera.getZoom()), (float)window->getWindowWidth() / (float)window->getWindowHeight(), 0.1f, 100.0f);
 	// render loop
 	// -----------
 	while (!window->shouldClose())
@@ -122,7 +125,7 @@ int main()
 		appManager->update();
 		player.setSSBO(computeShader.getSSBO());
 
-		//camera.pivotTarget(player.getSSBO().position, pivotOffset);
+		camera.pivotTarget(player.getSSBO().position, pivotOffset);
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
@@ -131,11 +134,9 @@ int main()
 		ubo.playerPos = player.getSSBO().position;
 		ubo.playerRadius = player.getSSBO().radius;
 
-		ubo.projection = glm::perspective(glm::radians(camera.getZoom()), (float)window->getWindowWidth() / (float)window->getWindowHeight(), 0.1f, 100.0f);
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -10.5f, -0.7f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));	// it's a bit too big for our scene, so scale it down
+		model = glm::translate(unityMatrix, player.getSSBO().position); // translate it down so it's at the center of the scene
+		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), {0, 1, 0});
+		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
 		for (RenderShader* shader : renderShaders) {

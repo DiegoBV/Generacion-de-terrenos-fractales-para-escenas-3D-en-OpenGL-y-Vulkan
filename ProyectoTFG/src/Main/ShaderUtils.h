@@ -2,7 +2,7 @@
 #include <glm.hpp>
 
 const int COLLISION_SAMPLES = 200;
-const float M_PI = 3.1415926535897932384626433832795;
+const double M_PI = 3.1415926535897932384626433832795;
 
 struct UniformBufferObject {
 	alignas(4) float time;
@@ -20,6 +20,7 @@ struct UniformBufferObject {
 };
 
 struct StorageBufferObject {
+	alignas(4) bool isGrounded;
 	alignas(4) float deltaTime;
 	alignas(4) float radius;
 	alignas(4) float mass;

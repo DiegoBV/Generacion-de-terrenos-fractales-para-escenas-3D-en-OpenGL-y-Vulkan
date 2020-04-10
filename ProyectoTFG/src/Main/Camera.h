@@ -45,7 +45,7 @@ private:
 
 public:
     // Default Constructor
-    Camera(glm::vec3 position = glm::vec3(0.0f, 1.5f, 50.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
+    Camera(glm::vec3 position = glm::vec3(0.0f, 1.5f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
     // Scalar values
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
 
@@ -60,14 +60,16 @@ public:
 
     // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 getViewMatrix();
-    inline glm::vec3 getEye() { return eye; };
-    inline glm::vec3 getFront() { return front; };
-    inline glm::vec3 getRight() { return right; };
-    inline glm::vec3 getUp() { return up; };
-    inline glm::vec3 getWorldUp() { return worldUp; };
-    inline float getMovementSpeed() { return movementSpeed; };
-    inline float getMouseSensitivity() { return mouseSensitivity; };
-    inline float getZoom() { return zoom; };
+    inline const glm::vec3 getEye() const { return eye; };
+    inline const glm::vec3 getFront() const { return front; };
+    inline const glm::vec3 getRight() const { return right; };
+    inline const glm::vec3 getUp() const { return up; };
+    inline const glm::vec3 getWorldUp() const { return worldUp; };
+    inline const float getMovementSpeed() const { return movementSpeed; };
+    inline const float getMouseSensitivity() const { return mouseSensitivity; };
+    inline const float getZoom() const { return zoom; };
+    inline const float getPitch() const { return pitch; };
+    inline const float getYaw() const { return yaw; };
 
     inline void setMovementSpeed(float value) { movementSpeed = value; };
     inline void setMouseSensitivity(float value) { mouseSensitivity = value; };

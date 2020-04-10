@@ -5,6 +5,7 @@ layout  (local_size_x  =  2)  in;
 const int COLLISION_SAMPLES = 200;
 
 layout(std430, binding=0) buffer Pos{
+    bool isGrounded;
     float deltaTime;
     float radius;
     float mass;
@@ -28,11 +29,13 @@ void main(){
     // reset de las fuerzas
     force.x = force.y = force.z = 0;
 
+    isGrounded = false;
     for(int i = 0; i < COLLISION_SAMPLES; i++){
         float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST);
 
-        if(dist < radius){
-            position += abs(dist - radius) * -(collisionDirs[i]);
+        if(dist /*+ (radius/5)*/ < radius){
+            isGrounded = true;
+            position += abs(dist /*+ (radius/5)*/ - radius) * -(collisionDirs[i]);
         }
     }
 }

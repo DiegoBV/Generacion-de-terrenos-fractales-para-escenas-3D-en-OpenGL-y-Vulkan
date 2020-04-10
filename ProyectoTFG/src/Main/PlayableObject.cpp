@@ -22,6 +22,8 @@ PlayableObject::PlayableObject(glm::vec3 gravity, glm::vec3 velocity, glm::vec3 
 
 void PlayableObject::handleMovement(const char& key, const glm::vec3& direction)
 {
+	if (!ssbo.isGrounded) return;
+
 	switch (key) {
 	case 'W'://si pulsamos "w" acercamos la camara
 		glm::vec3 f;
