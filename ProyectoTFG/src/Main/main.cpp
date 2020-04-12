@@ -7,7 +7,7 @@
 #include "PlayableSphere.h"
 #include <math.h>
 #include <vector>
-#include "Model.h"
+// #include "Model.h"
 
 Camera camera;
 glm::dvec2 mCoord;
@@ -75,7 +75,7 @@ int main()
 	std::list<RenderShader*> renderShaders;
 
 	RenderShader renderShader = RenderShader();
-	renderShader.init("vertex.c", "fragment.c");
+	renderShader.init("textureVertex.c", "textureFragment.c");
 	renderShader.use();
 	appManager->addRenderShader(&renderShader);
 	renderShaders.push_back(&renderShader);
@@ -100,13 +100,13 @@ int main()
 
 	computeShader.setSSBO(player.getSSBO());
 
-	RenderShader modelShader = RenderShader();
+	/*RenderShader modelShader = RenderShader();
 	modelShader.init("vmodel.c", "fmodel.c");
 	modelShader.use();
 	appManager->addRenderShader(&modelShader);
 	renderShaders.push_back(&modelShader);
 
-	Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
+	Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");*/
 
 	glm::mat4 unityMatrix = glm::mat4(1.0f);
 	glm::mat4 model = unityMatrix;
@@ -118,7 +118,7 @@ int main()
 		// input callbacks...
 		window->update();
 		timeManager->update();
-		player.update(timeManager->getDeltaTime());
+		//player.update(timeManager->getDeltaTime());
 
 		// update
 		computeShader.setSSBO(player.getSSBO());
@@ -134,17 +134,24 @@ int main()
 		ubo.playerPos = player.getSSBO().position;
 		ubo.playerRadius = player.getSSBO().radius;
 
-		model = glm::translate(unityMatrix, player.getSSBO().position); // translate it down so it's at the center of the scene
-		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), {0, 1, 0});
-		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
-		ubo.model = model;
+#pragma region Model0
+		// model = glm::translate(unityMatrix, {0.0f, 0.0f, 0.0f}); // translate it down so it's at the center of the scene
+		// model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), {0, 1, 0});
+		// model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+		// ubo.model = model;
+#pragma endregion Model0
+
+#pragma region Textura
+		ubo.model = glm::rotate(glm::mat4(1.0f), (float)(timeManager->getTimeSinceBeginning() * glm::radians(90.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.viewMat = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)); 
+#pragma endregion Textura
 
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);
 		}
 
 		appManager->render();
-		ourModel.Draw(&modelShader);
+		// ourModel.Draw(&modelShader);
 	}
 
 	for (RenderShader* shader : renderShaders) {

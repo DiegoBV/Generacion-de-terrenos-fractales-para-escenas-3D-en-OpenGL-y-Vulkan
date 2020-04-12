@@ -31,7 +31,7 @@
     <Filter Include="PlayableObjects">
       <UniqueIdentifier>{a942fb7a-4f34-461a-ab2e-f2399761de27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OpenGL\extern">
+    <Filter Include="Extern">
       <UniqueIdentifier>{10808b00-1d5f-4e52-a13c-844075c935df}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -91,7 +91,7 @@
       <Filter>OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Main\glad.c">
-      <Filter>OpenGL\extern</Filter>
+      <Filter>Extern</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Main\VulkanModel.cpp">
       <Filter>Vulkan</Filter>
@@ -165,7 +165,7 @@
       <Filter>OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Main\stb_image.h">
-      <Filter>OpenGL\extern</Filter>
+      <Filter>Extern</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Main\VulkanModel.h">
       <Filter>Vulkan</Filter>

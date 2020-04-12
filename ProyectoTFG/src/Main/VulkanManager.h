@@ -5,11 +5,13 @@
 #include <glm.hpp>
 #include <list>
 
+
 // test shader variables
 class StorageBufferObject;
 
 struct Vertex {
 	glm::vec2 pos;
+	glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription() {
 		VkVertexInputBindingDescription bindingDescription = {};
@@ -19,10 +21,10 @@ struct Vertex {
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 1> getAttributeDescriptions() {
+	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
 		// how to extract a vertex attribute from a chunk of vertex data originating from a binding description
 		// position
-		std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions = {};
+		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
 		attributeDescriptions[0].binding = 0; // from wich binding this comes
 		attributeDescriptions[0].location = 0; // location at vertex shader
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; // format. see vulkan help
@@ -32,17 +34,23 @@ struct Vertex {
 		/*attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = 0;*/
+		attributeDescriptions[1].offset = offsetof(Vertex, color);*/
+
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(Vertex, texCoord);
+
 
 		return attributeDescriptions;
 	}
 };
 
 const std::vector<Vertex> vertices = {
-	{{-1.0f, -1.0f}},
-	{{1.0f, -1.0f}},
-	{{1.0f, 1.0f}},
-	{{-1.0f, 1.0f}}
+	{{-1.0f, -1.0f}, {1.0f, 0.0f}},
+	{{1.0f, -1.0f}, {0.0f, 0.0f}},
+	{{1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-1.0f, 1.0f}, {1.0f, 1.0f}}
 };
 
 const std::vector<uint16_t> indices = {
@@ -160,6 +168,12 @@ private:
 	VkQueue computeCommandQueue;
 	VkCommandBuffer computeCommandBuffer;
 
+	// texturas
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
+
 	// validation layers
 	const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -271,9 +285,22 @@ private:
 	void createPipelineCache();
 	void createComputeCommandPool();
 	void createComputeCommandBuffer();
+	void createTextureSampler();
 
 	void updateStorageBuffer();
 	StorageBufferObject getStorageBuffer();
+
+	// modelo y texturas
+	// load texture
+	void createTextureImage();
+	void createImage(uint32_t width, uint32_t height, VkFormat format,
+		VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	VkCommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	void createTextureImageView();
+	VkImageView createImageView(VkImage image, VkFormat format);
 
 	VulkanManager();
 	~VulkanManager();
