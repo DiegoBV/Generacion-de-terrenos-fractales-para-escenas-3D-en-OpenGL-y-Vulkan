@@ -1,11 +1,11 @@
 #version 450 core
 #extension GL_ARB_separate_shader_objects : enable
 
-out vec4 FragColor;
+layout(location = 0) out vec4 outColor;
 
-in vec2 TexCoords;
+layout(location = 0) in vec2 TexCoords;
 
-uniform sampler2D texture_diffuse1;
+layout(binding = 1) uniform sampler2D texture_diffuse1;
 
 float near = 0.1; 
 float far  = 100.0; 
@@ -15,5 +15,5 @@ float far  = 100.0;
 void main()
 {    
     gl_FragDepth = LinearizeDepth(gl_FragCoord.z)/far; // divide by far for demonstration
-    FragColor = texture(texture_diffuse1, TexCoords);
+    outColor = texture(texture_diffuse1, TexCoords);
 }

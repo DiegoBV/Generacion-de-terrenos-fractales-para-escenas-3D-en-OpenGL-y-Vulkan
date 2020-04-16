@@ -4,14 +4,19 @@
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
 #include <list>
-
+#define GLM_ENABLE_EXPERIMENTAL
+#include <gtx/hash.hpp>
 
 // test shader variables
 class StorageBufferObject;
 
 struct Vertex {
-	glm::vec2 pos;
+	glm::vec3 pos;
 	glm::vec2 texCoord;
+
+	bool operator==(const Vertex& other) const {
+		return pos == other.pos && texCoord == other.texCoord;
+	}
 
 	static VkVertexInputBindingDescription getBindingDescription() {
 		VkVertexInputBindingDescription bindingDescription = {};
@@ -27,7 +32,7 @@ struct Vertex {
 		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
 		attributeDescriptions[0].binding = 0; // from wich binding this comes
 		attributeDescriptions[0].location = 0; // location at vertex shader
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; // format. see vulkan help
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // format. see vulkan help
 		attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 		// color
@@ -46,16 +51,13 @@ struct Vertex {
 	}
 };
 
-const std::vector<Vertex> vertices = {
-	{{-1.0f, -1.0f}, {1.0f, 0.0f}},
-	{{1.0f, -1.0f}, {0.0f, 0.0f}},
-	{{1.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-1.0f, 1.0f}, {1.0f, 1.0f}}
-};
-
-const std::vector<uint16_t> indices = {
-	0, 1, 2, 2, 3, 0
-};
+namespace std {
+	template<> struct hash<Vertex> {
+		size_t operator()(Vertex const& vertex) const {
+			return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec2>()(vertex.texCoord) << 1)));
+		}
+	};
+}
 
 // end of test shader variables
 
@@ -173,6 +175,14 @@ private:
 	VkDeviceMemory textureImageMemory;
 	VkImageView textureImageView;
 	VkSampler textureSampler;
+
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
+
+	// model
+	const std::string MODEL_PATH = "..\\Assets\\Models\\nanosuit\\nanosuit.obj";
+	const std::string TEXTURE_PATH = "textures/chalet.jpg";
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {
@@ -300,12 +310,29 @@ private:
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void createTextureImageView();
-	VkImageView createImageView(VkImage image, VkFormat format);
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+	void createDepthResources();
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+	VkFormat findDepthFormat();
+	bool hasStencilComponent(VkFormat format);
+
+	void loadModel();
 
 	VulkanManager();
 	~VulkanManager();
 
 public:
+	std::vector<Vertex> vertices = {
+		{{-1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+		{{1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+		{{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+		{{-1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}
+	};
+
+	std::vector<uint32_t> indices = {
+		0, 1, 2, 2, 3, 0
+	};
+
 	static VulkanManager* GetSingleton();
 	static void ShutDownSingleton();
 
