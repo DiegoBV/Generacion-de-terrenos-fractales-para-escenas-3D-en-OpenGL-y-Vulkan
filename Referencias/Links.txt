@@ -38,6 +38,9 @@ https://imaginary.org/film/3d-fractal-trip-far-away
 -Fractal terrain 3: https://www.shadertoy.com/view/MdX3Rr
 -Fractal terrain 4: https://www.shadertoy.com/view/3ss3R4
 
+-Vulkan Subpasses: 
+https://www.saschawillems.de/blog/2018/07/19/vulkan-input-attachments-and-sub-passes/
+
 -Vulkan:
  - Compute shaders: https://gist.github.com/sheredom/523f02bbad2ae397d7ed255f3f3b5a7f / https://gist.github.com/sheredom/523f02bbad2ae397d7ed255f3f3b5a7f
  - Getting started: https://vulkan-tutorial.com/

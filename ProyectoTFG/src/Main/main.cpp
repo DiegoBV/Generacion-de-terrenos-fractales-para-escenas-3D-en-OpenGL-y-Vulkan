@@ -80,16 +80,17 @@ int main()
 	appManager->addRenderShader(&renderShader);
 	renderShaders.push_back(&renderShader);
 
-	ComputeShader computeShader = ComputeShader();
-	computeShader.init("compute.c");
-	computeShader.use();
-	appManager->addComputeShader(&computeShader);
-
 	RenderShader modelShader = RenderShader();
 	modelShader.init("vmodel.c", "fmodel.c");
 	modelShader.use();
 	appManager->addRenderShader(&modelShader);
 	renderShaders.push_back(&modelShader);
+
+	ComputeShader computeShader = ComputeShader();
+	computeShader.init("compute.c");
+	computeShader.use();
+	appManager->addComputeShader(&computeShader);
+
 
 	//Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
 

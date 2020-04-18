@@ -81,6 +81,7 @@ void VulkanManager::release()
 	}
 	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 	vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+	vkDestroyPipeline(logicalDevice, graphicsPipeline2, nullptr);
 	vkDestroyPipeline(logicalDevice, computePipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
 	vkDestroyPipelineLayout(logicalDevice, computePipelineLayout, nullptr);
@@ -124,6 +125,7 @@ void VulkanManager::waitUntilFinishEverything()
 void VulkanManager::setUpGraphicsPipeline()
 {
 	createGraphicsPipeline();
+	createGraphicsPipeline2();
 	createComputePipeline();
 	createCommandPool();
 	createComputeCommandPool();
@@ -451,29 +453,51 @@ void VulkanManager::createRenderPass() {
 	depthAttachmentRef.attachment = 1;
 	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+	std::vector<VkSubpassDescription> subpass = {};
+	subpass.push_back(VkSubpassDescription());
+	subpass.push_back(VkSubpassDescription());
+	subpass[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass[0].colorAttachmentCount = 1;
+	subpass[0].pColorAttachments = &colorAttachmentRef;
+	subpass[0].pDepthStencilAttachment = &depthAttachmentRef;
 
-	VkSubpassDependency dependency = {};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	subpass[1].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass[1].colorAttachmentCount = 1;
+	subpass[1].pColorAttachments = &colorAttachmentRef;
+	subpass[1].pDepthStencilAttachment = &depthAttachmentRef;
+
+	std::array<VkSubpassDependency, 3> dependencies;
+	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[0].dstSubpass = 0;
+	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[0].srcAccessMask = 0;
+	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	dependencies[1].srcSubpass = 0;
+	dependencies[1].dstSubpass = 1;
+	dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[1].srcAccessMask = 0;
+	dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+
+	dependencies[2].srcSubpass = 0;
+	dependencies[2].dstSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[2].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependencies[2].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 
 	std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
 	VkRenderPassCreateInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 	renderPassInfo.pAttachments = attachments.data();
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
+	renderPassInfo.subpassCount = 2;
+	renderPassInfo.pSubpasses = (subpass.data());
+	renderPassInfo.dependencyCount = 3;
+	renderPassInfo.pDependencies = dependencies.data();
 
 	if (vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
@@ -538,10 +562,10 @@ void VulkanManager::createComputeDescriptorSetLayout()
 void VulkanManager::createGraphicsPipeline()
 {
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-	for (VulkanRenderShader* shader : renderShaders) {
-		shaderStages.push_back(shader->getVertexStageInfo());
-		shaderStages.push_back(shader->getFragmentStageInfo());
-	}
+	//for (VulkanRenderShader* shader : renderShaders) {
+		shaderStages.push_back(renderShaders.front()->getVertexStageInfo());
+		shaderStages.push_back(renderShaders.front()->getFragmentStageInfo());
+	//}
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -632,7 +656,7 @@ void VulkanManager::createGraphicsPipeline()
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
-	pipelineInfo.pStages = shaderStages.data();
+	pipelineInfo.pStages = { shaderStages.data() };
 	pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;
 	pipelineInfo.pViewportState = &viewportState;
@@ -646,6 +670,112 @@ void VulkanManager::createGraphicsPipeline()
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 	if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create graphics pipeline!");
+	}
+}
+
+void VulkanManager::createGraphicsPipeline2()
+{
+	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+	//for (VulkanRenderShader* shader : renderShaders) {
+	shaderStages.push_back(renderShaders.back()->getVertexStageInfo());
+	shaderStages.push_back(renderShaders.back()->getFragmentStageInfo());
+	//}
+
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+	VkViewport viewport = {};
+	viewport.x = 0.0f;
+	viewport.y = (float)swapChainExtent.height;
+	viewport.width = (float)swapChainExtent.width;
+	viewport.height = -(float)swapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	VkRect2D scissor = {};
+	scissor.offset = { 0, 0 };
+	scissor.extent = swapChainExtent;
+
+	VkPipelineViewportStateCreateInfo viewportState = {};
+	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportState.viewportCount = 1;
+	viewportState.pViewports = &viewport;
+	viewportState.scissorCount = 1;
+	viewportState.pScissors = &scissor;
+
+	VkPipelineRasterizationStateCreateInfo rasterizer = {};
+	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer.depthClampEnable = VK_FALSE;
+	rasterizer.rasterizerDiscardEnable = VK_FALSE;
+	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizer.lineWidth = 1.0f;
+	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterizer.depthBiasEnable = VK_FALSE;
+
+	VkPipelineMultisampleStateCreateInfo multisampling = {};
+	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampling.sampleShadingEnable = VK_FALSE;
+	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	VkPipelineDepthStencilStateCreateInfo depthStencil = {};
+	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depthStencil.depthTestEnable = VK_TRUE;
+	depthStencil.depthWriteEnable = VK_TRUE;
+	depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+	depthStencil.depthBoundsTestEnable = VK_FALSE;
+	depthStencil.minDepthBounds = 0.0f; // Optional
+	depthStencil.maxDepthBounds = 1.0f; // Optional
+	depthStencil.stencilTestEnable = VK_FALSE;
+	depthStencil.front = {}; // Optional
+	depthStencil.back = {}; // Optional
+
+	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
+	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	colorBlendAttachment.blendEnable = VK_FALSE;
+
+	VkPipelineColorBlendStateCreateInfo colorBlending = {};
+	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlending.logicOpEnable = VK_FALSE;
+	colorBlending.logicOp = VK_LOGIC_OP_COPY;
+	colorBlending.attachmentCount = 1;
+	colorBlending.pAttachments = &colorBlendAttachment;
+	colorBlending.blendConstants[0] = 0.0f;
+	colorBlending.blendConstants[1] = 0.0f;
+	colorBlending.blendConstants[2] = 0.0f;
+	colorBlending.blendConstants[3] = 0.0f;
+
+	VkGraphicsPipelineCreateInfo pipelineInfo = {};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = { shaderStages.data() };
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &viewportState;
+	pipelineInfo.pRasterizationState = &rasterizer;
+	pipelineInfo.pMultisampleState = &multisampling;
+	pipelineInfo.pDepthStencilState = &depthStencil;
+	pipelineInfo.pColorBlendState = &colorBlending;
+	pipelineInfo.layout = pipelineLayout;
+	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.subpass = 1;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	if (vkCreateGraphicsPipelines(logicalDevice, pipelineCache, 1, &pipelineInfo, nullptr, &graphicsPipeline2) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 }
@@ -951,20 +1081,24 @@ void VulkanManager::createCommandBuffers()
 		renderPassInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
 
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+		// bind the descriptors
+		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 		VkBuffer vertexBuffers[] = { vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
-
 		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-		// bind the descriptors
-		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
-
 		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+
+		vkCmdNextSubpass(commandBuffers[i], VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline2);
+		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, NULL);
+		vkCmdDraw(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0);
+
 
 		vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -1464,7 +1598,7 @@ void VulkanManager::createTextureSampler()
 void VulkanManager::createTextureImage()
 {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load("..\\Assets\\Models\\house\\houseTexture.jpeg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load("..\\Assets\\Models\\house\\texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels) {
@@ -1608,6 +1742,17 @@ void VulkanManager::transitionImageLayout(VkImage image, VkFormat format, VkImag
 		throw std::invalid_argument("unsupported layout transition!");
 	}
 
+	if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+		if (hasStencilComponent(format)) {
+			barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+		}
+	}
+	else {
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	}
+
 	vkCmdPipelineBarrier(
 		commandBuffer,
 		sourceStage, destinationStage,
@@ -1733,17 +1878,15 @@ void VulkanManager::loadModel()
 			Vertex vertex = {};
 
 			vertex.pos = {
-				attrib.vertices[3 * index.vertex_index + 0],
-				attrib.vertices[3 * index.vertex_index + 1],
-				attrib.vertices[3 * index.vertex_index + 2]
+			attrib.vertices[3 * index.vertex_index + 0],
+			attrib.vertices[3 * index.vertex_index + 1],
+			attrib.vertices[3 * index.vertex_index + 2]
 			};
 
 			vertex.texCoord = {
 				attrib.texcoords[2 * index.texcoord_index + 0],
-				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+				attrib.texcoords[2 * index.texcoord_index + 1]
 			};
-
-			vertices.push_back(vertex);
 
 			if (uniqueVertices.count(vertex) == 0) {
 				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());

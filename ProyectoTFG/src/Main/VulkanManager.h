@@ -46,7 +46,6 @@ struct Vertex {
 		attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[1].offset = offsetof(Vertex, texCoord);
 
-
 		return attributeDescriptions;
 	}
 };
@@ -130,6 +129,7 @@ private:
 	VkPipelineLayout computePipelineLayout;
 	// handler of the pipeline
 	VkPipeline graphicsPipeline;
+	VkPipeline graphicsPipeline2;
 	// handler of the compute pipeline
 	VkPipeline computePipeline;
 	// one frame buffer for each swap chain image
@@ -227,6 +227,7 @@ private:
 	void createComputeDescriptorSetLayout();
 	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
 	void createGraphicsPipeline();
+	void createGraphicsPipeline2();
 
 	void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask,
 		VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask,
