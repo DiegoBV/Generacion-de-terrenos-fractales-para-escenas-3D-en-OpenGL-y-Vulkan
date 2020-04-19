@@ -151,10 +151,14 @@ private:
 
 	// Shader buffer
 	VkBuffer vertexBuffer;
+	VkBuffer modelVertexBuffer;
 	// handle of the vertex buffer memory
 	VkDeviceMemory vertexBufferMemory;
+	VkDeviceMemory modelVertexBufferMemory;
 	VkBuffer indexBuffer;
+	VkBuffer modelIndexBuffer;
 	VkDeviceMemory indexBufferMemory;
+	VkDeviceMemory modelIndexBufferMemory;
 	// we want more than one uniform buffer (avoid reading and writing collision)
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
@@ -332,6 +336,14 @@ public:
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0
+	};
+
+	std::vector<Vertex> modelVertices = {
+		
+	};
+
+	std::vector<uint32_t> modelIndices = {
+		
 	};
 
 	static VulkanManager* GetSingleton();

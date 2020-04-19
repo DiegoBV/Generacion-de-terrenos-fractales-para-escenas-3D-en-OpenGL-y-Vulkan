@@ -105,8 +105,12 @@ void VulkanManager::release()
 	vkDestroyDescriptorPool(logicalDevice, computeDescriptorPool, nullptr);
 	vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
 	vkFreeMemory(logicalDevice, indexBufferMemory, nullptr);
+	vkDestroyBuffer(logicalDevice, modelIndexBuffer, nullptr);
+	vkFreeMemory(logicalDevice, modelIndexBufferMemory, nullptr);
 	vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
 	vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
+	vkDestroyBuffer(logicalDevice, modelVertexBuffer, nullptr);
+	vkFreeMemory(logicalDevice, modelVertexBufferMemory, nullptr);
 	vkDestroyBuffer(logicalDevice, storageBuffer, nullptr);
 	vkFreeMemory(logicalDevice, storageBufferMemory, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
@@ -563,8 +567,8 @@ void VulkanManager::createGraphicsPipeline()
 {
 	std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 	//for (VulkanRenderShader* shader : renderShaders) {
-		shaderStages.push_back(renderShaders.front()->getVertexStageInfo());
-		shaderStages.push_back(renderShaders.front()->getFragmentStageInfo());
+	shaderStages.push_back(renderShaders.front()->getVertexStageInfo());
+	shaderStages.push_back(renderShaders.front()->getFragmentStageInfo());
 	//}
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
@@ -616,7 +620,7 @@ void VulkanManager::createGraphicsPipeline()
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_FALSE;
 	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-	
+
 	VkPipelineDepthStencilStateCreateInfo depthStencil = {};
 	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 	depthStencil.depthTestEnable = VK_TRUE;
@@ -872,6 +876,25 @@ void VulkanManager::createVertexBuffer()
 
 	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+
+
+	VkDeviceSize modelBufferSize = sizeof(modelVertices[0]) * modelVertices.size();
+
+	VkBuffer modelStagingBuffer;
+	VkDeviceMemory modelStagingBufferMemory;
+	createBuffer(modelBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, modelStagingBuffer, modelStagingBufferMemory);
+
+	void* modelData;
+	vkMapMemory(logicalDevice, modelStagingBufferMemory, 0, modelBufferSize, 0, &modelData);
+	memcpy(modelData, modelVertices.data(), (size_t)modelBufferSize);
+	vkUnmapMemory(logicalDevice, modelStagingBufferMemory);
+
+	createBuffer(modelBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, modelVertexBuffer, modelVertexBufferMemory);
+
+	copyBuffer(modelStagingBuffer, modelVertexBuffer, modelBufferSize);
+
+	vkDestroyBuffer(logicalDevice, modelStagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, modelStagingBufferMemory, nullptr);
 }
 
 void VulkanManager::createIndexBuffer()
@@ -893,6 +916,25 @@ void VulkanManager::createIndexBuffer()
 
 	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+
+
+	VkDeviceSize modelBufferSize = sizeof(modelIndices[0]) * modelIndices.size();
+
+	VkBuffer modelStagingBuffer;
+	VkDeviceMemory modelStagingBufferMemory;
+	createBuffer(modelBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, modelStagingBuffer, modelStagingBufferMemory);
+
+	void* modelData;
+	vkMapMemory(logicalDevice, modelStagingBufferMemory, 0, modelBufferSize, 0, &modelData);
+	memcpy(modelData, modelIndices.data(), (size_t)modelBufferSize);
+	vkUnmapMemory(logicalDevice, modelStagingBufferMemory);
+
+	createBuffer(modelBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, modelIndexBuffer, modelIndexBufferMemory);
+
+	copyBuffer(modelStagingBuffer, modelIndexBuffer, modelBufferSize);
+
+	vkDestroyBuffer(logicalDevice, modelStagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, modelStagingBufferMemory, nullptr);
 }
 
 void VulkanManager::createUniformBuffers()
@@ -1086,19 +1128,28 @@ void VulkanManager::createCommandBuffers()
 		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 		// bind the descriptors
 		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
+
 		VkBuffer vertexBuffers[] = { vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
-
-		vkCmdNextSubpass(commandBuffers[i], VK_SUBPASS_CONTENTS_INLINE);
-
 		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline2);
 		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, NULL);
 		vkCmdDraw(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0);
 
+		vkCmdNextSubpass(commandBuffers[i], VK_SUBPASS_CONTENTS_INLINE);
+
+		VkBuffer modelVertexBuffers[] = { modelVertexBuffer };
+		VkDeviceSize modelOffsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, modelVertexBuffers, modelOffsets);
+		vkCmdBindIndexBuffer(commandBuffers[i], modelIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline2);
+		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, NULL);
+		vkCmdDraw(commandBuffers[i], static_cast<uint32_t>(modelIndices.size()), 1, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -1607,7 +1658,7 @@ void VulkanManager::createTextureImage()
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
-	createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | 
+	createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 	void* data;
@@ -1616,7 +1667,7 @@ void VulkanManager::createTextureImage()
 	vkUnmapMemory(logicalDevice, stagingBufferMemory);
 	stbi_image_free(pixels);
 
-	createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, 
+	createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
 	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -1878,9 +1929,9 @@ void VulkanManager::loadModel()
 			Vertex vertex = {};
 
 			vertex.pos = {
-			attrib.vertices[3 * index.vertex_index + 0],
-			attrib.vertices[3 * index.vertex_index + 1],
-			attrib.vertices[3 * index.vertex_index + 2]
+				attrib.vertices[3 * index.vertex_index + 0],
+				attrib.vertices[3 * index.vertex_index + 1],
+				attrib.vertices[3 * index.vertex_index + 2]
 			};
 
 			vertex.texCoord = {
@@ -1888,12 +1939,8 @@ void VulkanManager::loadModel()
 				attrib.texcoords[2 * index.texcoord_index + 1]
 			};
 
-			if (uniqueVertices.count(vertex) == 0) {
-				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-				vertices.push_back(vertex);
-			}
-
-			indices.push_back(uniqueVertices[vertex]);
+			modelVertices.push_back(vertex);
+			modelIndices.push_back(modelIndices.size());
 		}
 	}
 }
