@@ -68,6 +68,8 @@ void main()
 
     float distanceToSurface = min(fractal, pelota);
     
+    gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
+    
     //DEBUG (modelo)
     if(pelota < fractal){
         outColor = sphere.color;
@@ -82,6 +84,5 @@ void main()
 	// 	return;
     // }
 
-    gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
     outColor = vec4(getColor(p, ubo.cameraEye, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
 }
