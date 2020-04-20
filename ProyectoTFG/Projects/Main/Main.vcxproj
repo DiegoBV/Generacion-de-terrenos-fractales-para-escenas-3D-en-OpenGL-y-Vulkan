@@ -274,7 +274,6 @@
     <ClCompile Include="..\..\src\Main\PlayableObject.cpp" />
     <ClCompile Include="..\..\src\Main\PlayableSphere.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanComputeShader.cpp" />
-    <ClCompile Include="..\..\src\Main\VulkanModel.cpp" />
     <ClCompile Include="..\..\src\Main\VulkanRenderShader.cpp" />
     <ClCompile Include="..\..\src\Main\Window.cpp" />
     <ClCompile Include="..\..\src\Main\GLManager.cpp" />
@@ -294,12 +293,10 @@
     <ClInclude Include="..\..\src\Main\GLRenderShader.h" />
     <ClInclude Include="..\..\src\Main\Mesh.h" />
     <ClInclude Include="..\..\src\Main\GLModel.h" />
-    <ClInclude Include="..\..\src\Main\Model.h" />
     <ClInclude Include="..\..\src\Main\PlayableObject.h" />
     <ClInclude Include="..\..\src\Main\PlayableSphere.h" />
     <ClInclude Include="..\..\src\Main\stb_image.h" />
     <ClInclude Include="..\..\src\Main\VulkanComputeShader.h" />
-    <ClInclude Include="..\..\src\Main\VulkanModel.h" />
     <ClInclude Include="..\..\src\Main\VulkanRenderShader.h" />
     <ClInclude Include="..\..\src\Main\Window.h" />
     <ClInclude Include="..\..\src\Main\GLManager.h" />

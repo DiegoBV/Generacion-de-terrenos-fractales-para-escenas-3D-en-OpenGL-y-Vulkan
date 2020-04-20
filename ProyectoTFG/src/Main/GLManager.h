@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include "GLModel.h"
 
 class GLRenderShader;
 class GLComputeShader;
@@ -12,6 +13,10 @@ private:
 	std::list<GLComputeShader*> computeShaders;
 
 	unsigned int VBO, VAO, EBO;
+
+	GLModel model;
+
+	const std::string MODEL_PATH = "..\\Assets\\Models\\nanosuit\\nanosuit.obj";
 
 	GLManager();
 	~GLManager();

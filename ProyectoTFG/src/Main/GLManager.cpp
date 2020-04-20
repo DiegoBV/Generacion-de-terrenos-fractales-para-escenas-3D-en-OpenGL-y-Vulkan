@@ -72,6 +72,8 @@ void GLManager::init()
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	model = GLModel(MODEL_PATH);
 }
 
 void GLManager::update()
@@ -90,6 +92,7 @@ void GLManager::render()
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
+	model.Draw(renderShaders.back());
 }
 
 void GLManager::release()

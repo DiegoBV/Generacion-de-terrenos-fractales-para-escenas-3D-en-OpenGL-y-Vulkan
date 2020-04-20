@@ -14,6 +14,10 @@ float far  = 100.0;
 
 void main()
 {    
-    gl_FragDepth = LinearizeDepth(gl_FragCoord.z)/far; // divide by far for demonstration
+    #ifdef VULKAN
+        gl_FragDepth = LinearizeDepth((gl_FragCoord.z + 1)/2)/far; // divide by far for demonstration
+    #else
+        gl_FragDepth = LinearizeDepth(gl_FragCoord.z)/far; // divide by far for demonstration
+    #endif
     outColor = texture(texture_diffuse1, TexCoords);
 }

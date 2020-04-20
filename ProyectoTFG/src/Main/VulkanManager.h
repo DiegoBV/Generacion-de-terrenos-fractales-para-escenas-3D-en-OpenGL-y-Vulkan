@@ -128,8 +128,7 @@ private:
 	// used for uniform variables in compute shader
 	VkPipelineLayout computePipelineLayout;
 	// handler of the pipeline
-	VkPipeline graphicsPipeline;
-	VkPipeline graphicsPipeline2;
+	std::vector<VkPipeline> graphicsPipelines;
 	// handler of the compute pipeline
 	VkPipeline computePipeline;
 	// one frame buffer for each swap chain image
@@ -150,15 +149,11 @@ private:
 	size_t currentFrame = 0;
 
 	// Shader buffer
-	VkBuffer vertexBuffer;
-	VkBuffer modelVertexBuffer;
 	// handle of the vertex buffer memory
-	VkDeviceMemory vertexBufferMemory;
-	VkDeviceMemory modelVertexBufferMemory;
-	VkBuffer indexBuffer;
-	VkBuffer modelIndexBuffer;
-	VkDeviceMemory indexBufferMemory;
-	VkDeviceMemory modelIndexBufferMemory;
+	std::vector<VkBuffer> vertexBuffers;
+	std::vector<VkDeviceMemory> vertexBuffersMemory;
+	std::vector<VkBuffer> indexBuffers;
+	std::vector<VkDeviceMemory> indexBuffersMemory;
 	// we want more than one uniform buffer (avoid reading and writing collision)
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
@@ -184,9 +179,8 @@ private:
 	VkDeviceMemory depthImageMemory;
 	VkImageView depthImageView;
 
-	// model
 	const std::string MODEL_PATH = "..\\Assets\\Models\\nanosuit\\nanosuit.obj";
-	const std::string TEXTURE_PATH = "textures/chalet.jpg";
+	const std::string TEXTURE_PATH = "..\\Assets\\Models\\house\\texture.jpg";
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {
@@ -230,8 +224,7 @@ private:
 	/// define the computer descriptor of the matrix (SHADER)
 	void createComputeDescriptorSetLayout();
 	/// pipeline: vertez shader, tessellation, geometry shader, fragment shader...
-	void createGraphicsPipeline();
-	void createGraphicsPipeline2();
+	void createGraphicsPipelines();
 
 	void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask,
 		VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask,
@@ -243,9 +236,9 @@ private:
 	/// creates and fills the commandPool object
 	void createCommandPool();
 	/// variables that can be read by the graphic card (in attributes of the vertex shader) (SHADER)
-	void createVertexBuffer();
+	void createVertexBuffers();
 	/// an index buffer allows us to reuse existing data, reordenate the vertex buffer data (SHADER)
-	void createIndexBuffer();
+	void createIndexBuffers();
 	/// fills the uniformBuffer vector
 	void createUniformBuffers();
 	/// fills the storageBuffer vector
@@ -327,23 +320,17 @@ private:
 	~VulkanManager();
 
 public:
-	std::vector<Vertex> vertices = {
-		{{-1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+	std::vector<std::vector<Vertex>> vertexVector = {
+		{{{-1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
 		{{1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-		{{-1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}
+		{{-1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}}
+		,{}
 	};
 
-	std::vector<uint32_t> indices = {
-		0, 1, 2, 2, 3, 0
-	};
-
-	std::vector<Vertex> modelVertices = {
-		
-	};
-
-	std::vector<uint32_t> modelIndices = {
-		
+	std::vector<std::vector<uint32_t>> indexVector = {
+		{0, 1, 2, 2, 3, 0},
+		{}
 	};
 
 	static VulkanManager* GetSingleton();

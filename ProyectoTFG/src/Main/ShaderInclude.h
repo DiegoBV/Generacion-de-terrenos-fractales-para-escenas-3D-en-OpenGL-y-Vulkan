@@ -7,6 +7,6 @@ private:
 	static std::string tempPath;
 	static std::fstream tempFile;
 public:
-	static std::string InterpretShader(const char* shaderPath, std::string includeReservedWord = "#include");
+	static std::string InterpretShader(const char* shaderPath, bool recursive = false, std::string includeReservedWord = "#include");
 };
 

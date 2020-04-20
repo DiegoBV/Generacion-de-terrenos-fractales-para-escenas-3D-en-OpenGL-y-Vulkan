@@ -1,13 +1,18 @@
 #pragma once
 #include <vulkan.hpp>
+#include <string>
+#include "Shader.h"
+
+using namespace std;
 
 class VulkanModel
 {
 private:
+	void loadModel(string const& path);
 
 public:
-	VulkanModel();
+	VulkanModel(string const& path, bool gamma = false);
 	~VulkanModel() {}
-	void loadModel();
-};
 
+	void Draw(RenderShader* shader);
+};

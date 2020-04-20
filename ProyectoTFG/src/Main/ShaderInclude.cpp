@@ -5,13 +5,17 @@
 std::string ShaderInclude::tempPath = "..\\..\\Shaders\\temp.c";
 std::fstream ShaderInclude::tempFile;
 
-std::string ShaderInclude::InterpretShader(const char * shaderPath, std::string includeReservedWord)
+std::string ShaderInclude::InterpretShader(const char * shaderPath, bool recursive, std::string includeReservedWord)
 {
 	includeReservedWord += ' ';
 
 	std::fstream shaderFile = FileHandler::openInputFile(shaderPath);
 	std::string currentLine = FileHandler::readLineFromInputFile(shaderFile);
 	std::string shaderCode;
+
+#if defined(VULKAN_RELEASE) || defined(VULKAN_DEBUG)
+	if(!recursive) shaderCode = "#define VULKAN\n";
+#endif
 
 	while (currentLine != "EOF")
 	{
@@ -21,7 +25,7 @@ std::string ShaderInclude::InterpretShader(const char * shaderPath, std::string 
 
 			std::string includeString;
 			//std::fstream includeFile = FileHandler::readInputFile(currentLine.c_str(), includeString); // reads 
-			std::string includeContent = InterpretShader(currentLine.c_str());
+			std::string includeContent = InterpretShader(currentLine.c_str(), true);
 			shaderCode += includeContent; // adds the included file to shader file
 			//FileHandler::closeFile(includeFile); // close
 

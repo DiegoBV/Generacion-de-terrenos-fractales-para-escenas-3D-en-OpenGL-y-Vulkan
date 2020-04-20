@@ -7,7 +7,6 @@
 #include "PlayableSphere.h"
 #include <math.h>
 #include <vector>
-//#include "Model.h"
 
 Camera camera;
 glm::dvec2 mCoord;
@@ -91,9 +90,6 @@ int main()
 	computeShader.use();
 	appManager->addComputeShader(&computeShader);
 
-
-	//Model ourModel("..\\Assets\\Models\\nanosuit\\nanosuit.obj");
-
 	appManager->GetSingleton()->setUpGraphicsPipeline();
 
 	// Callback registration
@@ -146,7 +142,6 @@ int main()
 		}
 
 		appManager->render();
-		//ourModel.Draw(&modelShader);
 	}
 
 	for (RenderShader* shader : renderShaders) {

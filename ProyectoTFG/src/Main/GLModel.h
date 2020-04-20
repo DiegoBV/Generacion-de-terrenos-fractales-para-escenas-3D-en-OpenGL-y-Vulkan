@@ -23,6 +23,8 @@ public:
     // constructor, expects a filepath to a 3D model.
     GLModel(string const& path, bool gamma = false);
 
+    GLModel() {}
+
     // draws the model, and thus all its meshes
     void Draw(RenderShader* shader);
 
