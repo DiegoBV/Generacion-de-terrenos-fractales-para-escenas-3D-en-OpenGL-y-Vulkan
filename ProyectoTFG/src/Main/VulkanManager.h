@@ -179,8 +179,8 @@ private:
 	VkDeviceMemory depthImageMemory;
 	VkImageView depthImageView;
 
-	const std::string MODEL_PATH = "..\\Assets\\Models\\nanosuit\\nanosuit.obj";
-	const std::string TEXTURE_PATH = "..\\Assets\\Models\\house\\texture.jpg";
+	const std::string MODEL_PATH = "..\\Assets\\Models\\pacman\\pacman.obj";
+	const std::string TEXTURE_PATH = "..\\Assets\\Models\\pacman\\pacmantex.jpg";
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {

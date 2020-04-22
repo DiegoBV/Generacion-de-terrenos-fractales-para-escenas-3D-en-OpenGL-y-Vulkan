@@ -133,8 +133,8 @@ int main()
 		ubo.playerRadius = player.getSSBO().radius;
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
-		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), {0, 1, 0});
-		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+		model = glm::rotate(model, glm::radians(-(camera.getYaw() + 90.0f)), {0, 1, 0});
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
 		for (RenderShader* shader : renderShaders) {

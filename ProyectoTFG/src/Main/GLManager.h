@@ -16,7 +16,7 @@ private:
 
 	GLModel model;
 
-	const std::string MODEL_PATH = "..\\Assets\\Models\\nanosuit\\nanosuit.obj";
+	const std::string MODEL_PATH = "..\\Assets\\Models\\pacman\\pacman.obj";
 
 	GLManager();
 	~GLManager();

@@ -136,6 +136,7 @@ void VulkanManager::waitUntilFinishEverything()
 void VulkanManager::setUpGraphicsPipeline()
 {
 	loadModel();
+	createPipelineCache();
 	createGraphicsPipelines();
 	createComputePipeline();
 	createCommandPool();
