@@ -54,7 +54,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 	//	camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
 	//	break;
 	//case 'A'://izquierda
-	//	camera.handleMovement(Camera_Movement::LEFT, deltaTime);
+	//	camera.hand leMovement(Camera_Movement::LEFT, deltaTime);
 	//	break;
 	//default:
 	//	break;
@@ -175,7 +175,9 @@ char menu() {
 		std::cout << "4: Debug scene" << std::endl;
 		std::cout << "Q: Exit application" << std::endl;
 
+		std::cout << "Enter your selection: ";
 		std::cin >> option;
+
 		option = std::toupper(option);
 		if (option == 'Q') {
 			break;
