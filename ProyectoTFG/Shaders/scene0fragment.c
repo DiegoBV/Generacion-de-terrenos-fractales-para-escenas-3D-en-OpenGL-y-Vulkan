@@ -4,14 +4,20 @@
 layout(binding = 0) uniform UniformBufferObject {
     float time;
     float yDirection;
+    float playerRadius;
     vec2 resolution;
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;
+    vec3 playerPos;
+    vec4 playerColor;
     mat4 viewMat;
 } ubo;
 
 layout(location = 0) out vec4 outColor;
+
+float near = 0.1; 
+float far  = 100.0; 
 
 #include ..\\..\\Shaders\\geometries.c
 
@@ -198,6 +204,7 @@ void main()
 
     float dif = getLight(p);
 
+    gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
     if (distanceToSurface > MAX_DIST - EPSILON) {
         // Didn't hit anything
         outColor = vec4(0.1, 0.1, 0.1, 1.0);

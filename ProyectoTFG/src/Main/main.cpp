@@ -61,8 +61,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 	//}//switch
 }
 
-int main()
-{
+void init() {
 	TimeManager* timeManager = TimeManager::GetSingleton();
 	ApplicationManager* appManager = ApplicationManager::GetSingleton();
 	Window* window = Window::GetSingleton();
@@ -70,11 +69,30 @@ int main()
 	window->init();
 	timeManager->init();
 	appManager->init();
+}
+
+void release() {
+	ApplicationManager::GetSingleton()->waitUntilFinishEverything();
+	ApplicationManager::GetSingleton()->ShutDownSingleton();
+	TimeManager::GetSingleton()->ShutDownSingleton();
+	Window::GetSingleton()->ShutDownSingleton();
+}
+
+void runApplication(const std::string& vertex, const std::string& fragment) {
+
+	TimeManager* timeManager = TimeManager::GetSingleton();
+	ApplicationManager* appManager = ApplicationManager::GetSingleton();
+	Window* window = Window::GetSingleton();
 
 	std::list<RenderShader*> renderShaders;
 
+	ComputeShader computeShader = ComputeShader();
+	computeShader.init("compute.c");
+	computeShader.use();
+	appManager->addComputeShader(&computeShader);
+
 	RenderShader renderShader = RenderShader();
-	renderShader.init("vertex.c", "fragment.c");
+	renderShader.init(vertex, fragment);
 	renderShader.use();
 	appManager->addRenderShader(&renderShader);
 	renderShaders.push_back(&renderShader);
@@ -84,11 +102,6 @@ int main()
 	modelShader.use();
 	appManager->addRenderShader(&modelShader);
 	renderShaders.push_back(&modelShader);
-
-	ComputeShader computeShader = ComputeShader();
-	computeShader.init("compute.c");
-	computeShader.use();
-	appManager->addComputeShader(&computeShader);
 
 	appManager->GetSingleton()->setUpGraphicsPipeline();
 
@@ -133,7 +146,7 @@ int main()
 		ubo.playerRadius = player.getSSBO().radius;
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
-		model = glm::rotate(model, glm::radians(-(camera.getYaw() + 90.0f)), {0, 1, 0});
+		model = glm::rotate(model, glm::radians(-(camera.getYaw() + 90.0f)), { 0, 1, 0 });
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
@@ -147,14 +160,72 @@ int main()
 	for (RenderShader* shader : renderShaders) {
 		shader->release();
 	}
-	
+
 	computeShader.release();
+}
 
-	appManager->waitUntilFinishEverything();
-	appManager->ShutDownSingleton();
-	timeManager->ShutDownSingleton();
-	window->ShutDownSingleton();
+char menu() {
+	char option = ' ';
+	do {
+		system("cls");
+		std::cout << "Write the desired map" << std::endl;
+		std::cout << "1: Snow terrain" << std::endl;
+		std::cout << "2: Mandelbulb" << std::endl;
+		std::cout << "3: Mandelbox" << std::endl;
+		std::cout << "4: Debug scene" << std::endl;
+		std::cout << "Q: Exit application" << std::endl;
 
-	system("pause");
+		std::cin >> option;
+		option = std::toupper(option);
+		if (option == 'Q') {
+			break;
+		}
+
+	} while(option <= '0' || option > '4');
+
+	return option;
+}
+
+std::pair<const std::string, const std::string> selectShaders(const char& option) {
+	std::pair<std::string, std::string> shaders;
+
+	switch (option)
+	{
+	case '1':
+		shaders.first = "vertex.c";
+		shaders.second = "snowTerrainFragment.c";
+		break;
+	case '2':
+		shaders.first = "vertex.c";
+		shaders.second = "mandelbulbFragment.c";
+		break;
+	case '3':
+		shaders.first = "vertex.c";
+		shaders.second = "mandelboxFragment.c";
+		break;
+	case '4':
+		shaders.first = "vertex.c";
+		shaders.second = "scene0fragment.c";
+		break;
+	default:
+		break;
+	}
+
+	return shaders;
+}
+
+int main()
+{
+	char selectedOption = menu();
+	while (selectedOption != 'Q')
+	{
+		std::pair<const std::string, const std::string> shaders = selectShaders(selectedOption);
+		init();
+		runApplication(shaders.first, shaders.second);
+		release();
+
+		selectedOption = menu();
+	}
+
 	return 0;
 }

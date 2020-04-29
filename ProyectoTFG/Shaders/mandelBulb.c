@@ -1,7 +1,7 @@
 const float FRACTAL_DIST = 1.5;
 const float FRACTAL_STEPS = 5;
 
-vec2 SDF(vec3 z);
+vec2 SDF(vec3 z, float time);
 
 #include ..\\..\\Shaders\\fractalFunctions.c
 
