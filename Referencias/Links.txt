@@ -45,6 +45,10 @@ https://imaginary.org/film/3d-fractal-trip-far-away
 -Physics:
 https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
 
+-Fractal Pyhsics:
+https://stackoverflow.com/questions/31064234/find-the-angle-between-two-vectors-from-an-arbitrary-origin
+https://gamedev.stackexchange.com/questions/117262/how-do-you-build-a-rotation-matrix-from-a-normalized-vector
+
 -Vulkan Subpasses: 
 https://www.saschawillems.de/blog/2018/07/19/vulkan-input-attachments-and-sub-passes/
 
