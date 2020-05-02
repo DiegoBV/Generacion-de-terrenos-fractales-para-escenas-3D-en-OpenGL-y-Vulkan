@@ -7,6 +7,7 @@ const int COLLISION_SAMPLES = 200;
 layout(std430, binding=0) buffer Pos{
     bool isGrounded;
     float deltaTime;
+    float time;
     float radius;
     float mass;
     float damping;

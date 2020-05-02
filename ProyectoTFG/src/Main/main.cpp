@@ -8,6 +8,13 @@
 #include <math.h>
 #include <vector>
 
+struct InitApplicationInfo {
+	std::string vertexName;
+	std::string fragmentName;
+	std::string computeName;
+	bool terrain;
+};
+
 Camera camera;
 glm::dvec2 mCoord;
 float pivotOffset = 2.0f;
@@ -78,7 +85,13 @@ void release() {
 	Window::GetSingleton()->ShutDownSingleton();
 }
 
-void runApplication(const std::string& vertex, const std::string& fragment) {
+float angleBetween(glm::vec3 a,glm::vec3 b,glm::vec3 origin) {
+	glm::vec3 da = glm::normalize(a - origin);
+	glm::vec3 db = glm::normalize(b - origin);
+	return glm::acos(glm::dot(da, db));
+}
+
+void runApplication(const std::string& vertex, const std::string& fragment, const std::string& compute, bool terrain) {
 
 	TimeManager* timeManager = TimeManager::GetSingleton();
 	ApplicationManager* appManager = ApplicationManager::GetSingleton();
@@ -87,7 +100,7 @@ void runApplication(const std::string& vertex, const std::string& fragment) {
 	std::list<RenderShader*> renderShaders;
 
 	ComputeShader computeShader = ComputeShader();
-	computeShader.init("compute.c");
+	computeShader.init(compute);
 	computeShader.use();
 	appManager->addComputeShader(&computeShader);
 
@@ -114,10 +127,10 @@ void runApplication(const std::string& vertex, const std::string& fragment) {
 	ubo.worldUp = camera.getWorldUp();
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-	player = PlayableSphere({ 0.0f, -1.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.75f, 50.0f }, 1.5f, 5.0f, 0.1f, 0.01f);
+	glm::vec3 gravityDirection = { 0.0f, -1.0f, 0.0f };
+	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, { 0.0f, 3.0f, 0.0f }, 1.5f, 1.5f, 5.0f, 0.1f, 0.01f);
 
 	computeShader.setSSBO(player.getSSBO());
-
 
 	glm::mat4 unityMatrix = glm::mat4(1.0f);
 	glm::mat4 model = unityMatrix;
@@ -132,6 +145,10 @@ void runApplication(const std::string& vertex, const std::string& fragment) {
 		player.update(timeManager->getDeltaTime());
 
 		// update
+		if (!terrain) {
+			gravityDirection = glm::vec3(0, 0, 0) - player.getPosition();
+			player.setGravityDirection(gravityDirection);
+		}
 		computeShader.setSSBO(player.getSSBO());
 		appManager->update();
 		player.setSSBO(computeShader.getSSBO());
@@ -146,8 +163,26 @@ void runApplication(const std::string& vertex, const std::string& fragment) {
 		ubo.playerRadius = player.getSSBO().radius;
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
-		model = glm::rotate(model, glm::radians(-(camera.getYaw() + 90.0f)), { 0, 1, 0 });
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
+
+		glm::vec3 newY = -gravityDirection;
+		glm::vec3 newX = glm::normalize(glm::cross(glm::vec3(0, 0, 1), newY));
+		glm::vec3 newZ = glm::normalize(glm::cross(newY, newX));
+		/*model = glm::rotate(model, angleBetween(newY, { 0, 1, 0 }, { 0, 0, 0 }), { 1, 0, 0 });
+		model = glm::rotate(model, angleBetween(newY, { 0, 1, 0 }, { 0, 0, 0 }), { 0, 0, 1 });*/
+
+		model[0][0] = newX.x;
+		model[0][1] = newX.y;
+		model[0][2] = newX.z;
+		model[1][0] = newY.x;
+		model[1][1] = newY.y;
+		model[1][2] = newY.z;
+		model[2][0] = newZ.x;
+		model[2][1] = newZ.y;
+		model[2][2] = newZ.z;
+
+		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
+
+		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
 		for (RenderShader* shader : renderShaders) {
@@ -188,32 +223,40 @@ char menu() {
 	return option;
 }
 
-std::pair<const std::string, const std::string> selectShaders(const char& option) {
-	std::pair<std::string, std::string> shaders;
+InitApplicationInfo setAppInfo(const char& option) {
+	InitApplicationInfo appInfo;
 
 	switch (option)
 	{
 	case '1':
-		shaders.first = "vertex.c";
-		shaders.second = "snowTerrainFragment.c";
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "snowTerrainFragment.c";
+		appInfo.computeName = "snowTerrainCompute.c";
+		appInfo.terrain = true;
 		break;
 	case '2':
-		shaders.first = "vertex.c";
-		shaders.second = "mandelbulbFragment.c";
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "mandelbulbFragment.c";
+		appInfo.computeName = "mandelbulbCompute.c";
+		appInfo.terrain = false;
 		break;
 	case '3':
-		shaders.first = "vertex.c";
-		shaders.second = "mandelboxFragment.c";
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "mandelboxFragment.c";
+		appInfo.computeName = "mandelboxCompute.c";
+		appInfo.terrain = false;
 		break;
 	case '4':
-		shaders.first = "vertex.c";
-		shaders.second = "scene0fragment.c";
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "scene0fragment.c";
+		appInfo.computeName = "scene0Compute.c";
+		appInfo.terrain = true;
 		break;
 	default:
 		break;
 	}
 
-	return shaders;
+	return appInfo;
 }
 
 int main()
@@ -221,9 +264,9 @@ int main()
 	char selectedOption = menu();
 	while (selectedOption != 'Q')
 	{
-		std::pair<const std::string, const std::string> shaders = selectShaders(selectedOption);
+		InitApplicationInfo appInfo = setAppInfo(selectedOption);
 		init();
-		runApplication(shaders.first, shaders.second);
+		runApplication(appInfo.vertexName, appInfo.fragmentName, appInfo.computeName, appInfo.terrain);
 		release();
 
 		selectedOption = menu();

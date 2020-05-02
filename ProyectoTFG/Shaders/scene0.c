@@ -1,5 +1,5 @@
-vec2 SDF(vec3 point);
-float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end);
+float SDF(vec3 point, float time);
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end, float time);
 
 const int MAX_MARCHING_STEPS = 2500;
 const float MIN_DIST = 0.0;
@@ -22,22 +22,16 @@ float differenceSDF(float distA, float distB) {
     return max(distA, -distB);
 }
 
-float SDFCylinder( vec3 p, float h, float r )
-{
-  vec2 d = abs(vec2(length(p.xy),p.z)) - vec2(r,h);
-  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
-}
-
 float getDistance(vec3 point){
     Sphere sphere;
     sphere.center = vec3(1.0, 0.0, 0.0);
     sphere.radius = 3.0;
     sphere.color = vec4(1.0, 0.0, 0.0, 1.0);
 
-    return min(sphere.SDF(point), point.y + 5.0);
+    return min(sphereSDF(sphere, point), point.y + 5.0);
 }
 
-vec2 SDF(vec3 point){
+float SDF(vec3 point, float time){
     mat3 identity = mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
     point = rotateY(degrees(time / 2.0), identity) * point;
 
@@ -53,10 +47,10 @@ vec2 SDF(vec3 point){
     cylinder1.rotation = identity;
     Cylinder cylinder2; cylinder2.center = vec3(0.0, 0.0, 0.0); cylinder2.height = 2.4; cylinder2.radius = cylinderRadius;
     cylinder2.rotation = identity;
-    cylinder2.rotateFigX(90.0);
+    cylinder2.rotation = rotateX(90.0, cylinder2.rotation);
     Cylinder cylinder3; cylinder3.center = vec3(0.0, 0.0, 0.0); cylinder3.height = 2.4; cylinder3.radius = cylinderRadius;
     cylinder3.rotation = identity;
-    cylinder3.rotateFigY(90.0);
+    cylinder3.rotation = rotateY(90.0, cylinder3.rotation);
 
     float ballOffset = 0.4 + 1.0 + sin(1.7 * time);
     float ballRadius = 0.6;
@@ -74,49 +68,34 @@ vec2 SDF(vec3 point){
     Sphere sphere6; sphere6.center = vec3(0.0, 0.0, ballOffset); sphere6.radius = ballRadius; sphere6.color =  vec4(1.0, 0.0, 0.0, 1.0);
     sphere6.rotation = identity;
 
-    float balls = sphere1.SDF(point);
-    balls = unionSDF(balls, sphere2.SDF(point));
-    balls = unionSDF(balls, sphere3.SDF(point));
-    balls = unionSDF(balls, sphere4.SDF(point));
-    balls = unionSDF(balls, sphere5.SDF(point));
-    balls = unionSDF(balls, sphere6.SDF(point));
+    float balls = sphereSDF(sphere1, point);
+    balls = unionSDF(balls, sphereSDF(sphere2, point));
+    balls = unionSDF(balls, sphereSDF(sphere3, point));
+    balls = unionSDF(balls, sphereSDF(sphere4, point));
+    balls = unionSDF(balls, sphereSDF(sphere5, point));
+    balls = unionSDF(balls, sphereSDF(sphere6, point));
     
-    float csgNut = differenceSDF(intersectSDF(box.SDF(point), sphere.SDF(point)),
-                         unionSDF(cylinder1.SDF(point), unionSDF(cylinder2.SDF(point), cylinder3.SDF(point))));
+    float csgNut = differenceSDF(intersectSDF(boxSDF(box, point), sphereSDF(sphere, point)),
+                         unionSDF(cylinderSDF(cylinder1, point), unionSDF(cylinderSDF(cylinder2, point), cylinderSDF(cylinder3, point))));
     
     float intersection =  unionSDF(balls, csgNut);
 
-    return vec2(min(intersection, plane.SDF(point)), 1.0);
+    return min(intersection, planeSDF(plane, point));
 }
 
-float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end){
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end, float time){
     float depth = start;
 
     for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
-        vec2 dist = SDF(eye + depth * marchingDirection);
-        if (dist.x < EPSILON) {
-			break;
+        float dist = SDF(eye + depth * marchingDirection, time);
+        if (dist < EPSILON) {
+			return depth;
         }
-        depth += MARCHINGSTEP * dist.x;
+        depth += dist;
         if (depth >= end) {
-            break;
+            return end;
         }
     }
 
-    return depth;
-}
-
-vec3 getColor(vec3 p){        
-    float dif = getLight(p);
-    
-    vec3 K_a = (getNormal(p) + vec3(1.0)) / 2.0;
-    vec3 K_d = K_a;
-    vec3 K_s = vec3(1.0, 1.0, 1.0);
-    float shininess = 10.0;
-    
-    vec3 phongColor = phongIllumination(K_a, K_d, K_s, shininess, p, cameraEye);
-
-    vec3 lightColor = vec3(dif);
-
-    return lightColor * phongColor;
+    return end;
 }

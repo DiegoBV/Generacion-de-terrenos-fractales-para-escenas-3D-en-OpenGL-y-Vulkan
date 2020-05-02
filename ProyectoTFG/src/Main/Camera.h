@@ -76,5 +76,7 @@ public:
     inline void setZoom(float value) { zoom = value; };
     inline void setEye(glm::vec3 value) { eye = value; };
     inline void setFront(glm::vec3 value) { front = value; };
+    inline void setRight(glm::vec3 value) { right = value; };
+    inline void setUp(glm::vec3 value) { up = value; };
 };
 #endif

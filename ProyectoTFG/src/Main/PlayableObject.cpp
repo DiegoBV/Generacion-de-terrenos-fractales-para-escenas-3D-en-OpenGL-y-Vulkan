@@ -1,9 +1,7 @@
 #include "PlayableObject.h"
-//DEBUG
-#include <iostream>
-//DEBUG
+#include "TimeManager.h"
 
-PlayableObject::PlayableObject() : gravity({ 0.0f, -0.8, 0.0f }), acceleration(5.0f)
+PlayableObject::PlayableObject() : gravityDirection({ 0.0f, -1.0, 0.0f }), gravityForce(0.8), acceleration(5.0f)
 {
 	ssbo.position = { 0.0f, 0.75f, 50.0f };
 	ssbo.velocity = { 0.0f, 0.0f, 0.0f };
@@ -11,8 +9,8 @@ PlayableObject::PlayableObject() : gravity({ 0.0f, -0.8, 0.0f }), acceleration(5
 	ssbo.damping = 0.1f;
 }
 
-PlayableObject::PlayableObject(glm::vec3 gravity, glm::vec3 velocity, glm::vec3 position, float mass, float acceleration, float damping)
-	: gravity(gravity), acceleration(acceleration)
+PlayableObject::PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::vec3 position, float gravityForce, float mass, float acceleration, float damping)
+	: gravityDirection(gravityDir), gravityForce(gravityForce), acceleration(acceleration)
 {
 	ssbo.position = position;
 	ssbo.velocity = velocity;
@@ -75,6 +73,7 @@ void PlayableObject::handleMovement(const char& key, const glm::vec3& direction)
 
 void PlayableObject::update(float deltaTime)
 {
-	addForce(gravity);
+	addForce(gravityDirection * gravityForce);
 	ssbo.deltaTime = deltaTime;
+	ssbo.time = TimeManager::GetSingleton()->getTimeSinceBeginning();
 }

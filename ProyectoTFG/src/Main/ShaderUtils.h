@@ -22,6 +22,7 @@ struct UniformBufferObject {
 struct StorageBufferObject {
 	alignas(4) bool isGrounded;
 	alignas(4) float deltaTime;
+	alignas(4) float time;
 	alignas(4) float radius;
 	alignas(4) float mass;
 	alignas(4) float damping;
