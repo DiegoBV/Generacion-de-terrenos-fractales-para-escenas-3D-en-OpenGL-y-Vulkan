@@ -13,6 +13,7 @@ struct InitApplicationInfo {
 	std::string fragmentName;
 	std::string computeName;
 	bool terrain;
+	bool freeCamera;
 };
 
 Camera camera;
@@ -41,43 +42,21 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	int state = glfwGetKey(window, key);
 	if (state == GLFW_PRESS) {
+		if (key == 'F') appInfo.freeCamera = !appInfo.freeCamera;
 		//DEBUG
-		if (key == 'Z') pivotOffset -= 0.1f;
+		else if (key == 'Z') pivotOffset -= 0.1f;
 		else if (key == 'X') pivotOffset += 0.1f;
-		else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
-		else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
+		else if (key == 'C') player.setRadius(player.getRadius() + 0.005f);
+		else if (key == 'V') player.setRadius(player.getRadius() - 0.005f);
 		//DEBUG
+
 		else {
-			glm::vec3 f = player.getMovementDirection(key, camera.getFront());
-			if (appInfo.terrain) {
-				player.addForce(f * player.getAcceleration());
-			}
-			else {
-				StorageBufferObject ssbo = player.getSSBO();
-				ssbo.fractalRotation += f * 0.02f;
-				player.setSSBO(ssbo);
-			}
+			if (appInfo.freeCamera)
+				camera.handleMovement(key);
+			else
+				player.handleMovement(key, camera.getFront(), appInfo.terrain);
 		}
 	}
-
-	//double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
-
-	//switch (key) {
-	//case 'W'://si pulsamos "w" acercamos la camara
-	//	camera.handleMovement(Camera_Movement::FORWARD, deltaTime);
-	//	break;
-	//case 'S'://"s" la alejamos
-	//	camera.handleMovement(Camera_Movement::BACKWARD, deltaTime);
-	//	break;
-	//case 'D'://derecha
-	//	camera.handleMovement(Camera_Movement::RIGHT, deltaTime);
-	//	break;
-	//case 'A'://izquierda
-	//	camera.hand leMovement(Camera_Movement::LEFT, deltaTime);
-	//	break;
-	//default:
-	//	break;
-	//}//switch
 }
 
 void init() {
@@ -165,7 +144,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		appManager->update();
 		player.setSSBO(computeShader.getSSBO());
 
-		camera.pivotTarget(player.getSSBO().position, pivotOffset);
+		if(!appInfo.freeCamera)camera.pivotTarget(player.getSSBO().position, pivotOffset);
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
@@ -227,24 +206,28 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.fragmentName = "snowTerrainFragment.c";
 		appInfo.computeName = "snowTerrainCompute.c";
 		appInfo.terrain = true;
+		appInfo.freeCamera = false;
 		break;
 	case '2':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "mandelbulbFragment.c";
 		appInfo.computeName = "mandelbulbCompute.c";
 		appInfo.terrain = false;
+		appInfo.freeCamera = false;
 		break;
 	case '3':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "mandelboxFragment.c";
 		appInfo.computeName = "mandelboxCompute.c";
 		appInfo.terrain = false;
+		appInfo.freeCamera = false;
 		break;
 	case '4':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "scene0fragment.c";
 		appInfo.computeName = "scene0Compute.c";
 		appInfo.terrain = true;
+		appInfo.freeCamera = false;
 		break;
 	default:
 		break;

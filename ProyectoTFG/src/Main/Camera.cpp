@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "TimeManager.h"
 
 void Camera::updateCameraVectors()
 {
@@ -27,7 +28,7 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
     updateCameraVectors();
 }
 
-void Camera::handleMovement(Camera_Movement direction, float deltaTime)
+void Camera::applyDirection(Camera_Movement direction, float deltaTime)
 {
     float velocity = movementSpeed * deltaTime;
     if (direction == FORWARD)
@@ -38,6 +39,28 @@ void Camera::handleMovement(Camera_Movement direction, float deltaTime)
         eye -= right * velocity;
     if (direction == RIGHT)
         eye += right * velocity;
+}
+
+void Camera::handleMovement(char key)
+{
+    double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
+
+    switch (key) {
+    case 'W'://si pulsamos "w" acercamos la camara
+        applyDirection(Camera_Movement::FORWARD, deltaTime);
+        break;
+    case 'S'://"s" la alejamos
+        applyDirection(Camera_Movement::BACKWARD, deltaTime);
+        break;
+    case 'D'://derecha
+        applyDirection(Camera_Movement::RIGHT, deltaTime);
+        break;
+    case 'A'://izquierda
+        applyDirection(Camera_Movement::LEFT, deltaTime);
+        break;
+    default:
+        break;
+    }//switch
 }
 
 void Camera::handleOrientation(float xoffset, float yoffset, bool constrainPitch)

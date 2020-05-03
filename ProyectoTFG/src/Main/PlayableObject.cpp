@@ -18,9 +18,9 @@ PlayableObject::PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::ve
 	ssbo.damping = damping;
 }
 
-glm::vec3 PlayableObject::getMovementDirection(const char& key, const glm::vec3& direction)
+void PlayableObject::handleMovement(const char& key, const glm::vec3& direction, bool terrain)
 {
-	if (!ssbo.isGrounded) return { 0.0f, 0.0f, 0.0f };
+	if (!ssbo.isGrounded) return;
 
 	glm::vec3 d;
 	switch (key) {
@@ -58,7 +58,8 @@ glm::vec3 PlayableObject::getMovementDirection(const char& key, const glm::vec3&
 		break;
 	}//switch
 
-	return normalize(d);
+	if (terrain) addForce(d * acceleration);
+	else ssbo.fractalRotation += d * fractalVelocity;
 }
 
 void PlayableObject::update(float deltaTime)

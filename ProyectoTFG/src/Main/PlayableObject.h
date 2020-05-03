@@ -7,6 +7,7 @@ class PlayableObject
 protected:
 	StorageBufferObject ssbo = {};
 	float acceleration;
+	float fractalVelocity = 0.02f;
 	glm::vec3 gravityDirection;
 	float gravityForce;
 	std::vector<glm::vec3> hitboxPoints;
@@ -17,7 +18,7 @@ public:
 	PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::vec3 position, float gravityForce, float mass, float acceleration, float damping);
 	~PlayableObject() {};
 
-	glm::vec3 getMovementDirection(const char& key, const glm::vec3& direction);
+	void handleMovement(const char& key, const glm::vec3& direction, bool terrain);
 	void update(float deltaTime);
 
 	inline void addForce(glm::vec3 value) { ssbo.force += value; };

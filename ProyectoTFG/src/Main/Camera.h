@@ -42,6 +42,8 @@ private:
 
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors();
+    // Applies the given direction to the current position (eye)
+    void applyDirection(Camera_Movement direction, float deltaTime);
 
 public:
     // Default Constructor
@@ -49,8 +51,8 @@ public:
     // Scalar values
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
 
-    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void handleMovement(Camera_Movement direction, float deltaTime);
+    // Processes input received from keyboard
+    void handleMovement(char key);
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void handleOrientation(float xoffset, float yoffset, bool constrainPitch = true);
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
