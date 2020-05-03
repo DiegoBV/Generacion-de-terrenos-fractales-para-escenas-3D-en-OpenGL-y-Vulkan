@@ -9,6 +9,7 @@ struct UniformBufferObject {
 	alignas(4) float yDirection;
 	alignas(4) float playerRadius;
 	alignas(8) glm::vec2 resolution;
+	alignas(16) glm::vec3 fractalRotation;
 	alignas(16) glm::vec3 cameraEye;
 	alignas(16) glm::vec3 cameraFront;
 	alignas(16) glm::vec3 worldUp;
@@ -26,6 +27,7 @@ struct StorageBufferObject {
 	alignas(4) float radius;
 	alignas(4) float mass;
 	alignas(4) float damping;
+	alignas(16) glm::vec3 fractalRotation;
 	alignas(16) glm::vec3 velocity;
 	alignas(16) glm::vec3 force;
 	alignas(16) glm::vec3 position;

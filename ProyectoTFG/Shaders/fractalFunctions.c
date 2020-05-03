@@ -34,7 +34,7 @@ mat3 rotateZ(float angle)
     return mat3(c, -s, 0, s, c, 0, 0, 0, 1);
 }
 
-float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end, float time)
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end, float time, vec3 rotation)
 {
     //t is the point at which we are in the measuring of the distance
     float t = start;
@@ -42,7 +42,7 @@ float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end, float t
 
     for (int i = 0; i < MAX_MARCHING_STEPS; i++)
     {
-        vec2 dist = SDF(eye + t * marchingDirection, time);
+        vec2 dist = SDF(eye + t * marchingDirection, time, rotation);
         //dist.x = sceneSDF(eye + t * marchingDirection);
         if (dist.y < EPSILON)
         {

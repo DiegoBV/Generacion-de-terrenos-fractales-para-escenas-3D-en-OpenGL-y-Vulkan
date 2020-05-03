@@ -20,6 +20,8 @@ glm::dvec2 mCoord;
 float pivotOffset = 2.0f;
 PlayableSphere player;
 
+InitApplicationInfo appInfo;
+
 //calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
 //callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
 //momento en el cual se actualiza mCoord (se llama a mouse) y se produce un desplazamiento
@@ -45,7 +47,17 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		else if (key == 'C') player.setRadius(player.getRadius()+0.005f);
 		else if (key == 'V') player.setRadius(player.getRadius()-0.005f);
 		//DEBUG
-		else player.handleMovement(key, camera.getFront());
+		else {
+			glm::vec3 f = player.getMovementDirection(key, camera.getFront());
+			if (appInfo.terrain) {
+				player.addForce(f * player.getAcceleration());
+			}
+			else {
+				StorageBufferObject ssbo = player.getSSBO();
+				ssbo.fractalRotation += f * 0.02f;
+				player.setSSBO(ssbo);
+			}
+		}
 	}
 
 	//double deltaTime = TimeManager::GetSingleton()->getDeltaTime();
@@ -161,27 +173,10 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		ubo.time = timeManager->getTimeSinceBeginning();
 		ubo.playerPos = player.getSSBO().position;
 		ubo.playerRadius = player.getSSBO().radius;
+		ubo.fractalRotation = player.getSSBO().fractalRotation;
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
-
-		glm::vec3 newY = -gravityDirection;
-		glm::vec3 newX = glm::normalize(glm::cross(glm::vec3(0, 0, 1), newY));
-		glm::vec3 newZ = glm::normalize(glm::cross(newY, newX));
-		/*model = glm::rotate(model, angleBetween(newY, { 0, 1, 0 }, { 0, 0, 0 }), { 1, 0, 0 });
-		model = glm::rotate(model, angleBetween(newY, { 0, 1, 0 }, { 0, 0, 0 }), { 0, 0, 1 });*/
-
-		model[0][0] = newX.x;
-		model[0][1] = newX.y;
-		model[0][2] = newX.z;
-		model[1][0] = newY.x;
-		model[1][1] = newY.y;
-		model[1][2] = newY.z;
-		model[2][0] = newZ.x;
-		model[2][1] = newZ.y;
-		model[2][2] = newZ.z;
-
 		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
-
 		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
@@ -224,7 +219,6 @@ char menu() {
 }
 
 InitApplicationInfo setAppInfo(const char& option) {
-	InitApplicationInfo appInfo;
 
 	switch (option)
 	{

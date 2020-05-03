@@ -6,6 +6,7 @@ layout(binding = 0) uniform UniformBufferObject {
     float yDirection;
     float playerRadius;
     vec2 resolution;
+    vec3 fractalRotation;
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;
@@ -62,7 +63,7 @@ void main()
     
     //tracing the ray (getting the distance of the closest object in the ray direction)
 	
-    float fractal = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST, ubo.time);
+    float fractal = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST, ubo.time, ubo.fractalRotation);
 
     float pelota = rayMarchDebug(rayOrigin, rayDir, MIN_DIST, MAX_DIST, sphere);
 

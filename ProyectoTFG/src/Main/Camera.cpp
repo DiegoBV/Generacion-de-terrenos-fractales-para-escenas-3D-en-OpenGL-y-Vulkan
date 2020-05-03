@@ -74,15 +74,6 @@ void Camera::handleZoom(float yoffset)
 void Camera::pivotTarget(glm::vec3 target, float offset)
 {
     glm::vec3 aux = (target - (front * offset));
-    //float auxY = eye.y;
-    //eye = aux;
-    //if (target.y >= eye.y + offset) {
-    //    eye.y = aux.y;
-    //}
-    //else {
-    //    eye.y = auxY;
-    //}
-    // if ((eye - (target - (front * offset))).y < 0.01f) return;
     eye = aux;
 }
 

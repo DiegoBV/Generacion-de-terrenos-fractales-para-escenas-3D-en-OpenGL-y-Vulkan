@@ -18,57 +18,47 @@ PlayableObject::PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::ve
 	ssbo.damping = damping;
 }
 
-void PlayableObject::handleMovement(const char& key, const glm::vec3& direction)
+glm::vec3 PlayableObject::getMovementDirection(const char& key, const glm::vec3& direction)
 {
-	if (!ssbo.isGrounded) return;
+	if (!ssbo.isGrounded) return { 0.0f, 0.0f, 0.0f };
 
+	glm::vec3 d;
 	switch (key) {
 	case 'W'://si pulsamos "w" acercamos la camara
-		glm::vec3 f;
-		f.z = direction.z;
-		f.x = direction.x;
-		f.y = 0.0f;
-		f = normalize(f) * acceleration;
-		addForce(f);
+		d.z = direction.z;
+		d.x = direction.x;
+		d.y = 0.0f;	
 		break;
 	case 'S'://"s" la alejamos
-		f.z = -direction.z;
-		f.x = -direction.x;
-		f.y = 0.0f;
-		f = normalize(f) * acceleration;
-		addForce(f);
+		d.z = -direction.z;
+		d.x = -direction.x;
+		d.y = 0.0f;
 		break;
 	case 'D'://derecha
-		f.x = -direction.z;
-		f.z = direction.x;
-		f.y = 0.0f;
-		f = normalize(f) * acceleration;
-		addForce(f);
+		d.x = -direction.z;
+		d.z = direction.x;
+		d.y = 0.0f;
 		break;
 	case 'A'://izquierda
-		f.x = direction.z;
-		f.z = -direction.x;
-		f.y = 0.0f;
-		f = normalize(f) * acceleration;
-		addForce(f);
+		d.x = direction.z;
+		d.z = -direction.x;
+		d.y = 0.0f;
 		break;
 	case 'Q':
-		f.y = 1.0f;
-		f.z = 0.0f;
-		f.x = 0.0f;
-		f = normalize(f) * acceleration;
-		addForce(f);
+		d.y = 1.0f;
+		d.z = 0.0f;
+		d.x = 0.0f;
 		break;
 	case 'E':
-		f.y = -1.0f;
-		f.z = 0.0f;
-		f.x = 0.0f;
-		f = normalize(f) * acceleration;
-		addForce(f);
+		d.y = -1.0f;
+		d.z = 0.0f;
+		d.x = 0.0f;
 		break;
-	default:
+	dedault:
 		break;
 	}//switch
+
+	return normalize(d);
 }
 
 void PlayableObject::update(float deltaTime)

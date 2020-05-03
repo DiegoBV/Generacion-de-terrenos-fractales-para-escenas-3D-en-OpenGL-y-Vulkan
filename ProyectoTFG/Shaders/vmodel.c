@@ -11,6 +11,7 @@ layout(binding = 0) uniform UniformBufferObject {
     float yDirection;
     float playerRadius;
     vec2 resolution;
+    vec3 fractalRotation;
     vec3 cameraEye;
     vec3 cameraFront;
     vec3 worldUp;

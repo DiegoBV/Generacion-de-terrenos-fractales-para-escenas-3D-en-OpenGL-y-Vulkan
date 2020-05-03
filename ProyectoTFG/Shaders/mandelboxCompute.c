@@ -11,6 +11,7 @@ layout(std430, binding=0) buffer Pos{
     float radius;
     float mass;
     float damping;
+    vec3 fractalRotation;
     vec3 velocity;
     vec3 force;
     vec3 position;
@@ -32,7 +33,7 @@ void main(){
 
     isGrounded = false;
     for(int i = 0; i < COLLISION_SAMPLES; i++){
-        float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST, time);
+        float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST, time, fractalRotation);
 
         if(dist /*+ (radius/5)*/ < radius){
             isGrounded = true;

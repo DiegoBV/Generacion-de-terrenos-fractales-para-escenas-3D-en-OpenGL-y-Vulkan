@@ -3,7 +3,7 @@ const float FRACTAL_STEPS = 7;
 const float FRACTAL_MIN_SCALE = 2;
 const float FRACTAL_MAX_SCALE = 4.2;
 
-vec2 SDF(vec3 z, float time);
+vec2 SDF(vec3 z, float time, vec3 rotation);
 
 #include ..\\..\\Shaders\\fractalFunctions.c
 
@@ -45,9 +45,10 @@ vec3 mengerFold(vec3 z)
     return z;
 }
 
-vec2 SDF(vec3 z, float time)
+vec2 SDF(vec3 z, float time, vec3 rotation)
 {
-    z *= rotateX(time / 8) * rotateZ(-time / 8);
+    z *= rotateX(rotation.z) * rotateZ(-rotation.x);
+    //z *= rotateX(time / 8) * rotateZ(-time / 8);
     float scale = FRACTAL_MAX_SCALE * abs(sin(time/16)) + FRACTAL_MIN_SCALE;
     vec3 offset = z;
     float dr = 1.0;

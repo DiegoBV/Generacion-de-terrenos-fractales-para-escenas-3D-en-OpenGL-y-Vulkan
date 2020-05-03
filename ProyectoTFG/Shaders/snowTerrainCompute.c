@@ -11,6 +11,7 @@ layout(std430, binding=0) buffer Pos{
     float radius;
     float mass;
     float damping;
+    vec3 fractalRotation;
     vec3 velocity;
     vec3 force;
     vec3 position;

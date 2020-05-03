@@ -1,11 +1,12 @@
 const float FRACTAL_DIST = 1.5;
 const float FRACTAL_STEPS = 5;
 
-vec2 SDF(vec3 z, float time);
+vec2 SDF(vec3 z, float time, vec3 rotation);
 
 #include ..\\..\\Shaders\\fractalFunctions.c
 
-vec2 SDF(vec3 pos, float time) {
+vec2 SDF(vec3 pos, float time, vec3 rotation) {
+	pos *= rotateX(rotation.z) * rotateZ(-rotation.x);
     float Power = 3.0+4.0*(sin(time/15.0)+1.0);
 	vec3 z = pos;
 	float dr = 1.0;
