@@ -346,6 +346,7 @@ public:
 	inline VkDevice getLogicalDevice() { return logicalDevice; }
 	inline VkPipelineLayout getComputePipelineLayout() { return computePipelineLayout; }
 	inline void addRenderShader(VulkanRenderShader* shader) { renderShaders.push_back(shader); }
+	inline void setModelShader(VulkanRenderShader* shader) { renderShaders.push_back(shader); }
 	inline void addComputeShader(VulkanComputeShader* shader) { computeShaders.push_back(shader); }
 };
 

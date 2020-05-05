@@ -104,7 +104,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	RenderShader modelShader = RenderShader();
 	modelShader.init("vmodel.c", "fmodel.c");
 	modelShader.use();
-	appManager->addRenderShader(&modelShader);
+	appManager->setModelShader(&modelShader);
 	renderShaders.push_back(&modelShader);
 
 	appManager->GetSingleton()->setUpGraphicsPipeline();
@@ -156,7 +156,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
 		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
-		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
 
 		for (RenderShader* shader : renderShaders) {

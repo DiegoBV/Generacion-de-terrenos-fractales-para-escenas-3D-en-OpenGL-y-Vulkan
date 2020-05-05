@@ -92,7 +92,8 @@ void GLManager::render()
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
-	model.Draw(renderShaders.back());
+	modelShader->use();
+	model.Draw(modelShader);
 }
 
 void GLManager::release()
