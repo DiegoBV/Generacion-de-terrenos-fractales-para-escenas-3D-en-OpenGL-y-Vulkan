@@ -180,7 +180,7 @@ private:
 	VkImageView depthImageView;
 
 	const std::string MODEL_PATH = "..\\Assets\\Models\\pacman\\pacman.obj";
-	const std::string TEXTURE_PATH = "..\\Assets\\Models\\pacman\\pacmantex.jpg";
+	const std::string TEXTURE_PATH = "..\\Assets\\Models\\pacman\\pacmantexV.jpg";
 
 	// validation layers
 	const std::vector<const char*> validationLayers = {

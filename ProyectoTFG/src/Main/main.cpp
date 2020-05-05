@@ -144,7 +144,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		appManager->update();
 		player.setSSBO(computeShader.getSSBO());
 
-		if(!appInfo.freeCamera)camera.pivotTarget(player.getSSBO().position, pivotOffset);
+		if(!appInfo.freeCamera) camera.pivotTarget(player.getSSBO().position, pivotOffset);
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
@@ -155,9 +155,10 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		ubo.fractalRotation = player.getSSBO().fractalRotation;
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
-		model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
+		if (!appInfo.freeCamera) model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
+
 
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);

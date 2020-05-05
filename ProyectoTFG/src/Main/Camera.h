@@ -40,6 +40,9 @@ private:
     float mouseSensitivity;
     float zoom;
 
+    float minDist;
+    float lastTarget;
+
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors();
     // Applies the given direction to the current position (eye)

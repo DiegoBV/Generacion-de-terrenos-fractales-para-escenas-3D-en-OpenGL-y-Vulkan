@@ -24,8 +24,11 @@ layout(std430, binding=0) buffer Pos{
 void main(){
     position += velocity * deltaTime;
 
+    float currentDamping = damping;
+
     vec3 totalAcceleration = force / mass;
     velocity += totalAcceleration * deltaTime;
+    if(!isGrounded) currentDamping = currentDamping/5.0;
     velocity *= pow(damping, deltaTime);
 
     // reset de las fuerzas

@@ -15,13 +15,15 @@ void Camera::updateCameraVectors()
 }
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), eye(position), worldUp(up), yaw(yaw), pitch(pitch)
+    : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), eye(position), worldUp(up), 
+    yaw(yaw), pitch(pitch), lastTarget(0.0f), minDist(0.005)
 {
     updateCameraVectors();
 }
 
 Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) 
-    : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), yaw(yaw), pitch(pitch)
+    : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), 
+    yaw(yaw), pitch(pitch), lastTarget( 0.0f), minDist(0.005)
 {
     eye = glm::vec3(posX, posY, posZ);
     worldUp = glm::vec3(upX, upY, upZ);
@@ -96,6 +98,10 @@ void Camera::handleZoom(float yoffset)
 
 void Camera::pivotTarget(glm::vec3 target, float offset)
 {
+    if (glm::distance(target.y, lastTarget) > minDist) {
+        lastTarget = target.y;
+    }
+    target.y = lastTarget;
     glm::vec3 aux = (target - (front * offset));
     eye = aux;
 }
