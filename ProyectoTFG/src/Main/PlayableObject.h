@@ -16,7 +16,8 @@ protected:
 
 public:
 	PlayableObject();
-	PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::vec3 position, float gravityForce, float mass, float acceleration, float damping);
+	PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::vec3 position, float gravityForce, float mass, 
+		float acceleration, float damping, float airDamping);
 	~PlayableObject() {};
 
 	void handleMovement(const char& key, const glm::vec3& dir, bool terrain);
