@@ -25,7 +25,7 @@ mat3 rotateX(float angle)
 mat3 rotateY(float angle)
 {
     float c = cos(angle), s = sin(angle);
-    return mat3(c, 0, -s, 0, 1, 0, s, 0, c);
+    return mat3(c, 0, s, 0, 1, 0, -s, 0, c);
 }
 
 mat3 rotateZ(float angle)

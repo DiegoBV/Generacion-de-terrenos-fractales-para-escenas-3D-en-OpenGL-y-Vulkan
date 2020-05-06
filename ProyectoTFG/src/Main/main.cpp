@@ -59,6 +59,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 				player.handleMovement(key, camera.getFront(), appInfo.terrain);
 		}
 	}
+	else player.resetKeyDirection();
 }
 
 void init() {
@@ -128,6 +129,12 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	glm::mat4 unityMatrix = glm::mat4(1.0f);
 	glm::mat4 model = unityMatrix;
 	ubo.projection = glm::perspective(glm::radians(camera.getZoom()), (float)window->getWindowWidth() / (float)window->getWindowHeight(), 0.1f, 100.0f);
+
+	float lastCameraYaw = 0.0f;
+	float lastDepthAdvance = 0.0f;
+	float lastLateralAdvance = 0.0f;
+	glm::vec3 lastPlayerPosition;
+
 	// render loop
 	// -----------
 	while (!window->shouldClose())
@@ -135,7 +142,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		// input callbacks...
 		window->update();
 		timeManager->update();
-		player.update(timeManager->getDeltaTime());
+		if (!appInfo.freeCamera) player.update(timeManager->getDeltaTime());
 
 		// update
 		if (!terrain) {
@@ -148,20 +155,28 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 
 		if(!appInfo.freeCamera) camera.pivotTarget(player.getSSBO().position, pivotOffset);
 
+		if (!appInfo.freeCamera) {
+			lastPlayerPosition = player.getSSBO().position;
+			lastDepthAdvance += player.getDirection().z * 300.0f * TimeManager::GetSingleton()->getDeltaTime();
+			lastLateralAdvance += (-player.getDirection().x) * 300.0f * TimeManager::GetSingleton()->getDeltaTime();
+			lastCameraYaw = camera.getYaw();
+		}
+
+		model = glm::translate(unityMatrix, lastPlayerPosition); // translate it down so it's at the center of the scene
+		model = glm::rotate(model, glm::radians(-lastCameraYaw - 180.0f), { 0, 1, 0 });
+		model = glm::rotate(model, glm::radians(lastDepthAdvance), { 0, 0, 1 });
+		model = glm::rotate(model, glm::radians(lastLateralAdvance), { 1, 0, 0 });
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
+
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
 		ubo.viewMat = transpose(camera.getViewMatrix());
 		ubo.time = timeManager->getTimeSinceBeginning();
-		ubo.playerPos = player.getSSBO().position;
+		ubo.playerPos = lastPlayerPosition;
 		ubo.playerRadius = player.getSSBO().radius;
 		ubo.fractalRotation = player.getSSBO().fractalRotation;
 		ubo.debug = debug;
-
-		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
-		if (!appInfo.freeCamera) model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
 		ubo.model = model;
-
 
 		for (RenderShader* shader : renderShaders) {
 			shader->setUBO(ubo);

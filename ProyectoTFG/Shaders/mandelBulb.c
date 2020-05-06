@@ -6,8 +6,9 @@ vec2 SDF(vec3 z, float time, vec3 rotation);
 #include ..\\..\\Shaders\\fractalFunctions.c
 
 vec2 SDF(vec3 pos, float time, vec3 rotation) {
-	pos *= rotateX(rotation.z) * rotateZ(-rotation.x);
-    float Power = 3.0+4.0*(sin(time/15.0)+1.0);
+	pos = rotateX(90.0* (time/1000)) * pos;
+	pos = rotateZ(90.0* (time/1000)) * pos;
+    float Power = 3.0+4.0*(sin(15.0)+1.0);
 	vec3 z = pos;
 	float dr = 1.0;
 	float r = 0.0;
