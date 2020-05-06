@@ -8,6 +8,7 @@ layout (location = 2) in vec3 aNormal;
 layout(location = 0) out vec2 TexCoords;
 
 layout(binding = 0) uniform UniformBufferObject {
+    bool debug;
     float time;
     float yDirection;
     float playerRadius;

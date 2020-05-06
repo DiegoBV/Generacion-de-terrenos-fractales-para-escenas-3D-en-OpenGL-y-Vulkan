@@ -5,6 +5,7 @@ const int COLLISION_SAMPLES = 200;
 const double M_PI = 3.1415926535897932384626433832795;
 
 struct UniformBufferObject {
+	alignas(4) float debug;
 	alignas(4) float time;
 	alignas(4) float yDirection;
 	alignas(4) float playerRadius;

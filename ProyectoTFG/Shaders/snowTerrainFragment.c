@@ -2,6 +2,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(binding = 0) uniform UniformBufferObject {
+    bool debug;
     float time;
     float yDirection;
     float playerRadius;
@@ -32,7 +33,6 @@ vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
     return normalize(vec3(uv, -nearPlane));
 }
 
-// TODO: quitar(?)
 float rayMarchDebug(vec3 eye, vec3 marchingDirection, float start, float end, Sphere sphere){
     float depth = start;
 
@@ -67,23 +67,23 @@ void main()
 
     float pelota = rayMarchDebug(rayOrigin, rayDir, MIN_DIST, MAX_DIST, sphere);
 
-    float distanceToSurface = min(fractal, pelota);
+    float distanceToSurface = 0.0f;
+    if(ubo.debug){
+        distanceToSurface = min(fractal, pelota);
+    }
+    else {
+        distanceToSurface = fractal;
+    }
     
     gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
     
     //DEBUG (modelo)
-    if(pelota < fractal){
+    if(ubo.debug && pelota < fractal){
         outColor = sphere.color;
 		return;
     }
 
     vec3 p = rayOrigin + rayDir * distanceToSurface;
-
-    // if (distanceToSurface > MAX_DIST - EPSILON) {
-    //     // Didn't hit anything
-    //     outColor = vec4(0.1, 0.1, 0.1, 1.0);
-	// 	return;
-    // }
 
     outColor = vec4(getColor(p, ubo.cameraEye, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
 }

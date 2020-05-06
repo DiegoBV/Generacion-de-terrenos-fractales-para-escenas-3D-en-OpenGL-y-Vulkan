@@ -2,6 +2,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(binding = 0) uniform UniformBufferObject {
+    bool debug;
     float time;
     float yDirection;
     float playerRadius;

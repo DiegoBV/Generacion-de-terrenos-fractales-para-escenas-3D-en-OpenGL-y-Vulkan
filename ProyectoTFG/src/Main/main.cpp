@@ -19,6 +19,7 @@ struct InitApplicationInfo {
 Camera camera;
 glm::dvec2 mCoord;
 float pivotOffset = 2.0f;
+bool debug = false;
 PlayableSphere player;
 
 InitApplicationInfo appInfo;
@@ -48,6 +49,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		else if (key == 'X') pivotOffset += 0.1f;
 		else if (key == 'C') player.setRadius(player.getRadius() + 0.005f);
 		else if (key == 'V') player.setRadius(player.getRadius() - 0.005f);
+		else if (key == 'H') debug = !debug;
 		//DEBUG
 
 		else {
@@ -153,6 +155,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		ubo.playerPos = player.getSSBO().position;
 		ubo.playerRadius = player.getSSBO().radius;
 		ubo.fractalRotation = player.getSSBO().fractalRotation;
+		ubo.debug = debug;
 
 		model = glm::translate(unityMatrix, ubo.playerPos); // translate it down so it's at the center of the scene
 		if (!appInfo.freeCamera) model = glm::rotate(model, glm::radians(-(camera.getYaw() - 90.0f)), { 0, 1, 0 });
