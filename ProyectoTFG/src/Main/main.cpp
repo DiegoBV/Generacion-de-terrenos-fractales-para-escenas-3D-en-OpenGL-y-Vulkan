@@ -117,7 +117,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
 	glm::vec3 gravityDirection = { 0.0f, -1.0f, 0.0f };
-	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, { 0.0f, 3.0f, 0.0f }, 1.5f, 1.5f, 5.0f, 0.1f, 0.01f);
+	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, { 0.0f, 3.0f, 0.0f }, 1.5f, 1.5f, 5.0f, 0.1f, 0.5f, 0.01f);
 
 	computeShader.setSSBO(player.getSSBO());
 

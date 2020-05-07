@@ -74,6 +74,7 @@ void GLManager::init()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	model = GLModel(MODEL_PATH);
+	modelShader = nullptr;
 }
 
 void GLManager::update()
@@ -92,8 +93,10 @@ void GLManager::render()
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
-	modelShader->use();
-	model.Draw(modelShader);
+	if (modelShader != nullptr) {
+		modelShader->use();
+		model.Draw(modelShader);
+	}
 }
 
 void GLManager::release()

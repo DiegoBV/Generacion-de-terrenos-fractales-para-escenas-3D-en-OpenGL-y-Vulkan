@@ -7,15 +7,18 @@ PlayableObject::PlayableObject() : gravityDirection({ 0.0f, -1.0, 0.0f }), keyDi
 	ssbo.velocity = { 0.0f, 0.0f, 0.0f };
 	ssbo.mass = 1.0f;
 	ssbo.damping = 0.1f;
+	ssbo.airDamping = 0.5f;
 }
 
-PlayableObject::PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::vec3 position, float gravityForce, float mass, float acceleration, float damping)
-	: gravityDirection(gravityDir), keyDirection({ 0.0f, 0.0f, 0.0f }), gravityForce(gravityForce), acceleration(acceleration)
+PlayableObject::PlayableObject(glm::vec3 gravityDir, glm::vec3 velocity, glm::vec3 position, float gravityForce, float mass, 
+	float acceleration, float damping, float airDamping)
+	: gravityDirection(gravityDir), keyDirection({ 0, 0, 0 }), gravityForce(gravityForce), acceleration(acceleration)
 {
 	ssbo.position = position;
 	ssbo.velocity = velocity;
 	ssbo.mass = mass;
 	ssbo.damping = damping;
+	ssbo.airDamping = airDamping;
 }
 
 void PlayableObject::handleMovement(const char& key, const glm::vec3& direction, bool terrain)

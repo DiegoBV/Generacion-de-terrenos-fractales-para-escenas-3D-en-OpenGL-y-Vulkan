@@ -28,6 +28,7 @@ struct StorageBufferObject {
 	alignas(4) float radius;
 	alignas(4) float mass;
 	alignas(4) float damping;
+	alignas(4) float airDamping;
 	alignas(16) glm::vec3 fractalRotation;
 	alignas(16) glm::vec3 velocity;
 	alignas(16) glm::vec3 force;
