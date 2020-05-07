@@ -1,9 +1,3 @@
-const int MAX_MARCHING_STEPS = 128;
-const float MIN_DIST = 0.0;
-const float MAX_DIST = 100.0;
-const float EPSILON = 0.001;
-const float MARCHING_STEP = 0.5;
-
 vec3 color = vec3(0.0, 0.0, 0.0);
 
 mat3 rotateX(float angle)

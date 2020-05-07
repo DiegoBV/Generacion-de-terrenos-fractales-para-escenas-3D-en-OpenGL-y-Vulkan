@@ -194,9 +194,10 @@ char menu() {
 		system("cls");
 		std::cout << "Write the desired map" << std::endl;
 		std::cout << "1: Snow terrain" << std::endl;
-		std::cout << "2: Mandelbulb" << std::endl;
-		std::cout << "3: Mandelbox" << std::endl;
-		std::cout << "4: Debug scene" << std::endl;
+		std::cout << "2: Ocean terrain" << std::endl;
+		std::cout << "3: Mandelbulb" << std::endl;
+		std::cout << "4: Mandelbox" << std::endl;
+		std::cout << "5: Debug scene" << std::endl;
 		std::cout << "Q: Exit application" << std::endl;
 
 		std::cout << "Enter your selection: ";
@@ -226,13 +227,21 @@ InitApplicationInfo setAppInfo(const char& option) {
 		break;
 	case '2':
 		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "oceanTerrainFragment.c";
+		appInfo.computeName = "oceanTerrainCompute.c";
+		appInfo.terrain = true;
+		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
+		break;
+	case '3':
+		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "mandelbulbFragment.c";
 		appInfo.computeName = "mandelbulbCompute.c";
 		appInfo.terrain = false;
 		appInfo.freeCamera = false;
 		appInfo.explorationMode = false;
 		break;
-	case '3':
+	case '4':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "mandelboxFragment.c";
 		appInfo.computeName = "mandelboxCompute.c";
@@ -240,7 +249,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.freeCamera = true;
 		appInfo.explorationMode = true;
 		break;
-	case '4':
+	case '5':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "scene0fragment.c";
 		appInfo.computeName = "scene0Compute.c";
