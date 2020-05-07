@@ -23,7 +23,7 @@ public:
 	void update(float deltaTime);
 
 	inline void addForce(glm::vec3 value) { ssbo.force += value; };
-	inline void resetKeyDirection() { keyDirection = { 0, 0, 0 }; };
+	inline void resetKeyDirection() { keyDirection = { 0.0f, 0.0f, 0.0f }; };
 	inline StorageBufferObject getSSBO() { return ssbo; };
 	inline float getAcceleration() { return acceleration; }
 	inline glm::vec3 getPosition() { return ssbo.position; }

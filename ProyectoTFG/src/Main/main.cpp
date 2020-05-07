@@ -14,6 +14,7 @@ struct InitApplicationInfo {
 	std::string computeName;
 	bool terrain;
 	bool freeCamera;
+	bool explorationMode;
 };
 
 Camera camera;
@@ -43,7 +44,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	int state = glfwGetKey(window, key);
 	if (state == GLFW_PRESS) {
-		if (key == 'F') appInfo.freeCamera = !appInfo.freeCamera;
+		if (key == 'F' && !appInfo.explorationMode) appInfo.freeCamera = !appInfo.freeCamera;
 		//DEBUG
 		else if (key == 'Z') pivotOffset -= 0.1f;
 		else if (key == 'X') pivotOffset += 0.1f;
@@ -77,12 +78,6 @@ void release() {
 	ApplicationManager::GetSingleton()->ShutDownSingleton();
 	TimeManager::GetSingleton()->ShutDownSingleton();
 	Window::GetSingleton()->ShutDownSingleton();
-}
-
-float angleBetween(glm::vec3 a,glm::vec3 b,glm::vec3 origin) {
-	glm::vec3 da = glm::normalize(a - origin);
-	glm::vec3 db = glm::normalize(b - origin);
-	return glm::acos(glm::dot(da, db));
 }
 
 void runApplication(const std::string& vertex, const std::string& fragment, const std::string& compute, bool terrain) {
@@ -133,6 +128,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	float lastCameraYaw = 0.0f;
 	float lastDepthAdvance = 0.0f;
 	float lastLateralAdvance = 0.0f;
+	float rotationAngle = 300.0f;
 	glm::vec3 lastPlayerPosition;
 
 	// render loop
@@ -157,8 +153,8 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 
 		if (!appInfo.freeCamera) {
 			lastPlayerPosition = player.getSSBO().position;
-			lastDepthAdvance += player.getDirection().z * 300.0f * TimeManager::GetSingleton()->getDeltaTime();
-			lastLateralAdvance += (-player.getDirection().x) * 300.0f * TimeManager::GetSingleton()->getDeltaTime();
+			lastDepthAdvance += player.getDirection().z * rotationAngle * TimeManager::GetSingleton()->getDeltaTime();
+			lastLateralAdvance += (-player.getDirection().x) * rotationAngle * TimeManager::GetSingleton()->getDeltaTime();
 			lastCameraYaw = camera.getYaw();
 		}
 
@@ -226,6 +222,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.computeName = "snowTerrainCompute.c";
 		appInfo.terrain = true;
 		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
 		break;
 	case '2':
 		appInfo.vertexName = "vertex.c";
@@ -233,13 +230,15 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.computeName = "mandelbulbCompute.c";
 		appInfo.terrain = false;
 		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
 		break;
 	case '3':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "mandelboxFragment.c";
 		appInfo.computeName = "mandelboxCompute.c";
 		appInfo.terrain = false;
-		appInfo.freeCamera = false;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
 		break;
 	case '4':
 		appInfo.vertexName = "vertex.c";
@@ -247,6 +246,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.computeName = "scene0Compute.c";
 		appInfo.terrain = true;
 		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
 		break;
 	default:
 		break;
