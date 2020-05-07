@@ -176,7 +176,7 @@ vec3 getColor(vec3 p, vec3 cameraEye, vec3 rayDir, vec2 resolution, vec2 fragCoo
   vec2 s = xy*vec2(1.75,1.0);
 
   // get camera position and view direction
-  float kk = 1.0;
+  float kk = (time+13.5+44.)*.05;
   vec3 campos = camera( kk );
   vec3 camtar = camera( kk + 0.4 );
   campos.y = max(waterlevel+30.0, waterlevel+90.0 + 60.0*sin(kk*2.0));
