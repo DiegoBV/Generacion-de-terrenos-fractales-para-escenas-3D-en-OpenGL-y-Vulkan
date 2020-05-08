@@ -208,7 +208,7 @@ char menu() {
 			break;
 		}
 
-	} while(option <= '0' || option > '4');
+	} while(option <= '0' || option > '5');
 
 	return option;
 }
