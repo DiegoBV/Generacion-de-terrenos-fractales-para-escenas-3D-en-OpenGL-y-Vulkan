@@ -11,6 +11,7 @@ layout(std430, binding=0) buffer Pos{
     float radius;
     float mass;
     float damping;
+    float airDamping;
     vec3 fractalRotation;
     vec3 velocity;
     vec3 force;
@@ -19,7 +20,7 @@ layout(std430, binding=0) buffer Pos{
     vec3 collisionDirs[COLLISION_SAMPLES];
 };
 
-#include ..\\..\\Shaders\\snowTerrain.c
+#include ..\\..\\Shaders\\oceanTerrain.c
 
 void main(){
     position += velocity * deltaTime;
@@ -28,15 +29,15 @@ void main(){
 
     vec3 totalAcceleration = force / mass;
     velocity += totalAcceleration * deltaTime;
-    if(!isGrounded) currentDamping = currentDamping/5.0;
-    velocity *= pow(damping, deltaTime);
+    if(!isGrounded) currentDamping = airDamping;
+    velocity *= pow(airDamping, deltaTime);
 
     // reset de las fuerzas
     force.x = force.y = force.z = 0;
 
     isGrounded = false;
     for(int i = 0; i < COLLISION_SAMPLES; i++){
-        float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST);
+        float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST)/28000;
 
         if(dist /*+ (radius/5)*/ < radius){
             isGrounded = true;

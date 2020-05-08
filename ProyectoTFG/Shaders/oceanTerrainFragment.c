@@ -63,8 +63,7 @@ void main()
     
     //tracing the ray (getting the distance of the closest object in the ray direction)
 	
-    float fractal = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST);
-
+    float fractal = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST, ubo.time);
     float pelota = rayMarchDebug(rayOrigin, rayDir, MIN_DIST, MAX_DIST, sphere);
 
     float distanceToSurface = 0.0f;
@@ -75,7 +74,7 @@ void main()
         distanceToSurface = fractal;
     }
     
-    gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
+    //gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
     
     //DEBUG (modelo)
     if(ubo.debug && pelota < fractal){
@@ -85,5 +84,5 @@ void main()
 
     vec3 p = rayOrigin + rayDir * distanceToSurface;
 
-    outColor = vec4(getColor(p, ubo.cameraEye, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
+    outColor = vec4(getColor(p, rayOrigin, rayDir, ubo.resolution, gl_FragCoord.xy, ubo.viewMat, ubo.yDirection, ubo.time), 1);
 }

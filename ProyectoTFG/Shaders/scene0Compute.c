@@ -11,6 +11,7 @@ layout(std430, binding=0) buffer Pos{
     float radius;
     float mass;
     float damping;
+    float airDamping;
     vec3 fractalRotation;
     vec3 velocity;
     vec3 force;
@@ -27,9 +28,12 @@ float far  = 100.0;
 void main(){
     position += velocity * deltaTime;
 
+    float currentDamping = damping;
+
     vec3 totalAcceleration = force / mass;
     velocity += totalAcceleration * deltaTime;
-    velocity *= pow(damping, deltaTime);
+    if(!isGrounded) currentDamping = airDamping;
+    velocity *= pow(airDamping, deltaTime);
 
     // reset de las fuerzas
     force.x = force.y = force.z = 0;

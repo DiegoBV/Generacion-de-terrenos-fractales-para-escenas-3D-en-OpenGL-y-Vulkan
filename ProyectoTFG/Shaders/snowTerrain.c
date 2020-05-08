@@ -195,6 +195,27 @@ void setColor(vec3 p, vec3 n, out vec3 color) {
   color = mix(vec3(1.), ground, a);  
 }
 
+
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end)
+{
+    //t is the point at which we are in the measuring of the distance
+    float t = start;
+    float dist = 0.0;
+
+    for (int i = 0; i < MAX_MARCHING_STEPS; i++)
+    {
+        dist = SDF(eye + t * marchingDirection);
+
+        if (dist < EPSILON * t || t > MAX_DIST) break;
+        
+        t += MARCHING_STEP * dist;
+    }
+
+    dist < EPSILON * t ? (sceneDist = t) : (sceneDist = MAX_DIST);
+
+    return sceneDist;
+}
+
 vec3 getColor(vec3 p, vec3 cameraEye, vec3 rayDir, vec2 resolution, vec2 fragCoord, mat4 viewMat, float yDirection, float time)
 {
     if (sceneDist < MAX_DIST)

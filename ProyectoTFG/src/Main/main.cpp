@@ -230,8 +230,8 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.fragmentName = "oceanTerrainFragment.c";
 		appInfo.computeName = "oceanTerrainCompute.c";
 		appInfo.terrain = true;
-		appInfo.freeCamera = false;
-		appInfo.explorationMode = false;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
 		break;
 	case '3':
 		appInfo.vertexName = "vertex.c";

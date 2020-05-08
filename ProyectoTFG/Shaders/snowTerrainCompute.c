@@ -11,6 +11,7 @@ layout(std430, binding=0) buffer Pos{
     float radius;
     float mass;
     float damping;
+    float airDamping;
     vec3 fractalRotation;
     vec3 velocity;
     vec3 force;
@@ -22,14 +23,14 @@ layout(std430, binding=0) buffer Pos{
 #include ..\\..\\Shaders\\snowTerrain.c
 
 void main(){
-    position += velocity * deltaTime;
+   position += velocity * deltaTime;
 
     float currentDamping = damping;
 
     vec3 totalAcceleration = force / mass;
     velocity += totalAcceleration * deltaTime;
-    if(!isGrounded) currentDamping = currentDamping/5.0;
-    velocity *= pow(damping, deltaTime);
+    if(!isGrounded) currentDamping = airDamping;
+    velocity *= pow(airDamping, deltaTime);
 
     // reset de las fuerzas
     force.x = force.y = force.z = 0;

@@ -1,14 +1,10 @@
-const float LOW_STEPS = 2;
-const float MID_STEPS = 5;
-const float HIGH_STEPS = 12;
-
 const int MAX_MARCHING_STEPS = 128;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
 const float EPSILON = 0.001;
-float MARCHING_STEP = 0.5;
+float MARCHING_STEP = 0.9;
 
-float SDF(vec3 z);
+float SDF(vec3 p);
 float sceneDist = 0.0;
 
 #include ..\\..\\Shaders\\terrainFunctions.c
@@ -31,7 +27,6 @@ float fog;
 float h = 20.0;
 float alpha = 0.1;
 float asum = 0.0;
-float k = 0.0;
 float sundot; 
 
 vec3 light       = normalize( vec3(  0.1, 0.25,  0.9 ) );
@@ -71,12 +66,12 @@ float fbm( vec3 p )
 }
 
 // this calculates the water as a height of a given position
-float water( vec2 p )
+float water( vec2 p , float time)
 {
   float height = waterlevel;
 
-  vec2 shift1 = 0.001*vec2( ubo.time*160.0*2.0, ubo.time*120.0*2.0 );
-  vec2 shift2 = 0.001*vec2( ubo.time*190.0*2.0, -ubo.time*130.0*2.0 );
+  vec2 shift1 = 0.001*vec2( time*160.0*2.0, time*120.0*2.0 );
+  vec2 shift2 = 0.001*vec2( time*190.0*2.0, -time*130.0*2.0 );
 
   // coarse crossing 'ocean' waves...
   float wave = 0.0;
@@ -105,11 +100,11 @@ float water( vec2 p )
 }
 
 // cloud intersection raycasting
-float trace_fog(in vec3 rStart, in vec3 rDirection )
+float trace_fog(in vec3 rStart, in vec3 rDirection , float time)
 {
 #if RENDER_CLOUDS
   // makes the clouds moving...
-  vec2 shift = vec2( ubo.time*80.0, ubo.time*60.0 );
+  vec2 shift = vec2( time*80.0, time*60.0 );
   float sum = 0.0;
   float q2 = 0., q3 = 0.;
   for (int q=0; q<10; q++)
@@ -130,18 +125,19 @@ float trace_fog(in vec3 rStart, in vec3 rDirection )
 #endif
 }
 
-// fog and water intersection function.
-// 1st: collects fog intensity while traveling
-// 2nd: check if hits the water surface and returns the distance
-float trace(in vec3 eye, in vec3 marchingDirection, float start, float end)
+float SDF(vec3 p, float time) {
+  h = p.y - water(p.xz, time);
+  return max(1.0,1.0*h);
+}
+
+float rayMarch(vec3 eye, vec3 marchingDirection, float start, float end, float time)
 {
   float t = start;
   float dist = 0.0;
 	
   for( int j=0; j<MAX_MARCHING_STEPS; j++ )
   {
-    dist = SDF(eye + t * marchingDirection);
-    //if (dist < EPSILON * t || t > MAX_DIST) break;
+    dist = SDF(eye + t * marchingDirection, time);
     t += MARCHING_STEP*dist;
   }
 
@@ -150,50 +146,8 @@ float trace(in vec3 eye, in vec3 marchingDirection, float start, float end)
   return sceneDist;
 }
 
-float SDF(vec3 p) {
-// some speed-up if all is far away...
-    if( k>500.0 ) 
-      MARCHING_STEP = 2.0;
-    else if( k>800.0 ) 
-      MARCHING_STEP = 5.0;
-    else if( k>1000.0 ) 
-      MARCHING_STEP = 12.0;
-
-  h = p.y - water(p.xz)*2.0;
-  float dist = max(1.0,1.0*h);
-  k += MARCHING_STEP*dist;
-  return dist;
-}
-
-vec3 camera( float time )
-{
-  return vec3( 500.0 * sin(1.5+1.57*time), 0.0, 1200.0*time );
-}
-
 vec3 getColor(vec3 p, vec3 cameraEye, vec3 rayDir, vec2 resolution, vec2 fragCoord, mat4 viewMat, float yDirection, float time)
 {
-  vec2 xy = -1.0 + 2.0*fragCoord.xy / ubo.resolution.xy;
-  vec2 s = xy*vec2(1.75,1.0);
-
-  // get camera position and view direction
-  float kk = (time+13.5+44.)*.05;
-  vec3 campos = camera( kk );
-  vec3 camtar = camera( kk + 0.4 );
-  campos.y = max(waterlevel+30.0, waterlevel+90.0 + 60.0*sin(kk*2.0));
-  camtar.y = campos.y*0.5;
-
-  float roll = 0.14*sin(kk*1.2);
-  vec3 cw = normalize(camtar-campos);
-  vec3 cp = vec3(sin(roll), cos(roll),0.0);
-  vec3 cu = normalize(cross(cw,cp));
-  vec3 cv = normalize(cross(cu,cw));
-  vec3 rd = normalize( s.x*cu + s.y*cv + 1.6*cw );
-
-  cameraEye = campos;
-  rayDir = rd;
-
-  sceneDist = trace(cameraEye, rd, MIN_DIST, MAX_DIST);
-
   float sundot = clamp(dot(rayDir,light),0.0,1.0);
 
   vec3 col;
@@ -248,10 +202,10 @@ vec3 getColor(vec3 p, vec3 cameraEye, vec3 rayDir, vec2 resolution, vec2 fragCoo
     vec2 ydiff = vec2(0.0, 0.1)*wavegain*4.;
 
     // get the reflected ray direction
-    rayDir = reflect(rayDir, normalize(vec3(water(wpos.xz-xdiff) - water(wpos.xz+xdiff), 1.0, water(wpos.xz-ydiff) - water(wpos.xz+ydiff))));  
+    rayDir = reflect(rayDir, normalize(vec3(water(wpos.xz-xdiff, time) - water(wpos.xz+xdiff, time), 1.0, water(wpos.xz-ydiff, time) - water(wpos.xz+ydiff, time))));  
     float refl = 1.0-clamp(dot(rayDir,vec3(0.0, 1.0, 0.0)),0.0,1.0);
   
-    float sh = smoothstep(0.2, 1.0, trace_fog(wpos+20.0*rayDir,rayDir))*.7+.3;
+    float sh = smoothstep(0.2, 1.0, trace_fog(wpos+20.0*rayDir,rayDir, time))*.7+.3;
     // water reflects more the lower the reflecting angle is...
     float wsky   = refl*sh;     // reflecting (sky-color) amount
     float wwater = (1.0-refl)*sh; // water-color amount
