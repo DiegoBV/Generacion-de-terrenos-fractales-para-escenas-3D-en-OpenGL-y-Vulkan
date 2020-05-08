@@ -37,7 +37,7 @@ void main(){
 
     isGrounded = false;
     for(int i = 0; i < COLLISION_SAMPLES; i++){
-        float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST)/28000;
+        float dist = rayMarch(position, collisionDirs[i], MIN_DIST, MAX_DIST, time)/28000;
 
         if(dist /*+ (radius/5)*/ < radius){
             isGrounded = true;
