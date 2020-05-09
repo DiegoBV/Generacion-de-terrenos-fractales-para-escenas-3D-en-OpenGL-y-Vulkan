@@ -53,7 +53,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		else if (key == 'H') debug = !debug;
 		//DEBUG
 
-		else {
+		else if(key == 'W' || key == 'A' || key == 'S' || key == 'D') {
 			if (appInfo.freeCamera)
 				camera.handleMovement(key);
 			else
