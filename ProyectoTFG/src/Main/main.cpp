@@ -197,7 +197,8 @@ char menu() {
 		std::cout << "2: Ocean terrain" << std::endl;
 		std::cout << "3: Mandelbulb" << std::endl;
 		std::cout << "4: Mandelbox" << std::endl;
-		std::cout << "5: Debug scene" << std::endl;
+		std::cout << "5: Mandelbox tunnel" << std::endl;
+		std::cout << "6: Debug scene" << std::endl;
 		std::cout << "Q: Exit application" << std::endl;
 
 		std::cout << "Enter your selection: ";
@@ -250,6 +251,14 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.explorationMode = true;
 		break;
 	case '5':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "mandelboxTunnelFragment.c";
+		appInfo.computeName = "mandelboxTunnelCompute.c";
+		appInfo.terrain = false;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
+		break;
+	case '6':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "scene0fragment.c";
 		appInfo.computeName = "scene0Compute.c";
