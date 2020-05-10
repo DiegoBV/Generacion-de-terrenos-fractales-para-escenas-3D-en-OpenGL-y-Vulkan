@@ -7,7 +7,7 @@ class PlayableObject
 protected:
 	StorageBufferObject ssbo = {};
 	float acceleration;
-	float fractalVelocity = 0.2f;
+	float fractalVelocity = 0.05f;
 	glm::vec3 keyDirection;
 	glm::vec3 gravityDirection;
 	float gravityForce;

@@ -79,6 +79,7 @@ void VulkanManager::release()
 	for (auto framebuffer : swapChainFramebuffers) {
 		vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
 	}
+	vkDestroyPipelineCache(logicalDevice, pipelineCache, nullptr);
 	vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 	for (VkPipeline graphicPipeline : graphicsPipelines) {
 		vkDestroyPipeline(logicalDevice, graphicPipeline, nullptr);

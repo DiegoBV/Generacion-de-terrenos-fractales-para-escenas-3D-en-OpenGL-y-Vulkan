@@ -14,15 +14,15 @@ void Camera::updateCameraVectors()
     up = glm::normalize(glm::cross(right, front));
 }
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), eye(position), worldUp(up), 
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float velocity)
+    : front(glm::vec3(0.0f, 0.0f, -1.0f)), velocity(velocity), mouseSensitivity(SENSITIVITY), zoom(ZOOM), eye(position), worldUp(up), 
     yaw(yaw), pitch(pitch), lastTarget(0.0f), minDist(0.005)
 {
     updateCameraVectors();
 }
 
-Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) 
-    : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM), 
+Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch, float velocity) 
+    : front(glm::vec3(0.0f, 0.0f, -1.0f)), velocity(velocity), mouseSensitivity(SENSITIVITY), zoom(ZOOM),
     yaw(yaw), pitch(pitch), lastTarget( 0.0f), minDist(0.005)
 {
     eye = glm::vec3(posX, posY, posZ);
@@ -32,15 +32,15 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 void Camera::applyDirection(Camera_Movement direction, float deltaTime)
 {
-    float velocity = movementSpeed * deltaTime;
+    float vel = velocity * deltaTime;
     if (direction == FORWARD)
-        eye += front * velocity;
+        eye += front * vel;
     if (direction == BACKWARD)
-        eye -= front * velocity;
+        eye -= front * vel;
     if (direction == LEFT)
-        eye -= right * velocity;
+        eye -= right * vel;
     if (direction == RIGHT)
-        eye += right * velocity;
+        eye += right * vel;
 }
 
 void Camera::handleMovement(char key)

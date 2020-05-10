@@ -9,12 +9,21 @@
 #include <vector>
 
 struct InitApplicationInfo {
-	std::string vertexName;
-	std::string fragmentName;
-	std::string computeName;
 	bool terrain;
 	bool freeCamera;
 	bool explorationMode;
+
+	float cameraVelocity;
+	float playerAcceleration;
+	float collisionRadius;
+	float pivotOffset;
+
+	glm::vec3 initialPosition;
+	glm::vec3 modelScale;
+
+	std::string vertexName;
+	std::string fragmentName;
+	std::string computeName;
 };
 
 Camera camera;
@@ -24,6 +33,107 @@ bool debug = false;
 PlayableSphere player;
 
 InitApplicationInfo appInfo;
+
+InitApplicationInfo setAppInfo(const char& option) {
+
+	switch (option)
+	{
+	case '1':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "snowTerrainFragment.c";
+		appInfo.computeName = "snowTerrainCompute.c";
+		appInfo.terrain = true;
+		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
+
+		appInfo.initialPosition = {0.0f, 1.2f, 0.0f};
+		appInfo.playerAcceleration = 5.0f;
+		appInfo.collisionRadius = 0.065f;
+		appInfo.modelScale = {0.1f, 0.1f, 0.1f};
+		appInfo.cameraVelocity = 1.0f;
+		appInfo.pivotOffset = 1.7f;
+		break;
+	case '2':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "oceanTerrainFragment.c";
+		appInfo.computeName = "oceanTerrainCompute.c";
+		appInfo.terrain = true;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
+
+		appInfo.initialPosition = { 0.0f, 100.0f, 0.0f };
+		appInfo.playerAcceleration = 10.0f;
+		appInfo.collisionRadius = 0.065f;
+		appInfo.modelScale = { 0.1f, 0.1f, 0.1f };
+		appInfo.cameraVelocity = 100.0f;
+		appInfo.pivotOffset = 1.7f;
+		break;
+	case '3':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "mandelbulbFragment.c";
+		appInfo.computeName = "mandelbulbCompute.c";
+		appInfo.terrain = false;
+		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
+
+		appInfo.initialPosition = { 0.0f, 1.2f, 0.0f };
+		appInfo.playerAcceleration = 0.1f;
+		appInfo.collisionRadius = 0.04;
+		appInfo.modelScale = { 0.05f, 0.05f, 0.05f };
+		appInfo.cameraVelocity = 1.0f;
+		appInfo.pivotOffset = 0.7f;
+		break;
+	case '4':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "mandelboxFragment.c";
+		appInfo.computeName = "mandelboxCompute.c";
+		appInfo.terrain = false;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
+
+		appInfo.initialPosition = { 0.0f, -1.0f, 40.0f };
+		appInfo.playerAcceleration = 10.0f;
+		appInfo.collisionRadius = 0.065f;
+		appInfo.modelScale = { 0.1f, 0.1f, 0.1f };
+		appInfo.cameraVelocity = 5.0f;
+		appInfo.pivotOffset = 1.7f;
+		break;
+	case '5':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "mandelboxTunnelFragment.c";
+		appInfo.computeName = "mandelboxTunnelCompute.c";
+		appInfo.terrain = false;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
+
+		appInfo.initialPosition = { 0.0f, 0.0f, 5.5f };
+		appInfo.playerAcceleration = 10.0f;
+		appInfo.collisionRadius = 0.065f;
+		appInfo.modelScale = { 0.1f, 0.1f, 0.1f };
+		appInfo.cameraVelocity = 0.25f;
+		appInfo.pivotOffset = 1.7f;
+		break;
+	case '6':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "scene0fragment.c";
+		appInfo.computeName = "scene0Compute.c";
+		appInfo.terrain = true;
+		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
+
+		appInfo.initialPosition = { 0.0f, 0.0f, 15.0f };
+		appInfo.playerAcceleration = 50.0f;
+		appInfo.collisionRadius = 3.6f;
+		appInfo.modelScale = { 5.5f, 5.5f, 5.5f };
+		appInfo.cameraVelocity = 1.0f;
+		appInfo.pivotOffset = 52.0f;
+		break;
+	default:
+		break;
+	}
+
+	return appInfo;
+}
 
 //calcula el desplazamiento del raton al moverlo y manda a la camara moverse en funcion de el
 //callback llamado cada vez que movemos el raton. Solo manda mover a la camara cuando estamos clicando, 
@@ -61,6 +171,9 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		}
 	}
 	else player.resetKeyDirection();
+
+	std::cout << player.getRadius() << std::endl;
+	std::cout << pivotOffset << std::endl;
 }
 
 void init() {
@@ -85,6 +198,9 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	TimeManager* timeManager = TimeManager::GetSingleton();
 	ApplicationManager* appManager = ApplicationManager::GetSingleton();
 	Window* window = Window::GetSingleton();
+	camera.setEye(appInfo.initialPosition);
+	camera.setVelocity(appInfo.cameraVelocity);
+	pivotOffset = appInfo.pivotOffset;
 
 	std::list<RenderShader*> renderShaders;
 
@@ -117,7 +233,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
 	glm::vec3 gravityDirection = { 0.0f, -1.0f, 0.0f };
-	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, { 0.0f, 3.0f, 0.0f }, 1.5f, 1.5f, 10.0f, 0.01f, 0.2f, 0.01f);
+	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, appInfo.initialPosition, 1.5f, 1.5f, appInfo.playerAcceleration, 0.01f, 0.2f, appInfo.collisionRadius);
 
 	computeShader.setSSBO(player.getSSBO());
 
@@ -158,15 +274,17 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 			lastCameraYaw = camera.getYaw();
 		}
 
-		model = glm::translate(unityMatrix, lastPlayerPosition); // translate it down so it's at the center of the scene
-		model = glm::rotate(model, glm::radians(-lastCameraYaw - 180.0f), { 0, 1, 0 });
+		model = glm::translate(unityMatrix, lastPlayerPosition); // translate 
+		model = glm::rotate(model, glm::radians(-lastCameraYaw - 180.0f), { 0, 1, 0 }); // rotate
 		model = glm::rotate(model, glm::radians(lastDepthAdvance), { 0, 0, 1 });
 		model = glm::rotate(model, glm::radians(lastLateralAdvance), { 1, 0, 0 });
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, appInfo.modelScale);	// scale 
 
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
 		ubo.viewMat = transpose(camera.getViewMatrix());
+		//if(!freecamera)
+		//	ubo.lastViewMatrix = transpose(camera.getViewMatrix()); // esta es la q usa el modelo, importante para q no haya problemas con la free camera
 		ubo.time = timeManager->getTimeSinceBeginning();
 		ubo.playerPos = lastPlayerPosition;
 		ubo.playerRadius = player.getSSBO().radius;
@@ -195,7 +313,7 @@ char menu() {
 		std::cout << "Write the desired map" << std::endl;
 		std::cout << "1: Snow terrain" << std::endl;
 		std::cout << "2: Ocean terrain" << std::endl;
-		std::cout << "3: Mandelbulb" << std::endl;
+		std::cout << "3: Mandelbulb (experimental)" << std::endl;
 		std::cout << "4: Mandelbox" << std::endl;
 		std::cout << "5: Mandelbox tunnel" << std::endl;
 		std::cout << "6: Debug scene" << std::endl;
@@ -209,69 +327,11 @@ char menu() {
 			break;
 		}
 
-	} while(option <= '0' || option > '5');
+	} while(option <= '0' || option > '6');
 
 	return option;
 }
 
-InitApplicationInfo setAppInfo(const char& option) {
-
-	switch (option)
-	{
-	case '1':
-		appInfo.vertexName = "vertex.c";
-		appInfo.fragmentName = "snowTerrainFragment.c";
-		appInfo.computeName = "snowTerrainCompute.c";
-		appInfo.terrain = true;
-		appInfo.freeCamera = false;
-		appInfo.explorationMode = false;
-		break;
-	case '2':
-		appInfo.vertexName = "vertex.c";
-		appInfo.fragmentName = "oceanTerrainFragment.c";
-		appInfo.computeName = "oceanTerrainCompute.c";
-		appInfo.terrain = true;
-		appInfo.freeCamera = true;
-		appInfo.explorationMode = true;
-		break;
-	case '3':
-		appInfo.vertexName = "vertex.c";
-		appInfo.fragmentName = "mandelbulbFragment.c";
-		appInfo.computeName = "mandelbulbCompute.c";
-		appInfo.terrain = false;
-		appInfo.freeCamera = false;
-		appInfo.explorationMode = false;
-		break;
-	case '4':
-		appInfo.vertexName = "vertex.c";
-		appInfo.fragmentName = "mandelboxFragment.c";
-		appInfo.computeName = "mandelboxCompute.c";
-		appInfo.terrain = false;
-		appInfo.freeCamera = true;
-		appInfo.explorationMode = true;
-		break;
-	case '5':
-		appInfo.vertexName = "vertex.c";
-		appInfo.fragmentName = "mandelboxTunnelFragment.c";
-		appInfo.computeName = "mandelboxTunnelCompute.c";
-		appInfo.terrain = false;
-		appInfo.freeCamera = true;
-		appInfo.explorationMode = true;
-		break;
-	case '6':
-		appInfo.vertexName = "vertex.c";
-		appInfo.fragmentName = "scene0fragment.c";
-		appInfo.computeName = "scene0Compute.c";
-		appInfo.terrain = true;
-		appInfo.freeCamera = false;
-		appInfo.explorationMode = false;
-		break;
-	default:
-		break;
-	}
-
-	return appInfo;
-}
 
 int main()
 {
