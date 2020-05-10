@@ -43,6 +43,9 @@ https://imaginary.org/film/3d-fractal-trip-far-away
 -Fractal terrain 6: https://flafla2.github.io/2014/08/09/perlinnoise.html
 -Fractal terrain 7: https://www.shadertoy.com/view/4sXGRM
 
+-Planet terrain: https://www.shadertoy.com/view/lltBWB
+-Cloud terrain: https://www.shadertoy.com/view/XtS3DD
+
 -Physics:
 https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
 

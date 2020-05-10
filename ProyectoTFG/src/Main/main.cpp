@@ -171,9 +171,6 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		}
 	}
 	else player.resetKeyDirection();
-
-	std::cout << player.getRadius() << std::endl;
-	std::cout << pivotOffset << std::endl;
 }
 
 void init() {
@@ -283,8 +280,6 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 		ubo.cameraEye = camera.getEye();
 		ubo.cameraFront = camera.getFront();
 		ubo.viewMat = transpose(camera.getViewMatrix());
-		//if(!freecamera)
-		//	ubo.lastViewMatrix = transpose(camera.getViewMatrix()); // esta es la q usa el modelo, importante para q no haya problemas con la free camera
 		ubo.time = timeManager->getTimeSinceBeginning();
 		ubo.playerPos = lastPlayerPosition;
 		ubo.playerRadius = player.getSSBO().radius;

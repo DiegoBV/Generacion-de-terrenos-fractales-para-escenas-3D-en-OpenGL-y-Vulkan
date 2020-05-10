@@ -14,6 +14,8 @@ layout(binding = 0) uniform UniformBufferObject {
     vec3 playerPos;
     vec4 playerColor;
     mat4 viewMat;
+    mat4 model;
+    mat4 projection;
 } ubo;
 
 layout(location = 0) out vec4 outColor;
