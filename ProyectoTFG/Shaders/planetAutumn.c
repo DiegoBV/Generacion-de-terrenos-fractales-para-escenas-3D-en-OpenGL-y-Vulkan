@@ -97,9 +97,9 @@ float SDF(in vec3 p, out vec4 color, const in bool doColor, vec3 rotation)
     float dmin = lp - 1.0;
     {
         vec3 w = p / lp;
-        vec4 fibo = inverseSF(w, 700.0);
+        vec4 fibo = inverseSF(w, 1500.0);
         float hh = 1.0 - smoothstep(0.05, 0.1, length(fibo.xyz - w));
-        dmin -= 0.07 * hh;
+        dmin -= 0.02 * hh;
         color = vec4(0.05, 0.1, 0.1, 1.0) * hh * (1.0 + 0.5 * sin(fibo.w * 111.1));
     }
 
