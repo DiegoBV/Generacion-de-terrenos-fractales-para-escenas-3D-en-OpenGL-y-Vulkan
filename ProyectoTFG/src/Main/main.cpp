@@ -20,6 +20,7 @@ struct InitApplicationInfo {
 
 	glm::vec3 initialPosition;
 	glm::vec3 modelScale;
+	glm::vec3 cameraDirection;
 
 	std::string vertexName;
 	std::string fragmentName;
@@ -50,6 +51,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.playerAcceleration = 5.0f;
 		appInfo.collisionRadius = 0.065f;
 		appInfo.modelScale = {0.1f, 0.1f, 0.1f};
+		appInfo.cameraDirection = {0.0f, 0.0f, -1.0f};
 		appInfo.cameraVelocity = 1.0f;
 		appInfo.pivotOffset = 1.7f;
 		break;
@@ -65,7 +67,8 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.playerAcceleration = 10.0f;
 		appInfo.collisionRadius = 0.065f;
 		appInfo.modelScale = { 0.1f, 0.1f, 0.1f };
-		appInfo.cameraVelocity = 100.0f;
+		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
+		appInfo.cameraVelocity = 500.0f;
 		appInfo.pivotOffset = 1.7f;
 		break;
 	case '3':
@@ -80,6 +83,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.playerAcceleration = 0.1f;
 		appInfo.collisionRadius = 0.04;
 		appInfo.modelScale = { 0.05f, 0.05f, 0.05f };
+		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 1.0f;
 		appInfo.pivotOffset = 0.7f;
 		break;
@@ -95,7 +99,8 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.playerAcceleration = 10.0f;
 		appInfo.collisionRadius = 0.065f;
 		appInfo.modelScale = { 0.1f, 0.1f, 0.1f };
-		appInfo.cameraVelocity = 5.0f;
+		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
+		appInfo.cameraVelocity = 10.0f;
 		appInfo.pivotOffset = 1.7f;
 		break;
 	case '5':
@@ -110,6 +115,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.playerAcceleration = 10.0f;
 		appInfo.collisionRadius = 0.065f;
 		appInfo.modelScale = { 0.1f, 0.1f, 0.1f };
+		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 0.25f;
 		appInfo.pivotOffset = 1.7f;
 		break;
@@ -125,6 +131,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.playerAcceleration = 50.0f;
 		appInfo.collisionRadius = 3.6f;
 		appInfo.modelScale = { 5.5f, 5.5f, 5.5f };
+		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 1.0f;
 		appInfo.pivotOffset = 52.0f;
 		break;
@@ -196,15 +203,18 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	ApplicationManager* appManager = ApplicationManager::GetSingleton();
 	Window* window = Window::GetSingleton();
 	camera.setEye(appInfo.initialPosition);
+	camera.setFront(appInfo.cameraDirection);
 	camera.setVelocity(appInfo.cameraVelocity);
 	pivotOffset = appInfo.pivotOffset;
 
 	std::list<RenderShader*> renderShaders;
 
-	ComputeShader computeShader = ComputeShader();
-	computeShader.init(compute);
-	computeShader.use();
-	appManager->addComputeShader(&computeShader);
+	ComputeShader computeShader;
+	if (!appInfo.explorationMode) {
+		computeShader.init(compute);
+		computeShader.use();
+		appManager->addComputeShader(&computeShader);
+	}
 
 	RenderShader renderShader = RenderShader();
 	renderShader.init(vertex, fragment);

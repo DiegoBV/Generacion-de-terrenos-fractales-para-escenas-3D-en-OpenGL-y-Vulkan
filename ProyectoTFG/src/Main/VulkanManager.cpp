@@ -694,6 +694,8 @@ void VulkanManager::createComputePipeline()
 {
 	// create pipelines
 	// first
+	if (computeShaders.empty())return;
+
 	VkShaderModule compute_density_pressure_shader_module = computeShaders.front()->getComputeShaderModule();
 
 	VkPipelineShaderStageCreateInfo compute_shader_stage_create_info
@@ -1005,7 +1007,10 @@ void VulkanManager::createCommandBuffers()
 		renderPassInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+
+		if (!computeShaders.empty()) {
+			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
+		}
 
 		for (int j = 0; j < renderShaders.size(); j++) {
 
@@ -1118,6 +1123,8 @@ void VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
 void VulkanManager::updateStorageBuffer()
 {
+	if (computeShaders.empty())return;
+
 	void* data;
 	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(StorageBufferObject), 0, &data);
 	memcpy(data, &computeShaders.front()->getSSBO(), sizeof(StorageBufferObject));
@@ -1126,6 +1133,8 @@ void VulkanManager::updateStorageBuffer()
 
 StorageBufferObject VulkanManager::getStorageBuffer()
 {
+	if (computeShaders.empty())return StorageBufferObject();
+
 	void* data;
 	vkMapMemory(logicalDevice, storageBufferMemory, 0, sizeof(computeShaders.front()->getSSBO()), 0, &data);
 	StorageBufferObject* ssbo = (StorageBufferObject*)data;
@@ -1358,6 +1367,8 @@ void VulkanManager::drawFrame()
 
 void VulkanManager::runComputeShader()
 {
+	if (computeShaders.empty())return;
+
 	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	vkBeginCommandBuffer(computeCommandBuffer, &beginInfo);
@@ -1449,6 +1460,8 @@ void VulkanManager::createComputeCommandPool()
 
 void VulkanManager::createComputeCommandBuffer()
 {
+	if (computeShaders.empty())return;
+
 	// allocate command buffer
 	VkCommandBufferAllocateInfo command_buffer_allocate_info
 	{
