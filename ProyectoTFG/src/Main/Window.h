@@ -8,8 +8,8 @@ private:
 	GLFWwindow* window = nullptr;
 	static Window* instance;
 	// settings
-	const unsigned int SRC_WIDTH = 1600;
-	const unsigned int SRC_HEIGHT = 900;
+	const unsigned int SRC_WIDTH = 1280;
+	const unsigned int SRC_HEIGHT = 720;
 
 	Window();
 	~Window();

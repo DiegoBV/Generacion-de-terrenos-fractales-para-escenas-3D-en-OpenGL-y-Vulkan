@@ -26,20 +26,23 @@ void Window::init()
 		// glfw: initialize and configure
 		// ------------------------------
 		glfwInit();
-#if defined (GL_DEBUG) || defined (GL_RELEASE) // no se me ocurria otra manera sin hacer dos clases diferentes
+		std::string windowName = "";
+#if defined (GL_DEBUG) || defined (GL_RELEASE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		windowName = "Terrain generation through fractals - OpenGL";
 #elif defined(VULKAN_DEBUG) || defined(VULKAN_RELEASE)
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // different from OPENGL
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		windowName = "Terrain generation through fractals - Vulkan";
 #elif __APPLE__
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
 #endif
 
 	// glfw window creation
 	// --------------------
-		window = glfwCreateWindow(SRC_WIDTH, SRC_HEIGHT, "LearnOpenGL", NULL, NULL);
+		window = glfwCreateWindow(SRC_WIDTH, SRC_HEIGHT, windowName.c_str(), NULL, NULL);
 		if (window == NULL)
 		{
 			std::cout << "Failed to create GLFW window" << std::endl;

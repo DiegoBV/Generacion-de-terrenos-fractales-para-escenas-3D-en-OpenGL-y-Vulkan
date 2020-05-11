@@ -17,6 +17,7 @@ struct InitApplicationInfo {
 	float playerAcceleration;
 	float collisionRadius;
 	float pivotOffset;
+	float gravityForce;
 
 	glm::vec3 initialPosition;
 	glm::vec3 modelScale;
@@ -54,6 +55,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.cameraDirection = {0.0f, 0.0f, -1.0f};
 		appInfo.cameraVelocity = 1.0f;
 		appInfo.pivotOffset = 1.7f;
+		appInfo.gravityForce = 1.5f;
 		break;
 	case '2':
 		appInfo.vertexName = "vertex.c";
@@ -70,6 +72,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 500.0f;
 		appInfo.pivotOffset = 1.7f;
+		appInfo.gravityForce = 1.5f;
 		break;
 	case '3':
 		appInfo.vertexName = "vertex.c";
@@ -86,6 +89,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 1.0f;
 		appInfo.pivotOffset = 0.7f;
+		appInfo.gravityForce = 1.5f;
 		break;
 	case '4':
 		appInfo.vertexName = "vertex.c";
@@ -102,6 +106,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 10.0f;
 		appInfo.pivotOffset = 1.7f;
+		appInfo.gravityForce = 1.5f;
 		break;
 	case '5':
 		appInfo.vertexName = "vertex.c";
@@ -118,8 +123,26 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 0.25f;
 		appInfo.pivotOffset = 1.7f;
+		appInfo.gravityForce = 1.5f;
 		break;
 	case '6':
+		appInfo.vertexName = "vertex.c";
+		appInfo.fragmentName = "planetAutumnFragment.c";
+		appInfo.computeName = "planetAutumnCompute.c";
+		appInfo.terrain = false;
+		appInfo.freeCamera = false;
+		appInfo.explorationMode = false;
+
+		appInfo.initialPosition = { 0.0f, 1.0f, 0.0f };
+		appInfo.playerAcceleration = 10.0f;
+		appInfo.collisionRadius = 0.033f;
+		appInfo.modelScale = { 0.05f, 0.05f, 0.05f };
+		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
+		appInfo.cameraVelocity = 1.0f;
+		appInfo.pivotOffset = 0.7f;
+		appInfo.gravityForce = 0.5f;
+		break;
+	case '7':
 		appInfo.vertexName = "vertex.c";
 		appInfo.fragmentName = "scene0fragment.c";
 		appInfo.computeName = "scene0Compute.c";
@@ -134,6 +157,7 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
 		appInfo.cameraVelocity = 1.0f;
 		appInfo.pivotOffset = 52.0f;
+		appInfo.gravityForce = 1.5f;
 		break;
 	default:
 		break;
@@ -240,7 +264,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	ubo.playerColor = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
 	glm::vec3 gravityDirection = { 0.0f, -1.0f, 0.0f };
-	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, appInfo.initialPosition, 1.5f, 1.5f, appInfo.playerAcceleration, 0.01f, 0.2f, appInfo.collisionRadius);
+	player = PlayableSphere(gravityDirection, { 0.0f, 0.0f, 0.0f }, appInfo.initialPosition, appInfo.gravityForce, 1.5f, appInfo.playerAcceleration, 0.01f, 0.2f, appInfo.collisionRadius);
 
 	computeShader.setSSBO(player.getSSBO());
 
@@ -321,7 +345,8 @@ char menu() {
 		std::cout << "3: Mandelbulb (experimental)" << std::endl;
 		std::cout << "4: Mandelbox" << std::endl;
 		std::cout << "5: Mandelbox tunnel" << std::endl;
-		std::cout << "6: Debug scene" << std::endl;
+		std::cout << "6: Autumn planet (experimental)" << std::endl;
+		std::cout << "7: Debug scene" << std::endl;
 		std::cout << "Q: Exit application" << std::endl;
 
 		std::cout << "Enter your selection: ";
@@ -332,7 +357,7 @@ char menu() {
 			break;
 		}
 
-	} while(option <= '0' || option > '6');
+	} while(option <= '0' || option > '7');
 
 	return option;
 }
