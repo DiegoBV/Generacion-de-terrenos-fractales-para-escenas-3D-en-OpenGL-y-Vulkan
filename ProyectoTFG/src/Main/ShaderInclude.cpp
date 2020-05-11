@@ -40,7 +40,10 @@ std::string ShaderInclude::InterpretShader(const char * shaderPath, bool recursi
 	}
 
 #if defined(GL_DEBUG) || defined(VULKAN_DEBUG)
-	tempFile = FileHandler::openOutputTruncatedFile((tempPath + std::to_string(index) + "_temp.c").c_str());
+	std::string aux = shaderPath;
+	auto size = aux.find_last_of('\\');
+	aux.erase(0, size);
+	tempFile = FileHandler::openOutputTruncatedFile((tempPath + (aux) + "_temp.c").c_str());
 	FileHandler::writeRawStringToOutputFile(tempFile, shaderCode);
 	FileHandler::closeFile(tempFile);
 #endif
