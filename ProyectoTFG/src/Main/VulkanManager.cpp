@@ -85,9 +85,11 @@ void VulkanManager::release()
 		vkDestroyPipeline(logicalDevice, graphicPipeline, nullptr);
 	}
 
-	vkDestroyPipeline(logicalDevice, computePipeline, nullptr);
+	if(computePipeline != nullptr)
+		vkDestroyPipeline(logicalDevice, computePipeline, nullptr);
 	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
-	vkDestroyPipelineLayout(logicalDevice, computePipelineLayout, nullptr);
+	if(computePipelineLayout != nullptr)
+		vkDestroyPipelineLayout(logicalDevice, computePipelineLayout, nullptr);
 	for (auto imageView : swapChainImageViews) {
 		vkDestroyImageView(logicalDevice, imageView, nullptr);
 	}
@@ -99,13 +101,15 @@ void VulkanManager::release()
 	vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
 	vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(logicalDevice, computeDescriptorSetLayout, nullptr);
+	if(computeDescriptorSetLayout != nullptr)
+		vkDestroyDescriptorSetLayout(logicalDevice, computeDescriptorSetLayout, nullptr);
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
 		vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
 		vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
 	}
 	vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
-	vkDestroyDescriptorPool(logicalDevice, computeDescriptorPool, nullptr);
+	if(computeDescriptorPool != nullptr)
+		vkDestroyDescriptorPool(logicalDevice, computeDescriptorPool, nullptr);
 	for (VkBuffer indexBuffer : indexBuffers) {
 		vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
 	}

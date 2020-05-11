@@ -7,7 +7,7 @@ class VulkanComputeShader: public VulkanShader
 private:
 	VkComputePipelineCreateInfo compShaderStageInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
 	StorageBufferObject ssbo;
-	VkShaderModule compShaderModule;
+	VkShaderModule compShaderModule = nullptr;
 
 	const std::string rawComputeName = "rawCompute";
 

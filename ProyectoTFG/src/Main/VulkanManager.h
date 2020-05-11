@@ -122,15 +122,15 @@ private:
 	// vertex descriptor
 	VkDescriptorSetLayout descriptorSetLayout;
 	// compute descriptor
-	VkDescriptorSetLayout computeDescriptorSetLayout;
+	VkDescriptorSetLayout computeDescriptorSetLayout = nullptr;
 	// used for uniform variables
 	VkPipelineLayout pipelineLayout;
 	// used for uniform variables in compute shader
-	VkPipelineLayout computePipelineLayout;
+	VkPipelineLayout computePipelineLayout = nullptr;
 	// handler of the pipeline
 	std::vector<VkPipeline> graphicsPipelines;
 	// handler of the compute pipeline
-	VkPipeline computePipeline;
+	VkPipeline computePipeline = nullptr;
 	// one frame buffer for each swap chain image
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	// command Pool, needs to be created in order to use command buffers
@@ -160,7 +160,7 @@ private:
 	VkBuffer storageBuffer;
 	VkDeviceMemory storageBufferMemory;
 	VkDescriptorPool descriptorPool;
-	VkDescriptorPool computeDescriptorPool;
+	VkDescriptorPool computeDescriptorPool = nullptr;
 	std::vector<VkDescriptorSet> descriptorSets;
 	VkDescriptorSet computeDescriptorSets;
 	// Compute shader

@@ -49,7 +49,9 @@ void VulkanComputeShader::release()
 
 void VulkanComputeShader::destroyModules()
 {
-	vkDestroyShaderModule(VulkanManager::GetSingleton()->getLogicalDevice(), compShaderModule, nullptr);
+	if (compShaderModule != nullptr) {
+		vkDestroyShaderModule(VulkanManager::GetSingleton()->getLogicalDevice(), compShaderModule, nullptr);
+	}
 }
 
 #endif
