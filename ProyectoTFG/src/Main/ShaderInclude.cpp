@@ -2,8 +2,9 @@
 #include <iostream>
 #include "FileHandler.h"
 
-std::string ShaderInclude::tempPath = "..\\..\\Shaders\\temp.c";
+std::string ShaderInclude::tempPath = "..\\..\\Shaders\\temp\\";
 std::fstream ShaderInclude::tempFile;
+unsigned int ShaderInclude::index = 0;
 
 std::string ShaderInclude::InterpretShader(const char * shaderPath, bool recursive, std::string includeReservedWord)
 {
@@ -39,13 +40,14 @@ std::string ShaderInclude::InterpretShader(const char * shaderPath, bool recursi
 	}
 
 #if defined(GL_DEBUG) || defined(VULKAN_DEBUG)
-	tempFile = FileHandler::openOutputTruncatedFile(tempPath.c_str());
+	tempFile = FileHandler::openOutputTruncatedFile((tempPath + std::to_string(index) + "_temp.c").c_str());
 	FileHandler::writeRawStringToOutputFile(tempFile, shaderCode);
 	FileHandler::closeFile(tempFile);
 #endif
 
 	//shaderCode += '\0'; // necesario?
 	FileHandler::closeFile(shaderFile);
+	index++;
 
 	return shaderCode;
 }
