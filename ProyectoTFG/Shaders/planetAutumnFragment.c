@@ -36,27 +36,6 @@ vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord)
     return normalize(vec3(uv, -nearPlane));
 }
 
-float rayMarchDebug(vec3 eye, vec3 marchingDirection, float start, float end, Sphere sphere)
-{
-    float depth = start;
-
-    for (int i = 0; i < MAX_MARCHING_STEPS; i++)
-    {
-        float dist = sphereSDF(sphere, eye + depth * marchingDirection);
-        if (dist < EPSILON)
-        {
-            break;
-        }
-        depth += 0.5 * dist;
-        if (depth >= end)
-        {
-            break;
-        }
-    }
-
-    return depth;
-}
-
 void main()
 {
     vec2 pixelCoord = gl_FragCoord.xy;
@@ -70,25 +49,9 @@ void main()
     
     //tracing the ray (getting the distance of the closest object in the ray direction)
 	
-    float fractal = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST, ubo.fractalRotation);
-
-    float pelota = rayMarchDebug(rayOrigin, rayDir, MIN_DIST, MAX_DIST, sphere);
-
-    float distanceToSurface = 0.0f;
-    if(ubo.debug){
-        distanceToSurface = min(fractal, pelota);
-    }
-    else {
-        distanceToSurface = fractal;
-    }
+    float distanceToSurface = rayMarch(rayOrigin, rayDir, MIN_DIST, MAX_DIST, ubo.fractalRotation);
 
     gl_FragDepth = distanceToSurface/(far + 1); // divide by far for demonstration
-    
-    //DEBUG (modelo)
-    if(ubo.debug && pelota < fractal){
-        outColor = sphere.color;
-		return;
-    }
 
     vec3 p = rayOrigin + rayDir * distanceToSurface;
 
