@@ -24,7 +24,7 @@ void VulkanComputeShader::init(std::string computeName)
 	FileHandler::writeRawStringToOutputFile(rawCompute, cShaderCode);
 	FileHandler::closeFile(rawCompute);
 
-	system(("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShader.bat " + rawComputeName + " .comp").c_str());
+	system(("cd .. & cd .. & cd Shaders/compile & AutoCompileShader.bat " + rawComputeName + " .comp").c_str());
 
 	auto compShaderCode = FileHandler::readBinaryFile((pathName + rawComputeName + compiledExtension).c_str());
 

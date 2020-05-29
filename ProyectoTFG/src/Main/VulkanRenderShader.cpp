@@ -30,8 +30,8 @@ void VulkanRenderShader::init(std::string vertexName, std::string fragmentName)
 	FileHandler::writeRawStringToOutputFile(rawFragment, fShaderCode);
 	FileHandler::closeFile(rawFragment);
 
-	system(("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShader.bat " + rawVertexName + " .vert").c_str());
-	system(("cd .. & cd .. & cd Dependencies/Vulkan & AutoCompileShader.bat " + rawFragmentName + " .frag").c_str());
+	system(("cd .. & cd .. & cd Shaders/compile & AutoCompileShader.bat " + rawVertexName + " .vert").c_str());
+	system(("cd .. & cd .. & cd Shaders/compile & AutoCompileShader.bat " + rawFragmentName + " .frag").c_str());
 
 	auto vertShaderCode = FileHandler::readBinaryFile((pathName + rawVertexName + compiledExtension).c_str());
 	auto fragShaderCode = FileHandler::readBinaryFile((pathName + rawFragmentName + compiledExtension).c_str());
