@@ -9,7 +9,7 @@ ProyectoTFG/exes/OpenGL/. Por ultimo, se debe asegurar que en las propiedades de
 Depuracion, el directorio de trabajo este establecido como $(TargetDir) en todas las configuraciones.
 
 Si se quiere probar la aplicacion sin necesidad de compilar el contenido del repositorio, se puede acceder
-a los ejecutables a traves del siguiente enlace: https://mega.nz/file/k0shgBgI#RbBAGaQ5kWqpCmlpMIx6redIHF_G0F5WAUry5N15O9Y.
+a los ejecutables a traves del siguiente enlace: https://mega.nz/file/QhFyWAzQ#z-_7sd72g_HBL-6BAN8PLVbWTc4KMF-fDYRD_DShtP0.
 
 
 INSTRUCTIONS
@@ -21,4 +21,4 @@ ProyectoTFG/exes/OpenGL/ folder. Finally, you must check if in the Main project 
 the working directory is set to $(TargetDir) in all the configurations.
 
 If you want to run the application without compiling the content of the repository, executables can be accessed through
-the next link: https://mega.nz/file/k0shgBgI#RbBAGaQ5kWqpCmlpMIx6redIHF_G0F5WAUry5N15O9Y.
+the next link: https://mega.nz/file/QhFyWAzQ#z-_7sd72g_HBL-6BAN8PLVbWTc4KMF-fDYRD_DShtP0.
