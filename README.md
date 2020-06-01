@@ -31,4 +31,6 @@ Interactive application in order to render fractal terrains through the Ray Marc
 
 #### Ejemplos / Examples
 
-(readme)snow.png
+![Autumn](readmeAssets/autumn.png)
+![Ocean](readmeAssets/ocean.png)
+![Snow](readmeAssets/snow.png)
