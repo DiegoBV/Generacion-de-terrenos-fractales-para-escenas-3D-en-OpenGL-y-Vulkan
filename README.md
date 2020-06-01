@@ -29,8 +29,19 @@ Aplicación interactiva para renderizar terrenos fractales, utilizando el algori
 ### Abstract
 Interactive application in order to render fractal terrains through the Ray Marching algorithm and vertex mesh models using the classic rendering pipeline. Collision points between them can be calculated, allowing a simple, physical movement of the model upon the created surfaces. Furthermore, the application lets OpenGL and Vulkan to be used, with GLSL as shading language.
 
-#### Ejemplos / Examples
+### Ejemplos / Examples
 
+#### Autumn planet
 ![Autumn](readmeAssets/autumn.png)
+
+#### Ocean terrain
 ![Ocean](readmeAssets/ocean.png)
+
+#### Snow terrain
 ![Snow](readmeAssets/snow.png)
+
+### Referencias
+Se puede consultar el documento relacionado con la investigación del TFG y las referencias que se han seguido para obtener el resultado en: https://eprints.ucm.es/view/tipocentroagrupa/tfg/18/
+
+### References
+All the references and the document related with this investigation are available at: https://eprints.ucm.es/view/tipocentroagrupa/tfg/18/
