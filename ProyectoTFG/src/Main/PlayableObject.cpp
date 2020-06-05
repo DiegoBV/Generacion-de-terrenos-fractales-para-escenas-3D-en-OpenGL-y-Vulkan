@@ -72,7 +72,8 @@ void PlayableObject::handleMovement(const char& key, const glm::vec3& direction,
 
 void PlayableObject::update(float deltaTime)
 {
-	addForce(gravityDirection * gravityForce);
+	if(!ssbo.isGrounded)
+		addForce(gravityDirection * gravityForce);
 	ssbo.deltaTime = deltaTime;
 	ssbo.time = TimeManager::GetSingleton()->getTimeSinceBeginning();
 }

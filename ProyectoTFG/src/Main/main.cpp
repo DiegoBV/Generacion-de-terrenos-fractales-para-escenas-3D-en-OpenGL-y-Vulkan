@@ -31,6 +31,7 @@ struct InitApplicationInfo {
 Camera camera;
 glm::dvec2 mCoord;
 float pivotOffset = 2.0f;
+float scaleIncrease = 0.005f;
 bool debug = false;
 PlayableSphere player;
 
@@ -189,8 +190,10 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		//DEBUG
 		else if (key == 'Z') pivotOffset -= 0.1f;
 		else if (key == 'X') pivotOffset += 0.1f;
-		else if (key == 'C') player.setRadius(player.getRadius() + 0.005f);
-		else if (key == 'V') player.setRadius(player.getRadius() - 0.005f);
+		else if (key == 'C') player.setRadius(player.getRadius() + scaleIncrease);
+		else if (key == 'V') player.setRadius(player.getRadius() - scaleIncrease);
+		else if (key == 'B') appInfo.modelScale += scaleIncrease;
+		else if (key == 'N') appInfo.modelScale -= scaleIncrease;
 		else if (key == 'H') debug = !debug;
 		//DEBUG
 
@@ -339,7 +342,17 @@ char menu() {
 	char option = ' ';
 	do {
 		system("cls");
-		std::cout << "Write the desired map" << std::endl;
+		std::cout << "CONTROLS" << std::endl;
+		std::cout << "-Use W, A, S, D to move the camera or the player" << std::endl;
+		std::cout << "-Use the mouse to rotate the camera or the player" << std::endl;
+		std::cout << "-Use F to switch between free camera mode and player controller mode" << std::endl;
+		std::cout << "-Use Z to reduce the camera pivot offset and X to increase it" << std::endl;
+		std::cout << "-Use V to reduce the hitbox radius and C to increase it" << std::endl;
+		std::cout << "-Use N to reduce the player radius and B to increase it" << std::endl;
+		std::cout << "-Use H to view the hitbox in the debug mode" << std::endl;
+		std::cout << std::endl;
+		std::cout << "TERRAINS" << std::endl;
+		std::cout << "Write the desired terrain" << std::endl;
 		std::cout << "1: Snow terrain" << std::endl;
 		std::cout << "2: Ocean terrain" << std::endl;
 		std::cout << "3: Mandelbulb (experimental)" << std::endl;
@@ -348,7 +361,7 @@ char menu() {
 		std::cout << "6: Autumn planet (experimental)" << std::endl;
 		std::cout << "7: Debug scene" << std::endl;
 		std::cout << "Q: Exit application" << std::endl;
-
+		std::cout << std::endl;
 		std::cout << "Enter your selection: ";
 		std::cin >> option;
 
