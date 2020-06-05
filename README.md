@@ -1,10 +1,10 @@
 # TFG
 
 ### GENERACION DE TERRENOS FISICOS A PARTIR DE FRACTALES
-Trabajo de Fin de Grado del Grado en Desarrollo de Videojuegos de la Universidad Complutense de Madrid.
-Jorge Rodriguez Garcia
-Diego Baratto Valdivia
-Gonzalo Sanz Lastra
+Trabajo de Fin de Grado del Grado en Desarrollo de Videojuegos de la Universidad Complutense de Madrid.   
+Jorge Rodriguez Garcia    
+Diego Baratto Valdivia   
+Gonzalo Sanz Lastra   
 
 ### INSTRUCCIONES
 Para compilar el contenido de este repositorio, es necesario ademas descargar sus dependencias,
