@@ -74,6 +74,10 @@ void PlayableObject::update(float deltaTime)
 {
 	if(!ssbo.isGrounded)
 		addForce(gravityDirection * gravityForce);
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 	ssbo.deltaTime = deltaTime;
 	ssbo.time = TimeManager::GetSingleton()->getTimeSinceBeginning();
 }
