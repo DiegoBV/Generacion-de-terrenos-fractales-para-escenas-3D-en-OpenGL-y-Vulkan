@@ -9,7 +9,7 @@ ProyectoTFG/exes/OpenGL/. Por ultimo, se debe asegurar que en las propiedades de
 Depuracion, el directorio de trabajo este establecido como $(TargetDir) en todas las configuraciones.
 
 Si se quiere probar la aplicacion sin necesidad de compilar el contenido del repositorio, se puede acceder
-a los ejecutables a traves del siguiente enlace: https://mega.nz/file/QhFyWAzQ#z-_7sd72g_HBL-6BAN8PLVbWTc4KMF-fDYRD_DShtP0.
+a los ejecutables a traves del siguiente enlace: https://mega.nz/file/XaBnQKDa#lrN-nTmiblnvUFu7BlC000kC-yUxBd0x8mk1GbFwvd4
 
 
 ### INSTRUCTIONS
@@ -21,7 +21,7 @@ ProyectoTFG/exes/OpenGL/ folder. Finally, you must check if in the Main project 
 the working directory is set to $(TargetDir) in all the configurations.
 
 If you want to run the application without compiling the content of the repository, executables can be accessed through
-the next link: https://mega.nz/file/QhFyWAzQ#z-_7sd72g_HBL-6BAN8PLVbWTc4KMF-fDYRD_DShtP0.
+the next link: https://mega.nz/file/XaBnQKDa#lrN-nTmiblnvUFu7BlC000kC-yUxBd0x8mk1GbFwvd4
 
 ### Resumen
 Aplicación interactiva para renderizar terrenos fractales, utilizando el algoritmo Ray Marching, y modelos basados en mallas de vértices, basado en la tubería clásica de renderizado. Se incorpora también un movimiento físico del modelo sobre las superficies generadas, mediante el cálculo de puntos de colisión entre ellos. Además, la aplicación permite utilizar como API de programación gráfica OpenGL y Vulkan, con GLSL como shading language.
