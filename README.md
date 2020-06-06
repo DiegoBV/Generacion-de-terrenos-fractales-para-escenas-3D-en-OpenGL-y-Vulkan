@@ -17,7 +17,7 @@ Por ultimo, se debe asegurar que en las propiedades del proyecto Main, en el apa
 directorio de trabajo este establecido como $(TargetDir) en todas las configuraciones.
 
 Si se quiere probar la aplicacion sin necesidad de compilar el contenido del repositorio, se puede acceder
-a los ejecutables a traves del siguiente enlace: https://mega.nz/file/R5kz1ShD#XxU5DUsmG88pe71SkIA0n8aRFHY2T_YwTXRPLkqTgdo.
+a los ejecutables a traves del siguiente enlace: https://mega.nz/file/o01QxCzQ#CYP2hGB0z1izjMcv3Lqf_GVcfI5AJlwtoX_yWcKmJxA.
 
 
 ### INSTRUCTIONS
@@ -31,7 +31,7 @@ Finally, you must check if in the Main project properties, in the Debug section,
 the working directory is set to $(TargetDir) in all the configurations.
 
 If you want to run the application without compiling the content of the repository, executables can be accessed through
-the next link: https://mega.nz/file/R5kz1ShD#XxU5DUsmG88pe71SkIA0n8aRFHY2T_YwTXRPLkqTgdo.
+the next link: https://mega.nz/file/o01QxCzQ#CYP2hGB0z1izjMcv3Lqf_GVcfI5AJlwtoX_yWcKmJxA.
 
 ### Resumen
 Aplicación interactiva para renderizar terrenos fractales, utilizando el algoritmo Ray Marching, y modelos basados en mallas de vértices, basado en la tubería clásica de renderizado. Se incorpora también un movimiento físico del modelo sobre las superficies generadas, mediante el cálculo de puntos de colisión entre ellos. Además, la aplicación permite utilizar como API de programación gráfica OpenGL y Vulkan, con GLSL como shading language.
