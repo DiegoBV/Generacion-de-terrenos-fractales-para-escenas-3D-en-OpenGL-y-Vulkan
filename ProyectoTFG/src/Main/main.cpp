@@ -148,15 +148,15 @@ InitApplicationInfo setAppInfo(const char& option) {
 		appInfo.fragmentName = "scene0fragment.c";
 		appInfo.computeName = "scene0Compute.c";
 		appInfo.terrain = true;
-		appInfo.freeCamera = false;
-		appInfo.explorationMode = false;
+		appInfo.freeCamera = true;
+		appInfo.explorationMode = true;
 
 		appInfo.initialPosition = { 0.0f, 0.0f, 15.0f };
 		appInfo.playerAcceleration = 50.0f;
-		appInfo.collisionRadius = 3.6f;
-		appInfo.modelScale = { 5.5f, 5.5f, 5.5f };
+		appInfo.collisionRadius = 2.7f;
+		appInfo.modelScale = { 4.0f, 4.0f, 4.0f };
 		appInfo.cameraDirection = { 0.0f, 0.0f, -1.0f };
-		appInfo.cameraVelocity = 1.0f;
+		appInfo.cameraVelocity = 20.0f;
 		appInfo.pivotOffset = 52.0f;
 		appInfo.gravityForce = 1.5f;
 		break;
@@ -274,6 +274,8 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	glm::mat4 unityMatrix = glm::mat4(1.0f);
 	glm::mat4 model = unityMatrix;
 	ubo.projection = glm::perspective(glm::radians(camera.getZoom()), (float)window->getWindowWidth() / (float)window->getWindowHeight(), 0.1f, 100.0f);
+	if (appInfo.explorationMode)
+		model = glm::translate(unityMatrix, { 0.0f, -100.0f, 0.0f });
 
 	float lastCameraYaw = 0.0f;
 	float lastDepthAdvance = 0.0f;
@@ -308,7 +310,9 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 			lastCameraYaw = camera.getYaw();
 		}
 
-		model = glm::translate(unityMatrix, lastPlayerPosition); // translate 
+		if(!appInfo.explorationMode)
+			model = glm::translate(unityMatrix, lastPlayerPosition); // translate 
+
 		model = glm::rotate(model, glm::radians(-lastCameraYaw - 180.0f), { 0, 1, 0 }); // rotate
 		model = glm::rotate(model, glm::radians(lastDepthAdvance), { 0, 0, 1 });
 		model = glm::rotate(model, glm::radians(lastLateralAdvance), { 1, 0, 0 });
@@ -359,7 +363,7 @@ char menu() {
 		std::cout << "4: Mandelbox" << std::endl;
 		std::cout << "5: Mandelbox tunnel" << std::endl;
 		std::cout << "6: Autumn planet (experimental)" << std::endl;
-		std::cout << "7: Debug scene" << std::endl;
+		std::cout << "7: Primitives scene" << std::endl;
 		std::cout << "Q: Exit application" << std::endl;
 		std::cout << std::endl;
 		std::cout << "Enter your selection: ";
