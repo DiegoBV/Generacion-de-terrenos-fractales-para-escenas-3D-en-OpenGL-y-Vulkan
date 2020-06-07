@@ -281,7 +281,7 @@ void runApplication(const std::string& vertex, const std::string& fragment, cons
 	float lastDepthAdvance = 0.0f;
 	float lastLateralAdvance = 0.0f;
 	float rotationAngle = 300.0f;
-	glm::vec3 lastPlayerPosition;
+	glm::vec3 lastPlayerPosition = { 0.0f, 0.0f, 0.0f };
 
 	// render loop
 	// -----------
