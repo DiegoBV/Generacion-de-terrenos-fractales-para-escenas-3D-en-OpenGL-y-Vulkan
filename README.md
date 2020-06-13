@@ -1,6 +1,6 @@
 # TFG
 
-### GENERACION DE TERRENOS FISICOS A PARTIR DE FRACTALES
+### GENERACION DE TERRENOS FRACTALES PARA ESCENAS 3D, EN OPENGL Y VULKAN
 Trabajo de Fin de Grado del Grado en Desarrollo de Videojuegos de la Universidad Complutense de Madrid.   
 Jorge Rodriguez Garcia    
 Diego Baratto Valdivia   
