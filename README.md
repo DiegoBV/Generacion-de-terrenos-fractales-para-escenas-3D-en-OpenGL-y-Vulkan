@@ -51,7 +51,7 @@ Interactive application in order to render fractal terrains through the Ray Marc
 ![Snow](readmeAssets/snow.png)
 
 ### Referencias
-Se puede consultar el documento relacionado con la investigación del TFG y las referencias que se han seguido para obtener el resultado en: https://eprints.ucm.es/view/tipocentroagrupa/tfg/18/
+Se puede consultar el documento relacionado con la investigación del TFG y las referencias que se han seguido para obtener el resultado en: https://eprints.ucm.es/id/eprint/61645/
 
 ### References
-All the references and the document related with this investigation are available at: https://eprints.ucm.es/view/tipocentroagrupa/tfg/18/
+All the references and the document related with this investigation are available at: https://eprints.ucm.es/id/eprint/61645/
